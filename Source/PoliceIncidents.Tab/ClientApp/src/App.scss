@@ -1,0 +1,28 @@
+.default-container {
+    height: 100vh !important;
+/*        background-color: #F3F2F1;*/
+        background-color: #FFFFFF;
+    .configContainer {
+        background-color: #fff;
+    }
+
+}
+
+.darkContainer {
+    background-color: #201f1f;
+    height: 100vh !important;
+
+    .configContainer {
+        background-color: #2d2c2c;
+    }
+
+}
+
+.highContrastContainer {
+    background-color: #000;
+    height: 100vh !important;
+
+    .configContainer {
+        background-color: #000;
+    }
+}
