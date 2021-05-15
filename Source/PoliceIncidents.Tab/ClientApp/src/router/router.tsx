@@ -14,7 +14,7 @@ export const AppRoute: React.FunctionComponent<{}> = () => {
         <Suspense fallback={<></>}>
             <BrowserRouter>
                 <Switch>
-                    <Route exact path="/dls" component={Home} />
+                    <Route exact path="/home" component={Home} />
                     <Route exact path="/errorpage" component={ErrorPage} />
                     <Route exact path="/errorpage/:id" component={ErrorPage} />
                     <Route exact path="/signin" component={SignInPage} />
