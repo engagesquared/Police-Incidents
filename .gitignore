@@ -239,3 +239,4 @@ profile.arm.json
 
 node_modules/
 appsettings.Development.json
+Source/PoliceIncidents.Tab/ClientApp/node_modules_/
