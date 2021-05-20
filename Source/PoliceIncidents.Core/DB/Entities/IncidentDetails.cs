@@ -7,8 +7,8 @@ namespace PoliceIncidents.Core.DB.Entities
     {
         public IncidentDetails()
         {
-            this.Participants = new HashSet<IncidentTeamMember>();
             this.IncidentUpdates = new HashSet<IncidentUpdate>();
+            this.Participants = new HashSet<IncidentTeamMember>();
         }
 
         public long Id { get; set; }
@@ -19,7 +19,7 @@ namespace PoliceIncidents.Core.DB.Entities
         public string IncidentLegacyId { get; set; }
         public string Description { get; set; }
         public string WebEOCLink { get; set; }
-        public Guid? IncidentManager { get; set; }        
+        public UserEntity IncidentManager { get; set; }        
         public IncidentStatus Status { get; set; }
         public string Location { get; set; }        
         public string ThreadLink { get; set; }

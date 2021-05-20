@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PoliceIncidents.Core.DB.Entities;
+using System;
 
 namespace PoliceIncidents.Core.DB
 {
@@ -18,8 +19,10 @@ namespace PoliceIncidents.Core.DB
             }
         }
 
-        public DbSet<IncidentTeamMember> IncidentTeams { get; protected set; }
+        public DbSet<UserEntity> IncidentTeams { get; protected set; }
         public DbSet<IncidentDetails> IncidentDetails { get; protected set; }
         public DbSet<IncidentUpdate> IncidentUpdates { get; protected set; }
+        public DbSet<IncidentTeamMember> IncidentTeamMembers { get; protected set; }
+        public DbSet<UserEntity> UserEntities { get; protected set; }
     }
 }
