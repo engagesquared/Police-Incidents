@@ -1,82 +1,36 @@
-import * as React from 'react';
-import './App.scss';
-import { Provider, teamsDarkTheme, teamsHighContrastTheme, teamsTheme } from '@fluentui/react-northstar';
-import * as microsoftTeams from "@microsoft/teams-js";
-import { AppRoute } from "./router/router";
+import * as React from "react";
+import "./App.scss";
+import "./localization";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import ErrorPage from "./components/error-page/error-page";
+import SignInPage from "./components/sign-in-page/sign-in-page";
+import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
+import SignInSimpleEnd from "./components/sign-in-page/sign-in-simple-end";
+import Home from "./components/home/home";
+import Personal from "./components/personal/personal";
+import ThemeProvider from "./providers/ThemeProvider";
+import { Flex } from "@fluentui/react-northstar";
 
-export interface IAppState {
-    theme: string;
-}
-
-class App extends React.Component<{}, IAppState> {
-
-    constructor(props: {}) {
-        super(props);
-        this.state = {
-            theme: "",
-        }
-    }
-
-    public componentDidMount = () => {
-        microsoftTeams.initialize();
-        microsoftTeams.getContext((context) => {
-            let theme = context.theme || "";
-            this.setState({
-                theme: theme
-            });
-        });
-
-        microsoftTeams.registerOnThemeChangeHandler((theme) => {
-            this.setState({
-                theme: theme,
-            }, () => {
-                this.forceUpdate();
-            });
-        });
-    }
-
-    public setThemeComponent = () => {
-        if (this.state.theme === "dark") {
-            return (
-                <Provider theme={teamsDarkTheme}>
-                    <div className="darkContainer">
-                        {this.getAppDom()}
-                    </div>
-                </Provider>
-            );
-        }
-        else if (this.state.theme === "contrast") {
-            return (
-                <Provider theme={teamsHighContrastTheme}>
-                    <div className="highContrastContainer">
-                        {this.getAppDom()}
-                    </div>
-                </Provider>
-            );
-        } else {
-            return (
-                <Provider theme={teamsTheme}>
-                    <div className="default-container">
-                        {this.getAppDom()}
-                    </div>
-                </Provider>
-            );
-        }
-    }
-
-    public getAppDom = () => {
-        return (
-                <div className="app-container">
-                     <AppRoute />
-                </div>
-        );
-    }
-
+class App extends React.Component<{}, {}> {
     public render(): JSX.Element {
         return (
-            <div>
-                {this.setThemeComponent()}
-            </div>
+            <ThemeProvider>
+                <Flex className="appContainer" column>
+                    <React.Suspense fallback={<></>}>
+                        <BrowserRouter>
+                            <Switch>
+                                <Route exact path="/home" component={Home} />
+                                <Route exact path="/personal" component={Personal} />
+                                <Route exact path="/errorpage" component={ErrorPage} />
+                                <Route exact path="/errorpage/:id" component={ErrorPage} />
+                                <Route exact path="/signin" component={SignInPage} />
+                                <Route exact path="/signin-simple-start" component={SignInSimpleStart} />
+                                <Route exact path="/signin-simple-end" component={SignInSimpleEnd} />
+                            </Switch>
+                        </BrowserRouter>
+                    </React.Suspense>
+                </Flex>
+            </ThemeProvider>
         );
     }
 }

@@ -43,7 +43,7 @@ namespace Microsoft.Teams.Apps.DLLookup
             services.AddControllers();
             var scopes = this.Configuration["AzureAd:GraphScope"].Split(new char[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
             IConfidentialClientApplication confidentialClientApp = ConfidentialClientApplicationBuilder.Create(this.Configuration["AzureAd:ClientId"])
-                .WithClientSecret(this.Configuration["AzureAd:ClientSecret"])
+                .WithClientSecret(this.Configuration["AzureAd:ClientSecret"]).WithTenantId(this.Configuration["AzureAd:TenantId"])
                 .Build();
 
             services.AddMemoryCache();
