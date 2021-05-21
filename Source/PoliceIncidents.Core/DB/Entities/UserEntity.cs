@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PoliceIncidents.Core.DB.Entities
+﻿namespace PoliceIncidents.Core.DB.Entities
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
-    /// Connect incedent with AAD user by id
+    /// Connect incedent with AAD user by id.
     /// </summary>
     public class UserEntity
     {
@@ -16,6 +16,10 @@ namespace PoliceIncidents.Core.DB.Entities
         public long Id { get; set; }
 
         public Guid AadUserId { get; set; }
+
+        public string BotUserId { get; set; }
+
+        public string ConversationId { get; set; }
 
         public virtual ICollection<IncidentTeamMember> IncidentTeamMembers { get; set; }
     }

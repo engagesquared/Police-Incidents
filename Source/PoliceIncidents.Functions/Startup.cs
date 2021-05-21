@@ -1,4 +1,8 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿// <copyright file="Startup.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
+// </copyright>
+
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PoliceIncidents.Core.DB;

@@ -1,11 +1,15 @@
-﻿using PoliceIncidents.Core.DB;
-using PoliceIncidents.Core.DB.Entities;
-using PoliceIncidents.Core.Interfaces;
-using PoliceIncidents.Core.Models;
-using System;
+﻿// <copyright file="IncidentService.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
+// </copyright>
 
 namespace PoliceIncidents.Core.Services
 {
+    using System;
+    using PoliceIncidents.Core.DB;
+    using PoliceIncidents.Core.DB.Entities;
+    using PoliceIncidents.Core.Interfaces;
+    using PoliceIncidents.Core.Models;
+
     public class IncidentService : IIncidentService
     {
 
