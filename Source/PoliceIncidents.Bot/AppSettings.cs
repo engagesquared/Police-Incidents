@@ -6,7 +6,7 @@ namespace PoliceIncidents.Bot
 {
     using Microsoft.Extensions.Configuration;
 
-    internal class AppSettings
+    public class AppSettings
     {
         private readonly IConfiguration configuration;
 
@@ -18,9 +18,12 @@ namespace PoliceIncidents.Bot
 
         public string BotAppId { get; private set; }
 
+        public string TenantId { get; private set; }
+
         private void Setup()
         {
             this.BotAppId = this.configuration["MicrosoftAppId"];
+            this.TenantId = this.configuration["TenantId"];
         }
     }
 }

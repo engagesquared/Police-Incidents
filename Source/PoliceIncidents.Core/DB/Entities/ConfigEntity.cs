@@ -6,8 +6,6 @@ namespace PoliceIncidents.Core.DB.Entities
 {
     public class ConfigEntity
     {
-        public long Id { get; set; }
-
         public string Key { get; set; }
 
         public string Value { get; set; }

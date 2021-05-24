@@ -19,6 +19,7 @@ namespace PoliceIncidents.Functions
         {
             var services = builder.Services;
             services.AddLogging();
+            services.AddHttpClient();
             services.AddScoped<IIncidentService, IncidentService>();
             services.AddDbContext<PoliceIncidentsDbContext>(p => p.UseSqlServer(WebConfig.DbConnectionString));
         }

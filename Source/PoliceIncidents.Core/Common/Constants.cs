@@ -7,5 +7,6 @@ namespace PoliceIncidents.Core.Common
     public static class Constants
     {
         public const string BotServiceUrlConfigKey = "BotServiceUrl";
+        public const string IncidentCreatedBotRoute = "/api/notify/incidentCreated/{id}";
     }
 }

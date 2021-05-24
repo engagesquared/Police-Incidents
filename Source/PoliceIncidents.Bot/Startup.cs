@@ -52,6 +52,7 @@ namespace PoliceIncidents.Bot
                 p.UseSqlServer(connectionString);
             });
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IIncidentService, IncidentService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -4,11 +4,13 @@
 
 namespace PoliceIncidents.Core.Interfaces
 {
-    using PoliceIncidents.Core.DB;
+    using System.Threading.Tasks;
     using PoliceIncidents.Core.Models;
 
     public interface IIncidentService
     {
-        void CreateIncident(IncidentInputModel model, PoliceIncidentsDbContext dbContext);
+        Task<long> CreateIncident(IncidentInputModel model);
+
+        NewIncidentInfoModel Get(long incidentId);
     }
 }

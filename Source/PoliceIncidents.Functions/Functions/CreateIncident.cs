@@ -1,8 +1,13 @@
-﻿namespace PoliceIncidents.Functions.Functions
+﻿// <copyright file="CreateIncident.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
+// </copyright>
+
+namespace PoliceIncidents.Functions.Functions
 {
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.IO;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -10,7 +15,6 @@
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
-    using PoliceIncidents.Core.DB;
     using PoliceIncidents.Core.Interfaces;
     using PoliceIncidents.Core.Models;
 
@@ -19,13 +23,13 @@
         private const string FuncName = "CreateIncident";
         private readonly ILogger<CreateIncident> log;
         private readonly IIncidentService incidentService;
-        private readonly PoliceIncidentsDbContext dbContext;
+        private readonly HttpClient httpClient;
 
-        public CreateIncident(ILogger<CreateIncident> log, IIncidentService incidentService, PoliceIncidentsDbContext dbContext)
+        public CreateIncident(ILogger<CreateIncident> log, IIncidentService incidentService, HttpClient httpClient)
         {
             this.log = log;
             this.incidentService = incidentService;
-            this.dbContext = dbContext;
+            this.httpClient = httpClient;
         }
 
         [FunctionName(FuncName)]
@@ -38,10 +42,11 @@
                 this.log.LogInformation($"Request body: '{requestBody}'");
 
                 var model = this.ParseAndValidateModel(requestBody);
-                this.incidentService.CreateIncident(model, this.dbContext);
+                var newIncidentId = await this.incidentService.CreateIncident(model);
                 try
                 {
-                    // TODO: create Teams Channel for incident and notify users
+                    var botNotifyPath = Core.Common.Constants.IncidentCreatedBotRoute.Replace("{id}", newIncidentId.ToString());
+                    await this.httpClient.GetAsync(WebConfig.BotBaseUrl + botNotifyPath);
                 }
                 catch (Exception ex)
                 {
