@@ -19,3 +19,9 @@ export const getClientId = async (): Promise<AxiosResponse<string>> => {
     console.log(url);
     return await axios.get(url);
 };
+
+export const getUserIncidents = async (): Promise<AxiosResponse<any>> => {
+    let url = baseAxiosUrl + "/Incidents/UserIncidents";
+    console.log(url);
+    return await axios.get(url);
+};

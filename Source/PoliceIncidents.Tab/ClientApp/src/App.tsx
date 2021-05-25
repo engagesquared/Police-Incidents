@@ -5,7 +5,7 @@ import ErrorPage from "./components/error-page/error-page";
 import SignInPage from "./components/sign-in-page/sign-in-page";
 import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
 import SignInSimpleEnd from "./components/sign-in-page/sign-in-simple-end";
-import { Home } from "./components/home/home";
+//import { Home } from "./components/home/home";
 import { PersonalTab } from "./components/personalTab/personalTab";
 
 import { Flex } from "@fluentui/react-northstar";
@@ -25,7 +25,7 @@ const App = () => {
                     <BrowserRouter>
                         <Switch>
                             <Route exact path="/home" component={PersonalTab} />
-                            <Route exact path="/personal" component={Home} />
+                            <Route exact path="/personal" component={PersonalTab} />
                             <Route exact path="/errorpage" component={ErrorPage} />
                             <Route exact path="/errorpage/:id" component={ErrorPage} />
                             <Route exact path="/signin" component={SignInPage} />

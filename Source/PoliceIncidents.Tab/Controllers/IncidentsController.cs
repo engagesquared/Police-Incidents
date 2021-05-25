@@ -5,13 +5,19 @@
 namespace PoliceIncidents.Controllers
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
+    using PoliceIncidents.Core.DB;
     using PoliceIncidents.Models;
+    using PoliceIncidents.Tab.Models;
+    using PoliceIncidents.Tab.Services;
 
     [Authorize]
     [Route("api/[controller]")]
@@ -19,23 +25,26 @@ namespace PoliceIncidents.Controllers
     public class IncidentsController : BaseController
     {
         private readonly ILogger<UserController> logger;
+        private readonly PoliceIncidentsDbContext dbContext;
 
         public IncidentsController(
             IOptions<AzureAdOptions> azureAdOptions,
             ILogger<UserController> logger,
-            IConfidentialClientApplication confidentialClientApp)
+            IConfidentialClientApplication confidentialClientApp, 
+            PoliceIncidentsDbContext dbContext)
             : base(confidentialClientApp, azureAdOptions, logger)
         {
             this.logger = logger;
+            this.dbContext = dbContext;
         }
 
         [HttpGet("UserIncidents")]
-        public async Task<IActionResult> GetUserIncidents()
+        public async Task<List<IncidentModel>> GetUserIncidents()
         {
             try
             {
-                string accessToken = await this.GetAccessTokenAsync();
-                return this.Ok(accessToken);
+                var userId = new Guid(this.UserObjectId);
+                return await new FakeIncidentService().GetUserIncidents(userId);
             }
             catch (Exception ex)
             {

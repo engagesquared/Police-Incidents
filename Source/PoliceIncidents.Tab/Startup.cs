@@ -7,11 +7,13 @@ namespace Microsoft.Teams.Apps.DLLookup
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Identity.Client;
     using PoliceIncidents.Authentication;
+    using PoliceIncidents.Core.DB;
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
 
@@ -52,6 +54,11 @@ namespace Microsoft.Teams.Apps.DLLookup
             services.AddDLLookupAuthentication(this.Configuration);
             services.AddSingleton<TokenAcquisitionHelper>();
             services.AddSession();
+            services.AddDbContext<PoliceIncidentsDbContext>(p =>
+            {
+                string connectionString = this.Configuration.GetConnectionString("PoliceIncidents");
+                p.UseSqlServer(connectionString);
+            });
             services.AddApplicationInsightsTelemetry(this.Configuration["ApplicationInsights:InstrumentationKey"]);
 
             services.Configure<CacheOptions>(options =>
