@@ -1,4 +1,8 @@
-﻿namespace PoliceIncidents.Functions
+﻿// <copyright file="WebConfig.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
+// </copyright>
+
+namespace PoliceIncidents.Functions
 {
     public static class WebConfig
     {

@@ -9,7 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="stylecop.json" />
+    <AdditionalFiles Include="..\stylecop.json" />
+    <AdditionalFiles Include="..\.editorconfig" />
   </ItemGroup>
 
   <ItemGroup>

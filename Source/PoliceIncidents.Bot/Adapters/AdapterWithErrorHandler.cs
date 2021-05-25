@@ -1,5 +1,5 @@
-﻿// <copyright file="AdapterWithErrorHandler.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+﻿// <copyright file="AdapterWithErrorHandler.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
 namespace PoliceIncidents.Bot.Adapters

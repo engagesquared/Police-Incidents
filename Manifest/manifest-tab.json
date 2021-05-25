@@ -1,0 +1,41 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.10/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.10",
+    "version": "1.0.0",
+    "id": "a1082658-48e9-4c7e-b0a9-d1fdcaeb3426",
+    "packageName": "com.police.incidents.tab",
+    "developer": {
+        "name": "Engage Squared",
+        "websiteUrl": "https://engagesq.com/",
+        "privacyUrl": "https://engagesq.com/",
+        "termsOfUseUrl": "https://engagesq.com/",
+        "mpnId": "5185221"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "Police Incidents Tab",
+        "full": "Police Incidents Management"
+    },
+    "description": {
+        "short": "The Police Incidents Management app helps interact with incidents",
+        "full": "The Police Incidents Management app helps users quickly browse through incidents, update their current status"
+    },
+    "accentColor": "#FFFFFF",
+    "staticTabs": [
+        {
+            "entityId": "Home",
+            "name": "Home",
+            "contentUrl": "https://<<app domain>>/home",
+            "scopes": ["personal", "team"]
+        }
+    ],
+    "permissions": ["identity"],
+    "validDomains": ["<<app domain>>", "<<tenant root>>"],
+    "webApplicationInfo": {
+        "id": "<<aad app id>>",
+        "resource": "api://<<app domain>>/<<aad app id>>"
+    }
+}

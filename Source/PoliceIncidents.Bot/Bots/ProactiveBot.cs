@@ -1,5 +1,5 @@
-﻿// <copyright file="ProactiveBot.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+﻿// <copyright file="ProactiveBot.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
 namespace PoliceIncidents.Bot.Bots

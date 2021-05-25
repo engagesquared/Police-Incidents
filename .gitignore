@@ -234,8 +234,7 @@ _Pvt_Extensions
 # Styles Generated Code
 *.scss.ts
 
-**/Manifest/*.zip
+/Manifest/*.zip
 profile.arm.json
 
 appsettings.Development.json
-Source/PoliceIncidents.Tab/ClientApp/node_modules_/

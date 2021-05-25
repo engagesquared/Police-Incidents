@@ -20,7 +20,7 @@ namespace PoliceIncidents.Functions.Functions
 
     public class CreateIncident
     {
-        private const string FuncName = "CreateIncident";
+        private const string FuncName = nameof(CreateIncident);
         private readonly ILogger<CreateIncident> log;
         private readonly IIncidentService incidentService;
         private readonly HttpClient httpClient;
@@ -66,6 +66,10 @@ namespace PoliceIncidents.Functions.Functions
                 var result = new JsonResult(ex.Message);
                 result.StatusCode = 500;
                 return result;
+            }
+            finally
+            {
+                this.log.LogInformation($"{FuncName} finished.");
             }
         }
 

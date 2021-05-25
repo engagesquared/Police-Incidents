@@ -1,5 +1,5 @@
-﻿// <copyright file="NotifyController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+﻿// <copyright file="NotifyController.cs" company="Engage Squared">
+// Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
 namespace PoliceIncidents.Bot.Controllers
@@ -22,7 +22,6 @@ namespace PoliceIncidents.Bot.Controllers
         [Route(Core.Common.Constants.IncidentCreatedBotRoute)]
         public async Task<StatusCodeResult> NewIncidentCreated(int id)
         {
-
             await this.bot.NotifyAboutIncidentCreated(id);
 
             // Let the caller know proactive messages have been sent

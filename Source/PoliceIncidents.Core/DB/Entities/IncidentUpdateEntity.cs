@@ -1,4 +1,4 @@
-﻿// <copyright file="IncidentUpdate.cs" company="Engage Squared">
+﻿// <copyright file="IncidentUpdateEntity.cs" company="Engage Squared">
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 

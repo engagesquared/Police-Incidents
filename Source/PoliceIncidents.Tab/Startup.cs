@@ -99,8 +99,6 @@ namespace Microsoft.Teams.Apps.DLLookup
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

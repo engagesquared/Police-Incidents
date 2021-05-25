@@ -11,7 +11,6 @@ namespace PoliceIncidents.Core.Exceptions
         public ValidationException(string message)
             : base(message)
         {
-
         }
     }
 }

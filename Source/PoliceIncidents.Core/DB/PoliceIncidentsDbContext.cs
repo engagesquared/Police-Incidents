@@ -34,6 +34,8 @@ namespace PoliceIncidents.Core.DB
 
         public DbSet<ConfigEntity> Config { get; protected set; }
 
+        public DbSet<DistrictEntity> Districts { get; protected set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserEntity>(e =>
@@ -56,11 +58,13 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.ThreadLink);
                 e.Property(e => e.Title);
                 e.Property(e => e.WebEOCLink);
+                e.Property(e => e.DistrictId).IsRequired();
 
                 e.HasKey(x => x.Id);
                 e.HasOne(x => x.IncidentManager).WithMany(x => x.IncidentsManagedByUser).HasForeignKey(x => x.IncidentManagerId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.IncidentUpdates).WithOne(x => x.ParentIncident).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.Participants).WithOne(x => x.Incident).HasForeignKey(x => x.IncidentId).OnDelete(DeleteBehavior.NoAction);
+                e.HasOne(x => x.District).WithMany().HasForeignKey(x => x.DistrictId).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<ConfigEntity>(e =>

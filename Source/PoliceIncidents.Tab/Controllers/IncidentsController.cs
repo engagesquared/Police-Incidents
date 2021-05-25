@@ -1,4 +1,4 @@
-﻿// <copyright file="UserController.cs" company="Engage Squared">
+﻿// <copyright file="IncidentsController.cs" company="Engage Squared">
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
@@ -16,11 +16,11 @@ namespace PoliceIncidents.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : BaseController
+    public class IncidentsController : BaseController
     {
         private readonly ILogger<UserController> logger;
 
-        public UserController(
+        public IncidentsController(
             IOptions<AzureAdOptions> azureAdOptions,
             ILogger<UserController> logger,
             IConfidentialClientApplication confidentialClientApp)
@@ -29,8 +29,8 @@ namespace PoliceIncidents.Controllers
             this.logger = logger;
         }
 
-        [HttpGet("GetToken")]
-        public async Task<IActionResult> GetToken()
+        [HttpGet("UserIncidents")]
+        public async Task<IActionResult> GetUserIncidents()
         {
             try
             {

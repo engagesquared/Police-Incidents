@@ -1,49 +1,50 @@
 {
-  "name": "dllookup-client-app",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@microsoft/teams-js": "1.10.0",
-    "@fluentui/react-northstar": "0.55.0",
-    "axios": "0.19.2",
-    "browserslist": "4.12.0",
-    "caniuse-lite": "1.0.30001079",
-    "i18next": "19.4.5",
-    "i18next-xhr-backend": "3.2.2",
-    "node-sass": "4.14.1",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "react-i18next": "11.5.0",
-    "react-router-dom": "5.2.0",
-    "react-scripts": "3.4.1",
-    "typescript": "3.9.5",
-    "typestyle": "2.1.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@types/node": "14.0.12",
-    "@types/react": "16.9.35",
-    "@types/react-dom": "16.9.8",
-    "@types/react-router-dom": "5.1.5"
-  }
+    "name": "police-incidents-client-app",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@microsoft/teams-js": "1.10.0",
+        "@fluentui/react-northstar": "0.55.0",
+        "axios": "0.19.2",
+        "browserslist": "4.12.0",
+        "caniuse-lite": "1.0.30001079",
+        "i18next": "19.4.5",
+        "i18next-xhr-backend": "3.2.2",
+        "node-sass": "4.14.1",
+        "react": "16.13.1",
+        "react-dom": "16.13.1",
+        "react-i18next": "11.5.0",
+        "react-jss": "10.6.0",
+        "react-router-dom": "5.2.0",
+        "react-scripts": "3.4.1",
+        "typescript": "3.9.5",
+        "typestyle": "2.1.0"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@types/node": "14.0.12",
+        "@types/react": "16.9.35",
+        "@types/react-dom": "16.9.8",
+        "@types/react-router-dom": "5.1.5"
+    }
 }

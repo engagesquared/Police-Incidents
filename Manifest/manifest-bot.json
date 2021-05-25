@@ -1,0 +1,38 @@
+﻿{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.10/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.10",
+    "version": "1.0",
+    "id": "b4eacaae-80bd-4097-a209-e43cb6757aa1",
+    "packageName": "com.police.incidents.bot",
+    "developer": {
+        "name": "Engage Squared",
+        "websiteUrl": "https://engagesq.com/",
+        "privacyUrl": "https://engagesq.com/",
+        "termsOfUseUrl": "https://engagesq.com/",
+        "mpnId": "5185221"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "Police Incidents Bot",
+        "full": "Police Incidents Management Bot"
+    },
+    "description": {
+        "short": "Bot to help users manage incidents",
+        "full": "Microsoft Teams Bot that provide a reoccurring 'latest update' for anyone to see the latest developments on the incident without having to disturb others."
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [
+        {
+            "botId": "<<aad bot id>>",
+            "scopes": ["team", "personal"],
+            "needsChannelSelector": true,
+            "supportsFiles": false,
+            "isNotificationOnly": true
+        }
+    ],
+    "permissions": ["identity", "messageTeamMembers"],
+    "validDomains": ["token.botframework.com"]
+}

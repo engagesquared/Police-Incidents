@@ -20,5 +20,7 @@ namespace PoliceIncidents.Core.Models
         public string Status { get; set; }
 
         public string Location { get; set; }
+
+        public string Region { get; set; }
     }
 }

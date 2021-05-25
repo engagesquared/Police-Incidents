@@ -11,8 +11,8 @@ namespace PoliceIncidents.Core.DB.Entities
     {
         public IncidentDetailsEntity()
         {
-            this.IncidentUpdates = new HashSet<IncidentUpdateEntity>();
-            this.Participants = new HashSet<IncidentTeamMemberEntity>();
+            this.IncidentUpdates = new List<IncidentUpdateEntity>();
+            this.Participants = new List<IncidentTeamMemberEntity>();
         }
 
         public long Id { get; set; }
@@ -38,10 +38,14 @@ namespace PoliceIncidents.Core.DB.Entities
 
         public string ThreadLink { get; set; }
 
-        public virtual ICollection<IncidentTeamMemberEntity> Participants { get; set; }
+        public List<IncidentTeamMemberEntity> Participants { get; set; }
 
-        public virtual ICollection<IncidentUpdateEntity> IncidentUpdates { get; set; }
+        public List<IncidentUpdateEntity> IncidentUpdates { get; set; }
 
         public DateTime IncidentRaised { get; set; }
+
+        public long DistrictId { get; set; }
+
+        public DistrictEntity District { get; set; }
     }
 }

@@ -1,7 +1,9 @@
 {
     "files.exclude": {
-        "*.js": true,
-        "*.js.map": true
+        "src/**/*.js": true,
+        "src/**/*.js.map": true,
+        "src/react-app-env.d.ts": true
     },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }
