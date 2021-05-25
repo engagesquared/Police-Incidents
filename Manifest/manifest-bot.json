@@ -1,6 +1,6 @@
 ﻿{
-    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.10/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.10",
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.9/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.9",
     "version": "1.0",
     "id": "b4eacaae-80bd-4097-a209-e43cb6757aa1",
     "packageName": "com.police.incidents.bot",
