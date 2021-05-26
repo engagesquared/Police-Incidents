@@ -28,8 +28,6 @@ namespace PoliceIncidents.Core.DB.Entities
 
         public string WebEOCLink { get; set; }
 
-        public UserEntity IncidentManager { get; set; }
-
         public Guid IncidentManagerId { get; set; }
 
         public IncidentStatus Status { get; set; }

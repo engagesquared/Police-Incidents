@@ -19,26 +19,39 @@ namespace PoliceIncidents.Bot.Bots
     {
         private readonly ILogger<PoliceIncidentsBot> logger;
         private readonly IUserService userService;
+        private readonly IIncidentService incidentService;
         private readonly PoliceIncidentsDbContext dbContext;
 
         public PoliceIncidentsBot(
              ILogger<PoliceIncidentsBot> logger,
              IUserService userService,
+             IIncidentService incidentService,
              PoliceIncidentsDbContext dbContext)
         {
             this.logger = logger;
             this.userService = userService;
+            this.incidentService = incidentService;
             this.dbContext = dbContext;
         }
 
         protected override async Task OnConversationUpdateActivityAsync(ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
             var conversationReference = turnContext.Activity.GetConversationReference();
+            string recipientId = turnContext.Activity.Recipient.Id;
+            if (turnContext.Activity?.MembersAdded?.Any(v => v.Id == recipientId) == true
+                && turnContext.Activity?.Conversation?.ConversationType == "channel")
+            {
+                var teamName = turnContext.Activity.ChannelData.team?.name?.ToString();
+                string aadObjectId = conversationReference.User.AadObjectId;
+                string conversationId = conversationReference.Conversation.Id;
+                string useBotId = conversationReference.User.Id;
+                await this.incidentService.CreateDistrict(turnContext.Activity.Conversation.Id, teamName, conversationId);
+            }
+
             await this.EnsureConversaion(conversationReference);
 
             var serviceUrl = conversationReference.ServiceUrl.ToLowerInvariant().Trim();
             await this.EnsureServiceUrl(serviceUrl);
-
             await base.OnConversationUpdateActivityAsync(turnContext, cancellationToken);
         }
 

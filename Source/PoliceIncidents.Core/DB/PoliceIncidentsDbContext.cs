@@ -17,8 +17,8 @@ namespace PoliceIncidents.Core.DB
             // hack to ensure once per application run, becauser Azure Function DI doesn't provide such option.
             if (!isEnsured)
             {
-                this.Database.EnsureCreated();
                 isEnsured = true;
+                this.Database.EnsureCreated();
             }
         }
 
@@ -61,7 +61,6 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.DistrictId).IsRequired();
 
                 e.HasKey(x => x.Id);
-                e.HasOne(x => x.IncidentManager).WithMany(x => x.IncidentsManagedByUser).HasForeignKey(x => x.IncidentManagerId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.IncidentUpdates).WithOne(x => x.ParentIncident).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.Participants).WithOne(x => x.Incident).HasForeignKey(x => x.IncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(x => x.District).WithMany().HasForeignKey(x => x.DistrictId).OnDelete(DeleteBehavior.NoAction);
@@ -72,6 +71,17 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.Key).HasMaxLength(25);
                 e.Property(e => e.Value);
                 e.HasKey(x => x.Key);
+            });
+
+            modelBuilder.Entity<DistrictEntity>(e =>
+            {
+                e.Property(e => e.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.ConversationId).HasMaxLength(500);
+                e.Property(x => x.IsDefault);
+                e.Property(x => x.RegionName);
+                e.Property(x => x.TeamGroupId);
+                e.Property(x => x.TeamGroupName);
+                e.HasKey(x => x.Id);
             });
 
             modelBuilder.Entity<IncidentUpdateEntity>(e =>

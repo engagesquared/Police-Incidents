@@ -26,15 +26,49 @@ namespace PoliceIncidents.Core.Services
             this.logger = logger;
         }
 
-        public async Task<long> CreateIncident(IncidentInputModel model)
+        public async Task CreateDistrict(string channelId, string channelName, string conversationId)
         {
-            IncidentDetailsEntity newIncident = this.MapFromInputModel(model);
-            this.dbContext.IncidentDetails.Add(newIncident);
-            await this.dbContext.SaveChangesAsync();
-            return newIncident.Id;
+            try
+            {
+                var districts = this.dbContext.Districts.Where(v => v.TeamGroupId == channelId).Select(v => v.Id).ToList();
+                if (!districts.Any())
+                {
+                    var newDistrict = new DistrictEntity()
+                    {
+                        TeamGroupId = channelId,
+                        TeamGroupName = channelName,
+                        ConversationId = conversationId,
+                    };
+                    this.dbContext.Districts.Add(newDistrict);
+                    await this.dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to create district for channel {channelId} {channelName}");
+                throw;
+            }
         }
 
-        public NewIncidentInfoModel Get(long incidentId)
+        public async Task<long> CreateIncident(IncidentInputModel model)
+        {
+            try
+            {
+                IncidentDetailsEntity newIncident = this.MapFromInputModel(model);
+                var districtId = await this.GetDistrictByRegionAsync(model.Region);
+                newIncident.DistrictId = districtId;
+                this.dbContext.IncidentDetails.Add(newIncident);
+                await this.dbContext.SaveChangesAsync();
+                return newIncident.Id;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to create incident {model.Id} {model.Title} {model.WebEOCLink}");
+                throw;
+            }
+        }
+
+        public NewIncidentInfoModel GetIncident(long incidentId)
         {
             try
             {
@@ -50,6 +84,59 @@ namespace PoliceIncidents.Core.Services
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"Failed to get incident {incidentId} from database");
+                throw;
+            }
+        }
+
+        public DistrictEntity GetDistricForIncident(long incidentId)
+        {
+            try
+            {
+                var disctrict = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId).Select(v => v.District).FirstOrDefault();
+                return disctrict;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to get district for incident {incidentId} from database");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Create if not exist district.
+        /// </summary>
+        /// <param name="region">Name of district.</param>
+        /// <returns>District id.</returns>
+        private async Task<long> GetDistrictByRegionAsync(string region)
+        {
+            try
+            {
+                var districts = this.dbContext.Districts.Where(v => v.RegionName == region).Select(v => v.Id).ToList();
+                var districtId = districts.FirstOrDefault();
+                if (!districts.Any())
+                {
+                    this.logger.LogInformation($"No district was found with '{region}' name. Trying to return default district");
+                    districts = this.dbContext.Districts.Where(v => v.IsDefault).Select(v => v.Id).ToList();
+                    districtId = districts.FirstOrDefault();
+                    if (!districts.Any())
+                    {
+                        this.logger.LogInformation($"No default district was found.");
+                        this.logger.LogInformation($"Trying to create draft district for incident.");
+                        var newDistrict = new DistrictEntity()
+                        {
+                            RegionName = region,
+                        };
+                        this.dbContext.Districts.Add(newDistrict);
+                        await this.dbContext.SaveChangesAsync();
+                        districtId = newDistrict.Id;
+                    }
+                }
+
+                return districtId;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to ensure district with name: {region}");
                 throw;
             }
         }

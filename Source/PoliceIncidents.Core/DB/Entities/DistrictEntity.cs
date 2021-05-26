@@ -10,8 +10,14 @@ namespace PoliceIncidents.Core.DB.Entities
     {
         public long Id { get; set; }
 
-        public string Name { get; set; }
+        public string RegionName { get; set; }
 
-        public Guid TeamGroupId { get; set; }
+        public string TeamGroupName { get; set; }
+
+        public string TeamGroupId { get; set; }
+
+        public bool IsDefault { get; set; }
+
+        public string ConversationId { get; set; }
     }
 }

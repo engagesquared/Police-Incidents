@@ -46,7 +46,7 @@ namespace PoliceIncidents.Functions.Functions
                 try
                 {
                     var botNotifyPath = Core.Common.Constants.IncidentCreatedBotRoute.Replace("{id}", newIncidentId.ToString());
-                    await this.httpClient.GetAsync(WebConfig.BotBaseUrl + botNotifyPath);
+                    await this.httpClient.GetAsync(WebConfig.BotBaseUrl.Trim(new[] { '/' }) + botNotifyPath);
                 }
                 catch (Exception ex)
                 {

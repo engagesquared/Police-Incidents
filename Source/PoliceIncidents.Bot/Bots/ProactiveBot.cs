@@ -42,11 +42,15 @@ namespace PoliceIncidents.Bot.Bots
         {
             try
             {
-                var conversationRefs = this.dbContext.UserEntities.Where(x => x.ConversationId != null || !x.ConversationId.Equals(string.Empty)).Select(v => v.ConversationId).ToList();
-                foreach (var conversationRef in conversationRefs)
+                var district = this.incidentService.GetDistricForIncident(incidentId);
+                if (district == null)
+                {
+                    this.logger.LogError($"No distric found for IncidentId: {incidentId}");
+                }
+                else
                 {
                     var message = this.GeIncidentCreatedMessage(incidentId);
-                    await this.SendMessageAsync(message, conversationRef);
+                    await this.SendChannelMessageAsync(message, district.ConversationId, district.TeamGroupId);
                 }
             }
             catch (Exception ex)
@@ -55,7 +59,18 @@ namespace PoliceIncidents.Bot.Bots
             }
         }
 
-        private async Task SendMessageAsync(IActivity message, string conversationReference)
+        private async Task SendChannelMessageAsync(Activity message, string conversationId, string teamGroupId)
+        {
+            var conversation = this.CreateConversationReference(conversationId,"" );
+            async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)
+            {
+                await turnContext.SendActivityAsync(message, cancellationToken);
+            }
+
+            await ((BotAdapter)this.adapter).ContinueConversationAsync(this.appSettings.BotAppId, conversation, Conversationcallback, default);
+        }
+
+        private async Task SendPrivateMessageAsync(IActivity message, string conversationReference)
         {
             var conversation = this.CreateConversationReferencePersonal(conversationReference);
             async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)
@@ -68,7 +83,7 @@ namespace PoliceIncidents.Bot.Bots
 
         private Activity GeIncidentCreatedMessage(long incidentId)
         {
-            var incident = this.incidentService.Get(incidentId);
+            var incident = this.incidentService.GetIncident(incidentId);
             if (incident != null)
             {
                 var text = Strings.IncidentCreatedTemplate
@@ -102,7 +117,6 @@ namespace PoliceIncidents.Bot.Bots
                 Conversation = new ConversationAccount()
                 {
                     Id = conversationId,
-                    ConversationType = conversationType,
                     TenantId = this.appSettings.TenantId,
                 },
                 ServiceUrl = serviceUrl.Value,
