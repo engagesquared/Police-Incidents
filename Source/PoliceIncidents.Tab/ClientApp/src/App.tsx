@@ -5,13 +5,23 @@ import ErrorPage from "./components/error-page/error-page";
 import SignInPage from "./components/sign-in-page/sign-in-page";
 import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
 import SignInSimpleEnd from "./components/sign-in-page/sign-in-simple-end";
-//import { Home } from "./components/home/home";
 import { PersonalTab } from "./components/personalTab/personalTab";
+import { Providers, MgtPersonCard, TeamsHelper } from "@microsoft/mgt-react";
+import { MgtTokenProvider } from "./providers/MgtTokenProvider";
 
 import { Flex } from "@fluentui/react-northstar";
 import { useStyles } from "./App.styles";
 import { GlobalContext } from "./providers/GlobalContextProvider";
+import * as microsoftTeams from "@microsoft/teams-js";
 import { HostClientType } from "@microsoft/teams-js";
+
+TeamsHelper.microsoftTeamsLib = microsoftTeams;
+
+MgtPersonCard.config.useContactApis = false;
+MgtPersonCard.config.sections.mailMessages = false;
+MgtPersonCard.config.sections.files = false;
+
+Providers.globalProvider = new MgtTokenProvider();
 
 const App = () => {
     const classes = useStyles();

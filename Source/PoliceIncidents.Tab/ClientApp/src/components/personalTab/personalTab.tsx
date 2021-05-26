@@ -3,6 +3,7 @@ import { Button, Flex, Text, Segment, Divider, List, CallIcon, Image, Header, re
 import { getUserIncidents } from "../../apis/api-list";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./personalTab.styles";
+import { Person, PersonCardInteraction, PersonViewType } from "@microsoft/mgt-react";
 
 export const PersonalTab = () => {
     const { t } = useTranslation();
@@ -22,13 +23,19 @@ export const PersonalTab = () => {
 
             <Flex column>
                 {incidents.map((inc) => (
-                    <Segment color="brand">
+                    <Segment color="brand" key={inc.id}>
                         <Flex gap="gap.smaller" vAlign="center">
                             <Text content={inc.title} as="h3" />
 
                             <Text content={inc.description} />
 
-                            <Text content="Program the sensor to the SAS alarm through the haptic SQL card! Program the sensor to the SAS alarm through the haptic SQL card!" />
+                            <Person
+                                userId={inc.incidentManagerId}
+                                line2Property={"jobTitle"}
+                                showPresence={false}
+                                view={PersonViewType.twolines}
+                                personCardInteraction={PersonCardInteraction.hover}
+                            />
                         </Flex>
                         <Divider size={1} />
                         <List

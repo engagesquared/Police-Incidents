@@ -11,6 +11,7 @@
     <StartupObject></StartupObject>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AssemblyName>PoliceIncidents.Tab</AssemblyName>
+    <AssemblyOriginatorKeyFile />
   </PropertyGroup>
 
   <ItemGroup>
