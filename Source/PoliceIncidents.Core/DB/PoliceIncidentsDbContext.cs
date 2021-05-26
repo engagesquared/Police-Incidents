@@ -9,16 +9,20 @@ namespace PoliceIncidents.Core.DB
 
     public class PoliceIncidentsDbContext : DbContext
     {
+        private static readonly object SyncDbEnsured = new object();
         private static bool isEnsured;
 
         public PoliceIncidentsDbContext(DbContextOptions<PoliceIncidentsDbContext> options)
         : base(options)
         {
             // hack to ensure once per application run, becauser Azure Function DI doesn't provide such option.
-            if (!isEnsured)
+            lock (SyncDbEnsured)
             {
-                isEnsured = true;
-                this.Database.EnsureCreated();
+                if (!isEnsured)
+                {
+                    this.Database.EnsureCreated();
+                    isEnsured = true;
+                }
             }
         }
 
@@ -61,6 +65,7 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.DistrictId).IsRequired();
 
                 e.HasKey(x => x.Id);
+                e.HasOne(x => x.IncidentManager).WithMany(x => x.IncidentsManagedByUser).HasForeignKey(x => x.IncidentManagerId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.IncidentUpdates).WithOne(x => x.ParentIncident).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.Participants).WithOne(x => x.Incident).HasForeignKey(x => x.IncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(x => x.District).WithMany().HasForeignKey(x => x.DistrictId).OnDelete(DeleteBehavior.NoAction);

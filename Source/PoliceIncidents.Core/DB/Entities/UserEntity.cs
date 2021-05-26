@@ -20,6 +20,7 @@ namespace PoliceIncidents.Core.DB.Entities
 
         public List<IncidentTeamMemberEntity> IncidentTeamMembers { get; set; }
 
+        public List<IncidentDetailsEntity> IncidentsManagedByUser { get; set; }
         public List<IncidentUpdateEntity> IncidentUpdatesCreatedByUser { get; set; }
     }
 }

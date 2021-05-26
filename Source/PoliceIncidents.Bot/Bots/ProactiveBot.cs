@@ -61,7 +61,7 @@ namespace PoliceIncidents.Bot.Bots
 
         private async Task SendChannelMessageAsync(Activity message, string conversationId, string teamGroupId)
         {
-            var conversation = this.CreateConversationReference(conversationId,"" );
+            var conversation = this.CreateConversationReference(conversationId);
             async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)
             {
                 await turnContext.SendActivityAsync(message, cancellationToken);
@@ -72,7 +72,7 @@ namespace PoliceIncidents.Bot.Bots
 
         private async Task SendPrivateMessageAsync(IActivity message, string conversationReference)
         {
-            var conversation = this.CreateConversationReferencePersonal(conversationReference);
+            var conversation = this.CreateConversationReference(conversationReference);
             async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)
             {
                 await turnContext.SendActivityAsync(message, cancellationToken);
@@ -98,12 +98,7 @@ namespace PoliceIncidents.Bot.Bots
             return null;
         }
 
-        private ConversationReference CreateConversationReferencePersonal(string conversationId)
-        {
-            return this.CreateConversationReference(conversationId, "personal");
-        }
-
-        private ConversationReference CreateConversationReference(string conversationId, string conversationType)
+        private ConversationReference CreateConversationReference(string conversationId)
         {
             var serviceUrl = this.dbContext.Config.FirstOrDefault(x => x.Key == Core.Common.Constants.BotServiceUrlConfigKey);
             if (serviceUrl == null)
