@@ -7,10 +7,10 @@ export const useStyles = createUseStyles((theme: ITheme) => {
             height: "100vh",
         },
         scrollRegion: {
-            background: theme.siteVariables.colorScheme.default.background2,
+            background: theme.siteVariables.colorScheme.default.background1,
             overflowY: "auto",
             overflowX: "hidden",
-            paddingBottom: "15px",
+            padding: "12px",
             flexGrow: 1,
         },
         mobileGap: {

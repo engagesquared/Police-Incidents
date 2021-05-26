@@ -6,6 +6,7 @@ import SignInPage from "./components/sign-in-page/sign-in-page";
 import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
 import SignInSimpleEnd from "./components/sign-in-page/sign-in-simple-end";
 import { PersonalTab } from "./components/personalTab/personalTab";
+import { IncidentPage } from "./components/incidentPage/incidentPage";
 import { Providers, MgtPersonCard, TeamsHelper } from "@microsoft/mgt-react";
 import { MgtTokenProvider } from "./providers/MgtTokenProvider";
 
@@ -34,13 +35,17 @@ const App = () => {
                 <React.Suspense fallback={<></>}>
                     <BrowserRouter>
                         <Switch>
-                            <Route exact path="/home" component={PersonalTab} />
-                            <Route exact path="/personal" component={PersonalTab} />
-                            <Route exact path="/errorpage" component={ErrorPage} />
-                            <Route exact path="/errorpage/:id" component={ErrorPage} />
-                            <Route exact path="/signin" component={SignInPage} />
-                            <Route exact path="/signin-simple-start" component={SignInSimpleStart} />
-                            <Route exact path="/signin-simple-end" component={SignInSimpleEnd} />
+                            {/* Do not remove this pseudo-contatiner. Routes on mobile don't work without it */}
+                            <>
+                                <Route exact path="/home" component={PersonalTab} />
+                                <Route exact path="/personal" component={PersonalTab} />
+                                <Route exact path="/incident/:id" component={IncidentPage} />
+                                <Route exact path="/errorpage" component={ErrorPage} />
+                                <Route exact path="/errorpage/:id" component={ErrorPage} />
+                                <Route exact path="/signin" component={SignInPage} />
+                                <Route exact path="/signin-simple-start" component={SignInSimpleStart} />
+                                <Route exact path="/signin-simple-end" component={SignInSimpleEnd} />
+                            </>
                         </Switch>
                     </BrowserRouter>
                 </React.Suspense>

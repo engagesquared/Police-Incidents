@@ -6,7 +6,7 @@ i18n.use(Backend)
     .use(initReactI18next) // passes i18n down to react-i18next
     .init({
         lng: window.navigator.language,
-        fallbackLng: "en-US",
+        fallbackLng: "en-AU",
         keySeparator: false, // we do not use keys in form messages.welcome
         interpolation: {
             escapeValue: false, // react already safes from xss
