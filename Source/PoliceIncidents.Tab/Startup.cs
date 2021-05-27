@@ -16,6 +16,8 @@ namespace Microsoft.Teams.Apps.DLLookup
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
+    using PoliceIncidents.Tab.Interfaces;
+    using PoliceIncidents.Tab.Services;
 
     /// <summary>
     /// Default Startup class.
@@ -54,11 +56,8 @@ namespace Microsoft.Teams.Apps.DLLookup
             services.AddDLLookupAuthentication(this.Configuration);
             services.AddSingleton<TokenAcquisitionHelper>();
             services.AddSession();
-            services.AddDbContext<PoliceIncidentsDbContext>(p =>
-            {
-                string connectionString = this.Configuration.GetConnectionString("PoliceIncidents");
-                p.UseSqlServer(connectionString);
-            });
+
+            this.ConfigureDataServices(services);
             services.AddApplicationInsightsTelemetry(this.Configuration["ApplicationInsights:InstrumentationKey"]);
 
             services.Configure<CacheOptions>(options =>
@@ -81,6 +80,23 @@ namespace Microsoft.Teams.Apps.DLLookup
             });
 
             services.AddHttpClient();
+        }
+
+        private void ConfigureDataServices(IServiceCollection services)
+        {
+            string connectionString = "";// this.Configuration.GetConnectionString("PoliceIncidents");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                services.AddScoped<IIncidentService, FakeIncidentService>();
+                services.AddScoped<IIncidentUpdateService, FakeIncidentUpdateService>();
+            }
+            else
+            {
+                services.AddDbContext<PoliceIncidentsDbContext>(p => { p.UseSqlServer(connectionString); });
+                services.AddScoped<IIncidentService, IncidentService>();
+                services.AddScoped<IIncidentUpdateService, IncidentUpdateService>();
+            }
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

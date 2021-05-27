@@ -15,7 +15,7 @@ export const IncidentPage = () => {
     React.useEffect(() => {
         (async () => {
             if (!!id) {
-                var incident = await getIncident(Number(id));
+                const incident = (await getIncident(Number(id))).data;
                 setIncident(incident);
             }
         })();

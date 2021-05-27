@@ -18,7 +18,7 @@ namespace PoliceIncidents.Tab.Models
 
         public string WebEOCLink { get; set; }
 
-        public Guid IncidentManagerId { get; set; }
+        public Guid? IncidentManagerId { get; set; }
 
         public IncidentStatus Status { get; set; }
 

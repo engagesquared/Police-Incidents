@@ -16,6 +16,7 @@ namespace PoliceIncidents.Controllers
     using Microsoft.Identity.Client;
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Models;
+    using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
     using PoliceIncidents.Tab.Services;
 
@@ -25,17 +26,20 @@ namespace PoliceIncidents.Controllers
     public class IncidentsController : BaseController
     {
         private readonly ILogger<UserController> logger;
-        private readonly PoliceIncidentsDbContext dbContext;
+        private readonly IIncidentService incidentService;
+        private readonly IIncidentUpdateService incidentUpdateService;
 
         public IncidentsController(
             IOptions<AzureAdOptions> azureAdOptions,
             ILogger<UserController> logger,
-            IConfidentialClientApplication confidentialClientApp, 
-            PoliceIncidentsDbContext dbContext)
+            IIncidentService incidentService,
+            IIncidentUpdateService incidentUpdateService,
+            IConfidentialClientApplication confidentialClientApp)
             : base(confidentialClientApp, azureAdOptions, logger)
         {
             this.logger = logger;
-            this.dbContext = dbContext;
+            this.incidentService = incidentService;
+            this.incidentUpdateService = incidentUpdateService;
         }
 
         [HttpGet("UserIncidents")]
@@ -44,11 +48,68 @@ namespace PoliceIncidents.Controllers
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await new FakeIncidentService().GetUserIncidents(userId);
+                return await this.incidentService.GetUserIncidents(userId);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"An error occurred in GetToken: {ex.Message}");
+                this.logger.LogError(ex, $"An error occurred in GetUserIncidents: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IncidentModel> GetIncidentById(long id)
+        {
+            try
+            {
+                return await this.incidentService.GetIncidentById(id);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in GetIncidentById: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost("{id}/SetManager")]
+        public async Task SetIncidentManager(long id, string managerId)
+        {
+            try
+            {
+                await this.incidentService.ChangeIncidentManager(id, Guid.Parse(managerId));
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in SetIncidentManager {id} {managerId}: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("{id}/Updates")]
+        public async Task<List<IncidentUpdateModel>> GetIncidentUpdatesById(long id)
+        {
+            try
+            {
+                return await this.incidentUpdateService.GetIncidentUpdates(id);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in GetIncidentById: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost("{id}/AddUpdate")]
+        public async Task AddIncidentUpdate(long id, IncidentUpdateInputModel incidentUpdate)
+        {
+            try
+            {
+                incidentUpdate.ParentIncidentId = id;
+                await this.incidentUpdateService.AddIncidentUpdate(incidentUpdate);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in AddIncidentUpdate {id}: {ex.Message}");
                 throw;
             }
         }

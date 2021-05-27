@@ -159,7 +159,7 @@ namespace PoliceIncidents.Core.Services
             newIncident.Location = model.Location;
             newIncident.Description = model.Description;
             newIncident.Status = IncidentStatus.New;
-            newIncident.IncidentRaised = DateTime.Now.ToUniversalTime();
+            newIncident.IncidentRaised = DateTime.UtcNow;
             newIncident.WebEOCLink = model.WebEOCLink;
             return newIncident;
         }
