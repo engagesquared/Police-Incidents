@@ -8,9 +8,11 @@ function FluentThemeProvider(props: any) {
     const ctx = React.useContext(GlobalContext);
     const [themeName, setThemeName] = React.useState(ctx.teamsContext.theme);
 
-    microsoftTeams.registerOnThemeChangeHandler((theme) => {
-        setThemeName(theme);
-    });
+    React.useEffect(() => {
+        microsoftTeams.registerOnThemeChangeHandler((theme) => {
+            setThemeName(theme);
+        });
+    }, []);
 
     let theme: ThemePrepared<any> = teamsV2Theme;
     let mtgThemeRootClass = "mgt-dark";
@@ -22,11 +24,11 @@ function FluentThemeProvider(props: any) {
         mtgThemeRootClass = "mgt-light";
     }
     return (
-        <ThemeProvider theme={theme}>
-            <Provider theme={theme}>
+        <Provider theme={theme}>
+            <ThemeProvider theme={theme}>
                 <div className={mtgThemeRootClass}>{props.children}</div>
-            </Provider>
-        </ThemeProvider>
+            </ThemeProvider>
+        </Provider>
     );
 }
 

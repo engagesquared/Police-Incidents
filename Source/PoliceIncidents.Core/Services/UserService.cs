@@ -25,7 +25,7 @@ namespace PoliceIncidents.Core.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<UserEntity> EnsureUserAsync(string aadObjectId, string conversationId, string botUserId)
+        public async Task<UserEntity> EnsureUserAsync(string aadObjectId, string conversationId = null, string botUserId = null)
         {
             try
             {
@@ -44,10 +44,11 @@ namespace PoliceIncidents.Core.Services
                     this.dbContext.Add(user);
                     await this.dbContext.SaveChangesAsync();
                 }
-                else
+                else if (!string.IsNullOrEmpty(conversationId) && !string.IsNullOrEmpty(botUserId))
                 {
                     user.BotUserId = botUserId;
                     user.ConversationId = conversationId;
+                    await this.dbContext.SaveChangesAsync();
                 }
 
                 return user;
@@ -57,6 +58,11 @@ namespace PoliceIncidents.Core.Services
                 this.logger.LogError(ex, "Failed to ensure user");
                 throw;
             }
+        }
+
+        public async Task<UserEntity> EnsureUserAsync(string aadObjectId)
+        {
+            return await this.EnsureUserAsync(aadObjectId);
         }
     }
 }

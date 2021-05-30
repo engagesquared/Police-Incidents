@@ -40,6 +40,8 @@ namespace PoliceIncidents.Core.DB
 
         public DbSet<DistrictEntity> Districts { get; protected set; }
 
+        public DbSet<UserRoleEntity> UserRoles { get; protected set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserEntity>(e =>
@@ -55,18 +57,18 @@ namespace PoliceIncidents.Core.DB
             {
                 e.Property(e => e.Id).ValueGeneratedOnAdd();
                 e.Property(e => e.Description);
-                e.Property(e => e.IncidentLegacyId);
-                e.Property(e => e.IncidentRaised);
+                e.Property(e => e.ExternalId);
+                e.Property(e => e.CreatedUtc);
                 e.Property(e => e.Location);
                 e.Property(e => e.Status);
-                e.Property(e => e.ThreadLink);
+                e.Property(e => e.ChatConverstaionId);
                 e.Property(e => e.Title);
-                e.Property(e => e.WebEOCLink);
+                e.Property(e => e.ExternalLink);
                 e.Property(e => e.DistrictId).IsRequired();
 
                 e.HasKey(x => x.Id);
-                e.HasOne(x => x.IncidentManager).WithMany(x => x.IncidentsManagedByUser).HasForeignKey(x => x.IncidentManagerId).OnDelete(DeleteBehavior.NoAction);
-                e.HasMany(x => x.IncidentUpdates).WithOne(x => x.ParentIncident).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
+                e.HasOne(x => x.Manager).WithMany(x => x.IncidentsManagedByUser).HasForeignKey(x => x.ManagerId).OnDelete(DeleteBehavior.NoAction);
+                e.HasMany(x => x.Updates).WithOne(x => x.ParentIncident).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(x => x.Participants).WithOne(x => x.Incident).HasForeignKey(x => x.IncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(x => x.District).WithMany().HasForeignKey(x => x.DistrictId).OnDelete(DeleteBehavior.NoAction);
             });
@@ -85,7 +87,6 @@ namespace PoliceIncidents.Core.DB
                 e.Property(x => x.IsDefault);
                 e.Property(x => x.RegionName);
                 e.Property(x => x.TeamGroupId);
-                e.Property(x => x.TeamGroupName);
                 e.HasKey(x => x.Id);
             });
 
@@ -98,7 +99,7 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.UpdateType);
 
                 e.HasOne(x => x.CreatedBy).WithMany(x => x.IncidentUpdatesCreatedByUser).HasForeignKey(x => x.CreatedById).OnDelete(DeleteBehavior.NoAction);
-                e.HasOne(x => x.ParentIncident).WithMany(x => x.IncidentUpdates).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
+                e.HasOne(x => x.ParentIncident).WithMany(x => x.Updates).HasForeignKey(x => x.ParentIncidentId).OnDelete(DeleteBehavior.NoAction);
 
                 e.HasKey(x => x.Id);
             });
@@ -108,8 +109,22 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.Id).ValueGeneratedOnAdd();
                 e.HasOne(x => x.Incident).WithMany(x => x.Participants).HasForeignKey(x => x.IncidentId).OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(x => x.TeamMember).WithMany(x => x.IncidentTeamMembers).HasForeignKey(x => x.TeamMemberId).OnDelete(DeleteBehavior.NoAction);
+                e.HasOne(x => x.UserRole).WithMany().HasForeignKey(x => x.UserRoleId).OnDelete(DeleteBehavior.NoAction);
                 e.HasKey(x => x.Id);
             });
+
+            modelBuilder.Entity<UserRoleEntity>(e =>
+            {
+                e.Property(e => e.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Title).HasMaxLength(100);
+                e.HasKey(x => x.Id);
+            });
+
+            // Seed data
+            modelBuilder.Entity<UserRoleEntity>().HasData(
+                new UserRoleEntity { Id = 1, Title = "Field Officer" },
+                new UserRoleEntity { Id = 2, Title = "External Support" },
+                new UserRoleEntity { Id = 3, Title = "Member" });
         }
     }
 }

@@ -38,14 +38,13 @@ namespace PoliceIncidents.Bot.Bots
         {
             var conversationReference = turnContext.Activity.GetConversationReference();
             string recipientId = turnContext.Activity.Recipient.Id;
+
             if (turnContext.Activity?.MembersAdded?.Any(v => v.Id == recipientId) == true
                 && turnContext.Activity?.Conversation?.ConversationType == "channel")
             {
-                var teamName = turnContext.Activity.ChannelData.team?.name?.ToString();
-                string aadObjectId = conversationReference.User.AadObjectId;
                 string conversationId = conversationReference.Conversation.Id;
-                string useBotId = conversationReference.User.Id;
-                await this.incidentService.CreateDistrict(turnContext.Activity.Conversation.Id, teamName, conversationId);
+                var team = turnContext.Activity.TeamsGetTeamInfo();
+                await this.incidentService.CreateDistrict(new Guid(team.AadGroupId), team.Name, conversationId);
             }
 
             await this.EnsureConversaion(conversationReference);
@@ -57,7 +56,7 @@ namespace PoliceIncidents.Bot.Bots
 
         private async Task EnsureConversaion(ConversationReference conversation)
         {
-            var currentUser = await this.userService.EnsureUserAsync(conversation.User.AadObjectId, conversation.Conversation.Id, conversation.User.Id);
+            await this.userService.EnsureUserAsync(conversation.User.AadObjectId, conversation.Conversation.Id, conversation.User.Id);
         }
 
         private async Task EnsureServiceUrl(string serviceUrl)

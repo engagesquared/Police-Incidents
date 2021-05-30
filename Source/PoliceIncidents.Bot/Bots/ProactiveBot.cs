@@ -50,7 +50,8 @@ namespace PoliceIncidents.Bot.Bots
                 else
                 {
                     var message = this.GeIncidentCreatedMessage(incidentId);
-                    await this.SendChannelMessageAsync(message, district.ConversationId, district.TeamGroupId);
+                    await this.SendChannelMessageAsync(message, district.ConversationId);
+                    await this.incidentService.UpdateIncidentConversationId(incidentId, message.Id);
                 }
             }
             catch (Exception ex)
@@ -59,7 +60,7 @@ namespace PoliceIncidents.Bot.Bots
             }
         }
 
-        private async Task SendChannelMessageAsync(Activity message, string conversationId, string teamGroupId)
+        private async Task SendChannelMessageAsync(Activity message, string conversationId)
         {
             var conversation = this.CreateConversationReference(conversationId);
             async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)

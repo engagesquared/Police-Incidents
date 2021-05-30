@@ -14,6 +14,10 @@ namespace PoliceIncidents.Core.DB.Entities
 
         public long IncidentId { get; set; }
 
+        public int UserRoleId { get; set; }
+
+        public UserRoleEntity UserRole { get; set; }
+
         public UserEntity TeamMember { get; set; }
 
         public IncidentDetailsEntity Incident { get; set; }

@@ -7,7 +7,7 @@ export const useStyles = createUseStyles((theme: ITheme) => {
             height: "100vh",
         },
         scrollRegion: {
-            background: theme.siteVariables.colorScheme.default.background1,
+            background: theme.siteVariables.colorScheme.default.background2,
             overflowY: "auto",
             overflowX: "hidden",
             padding: "12px",

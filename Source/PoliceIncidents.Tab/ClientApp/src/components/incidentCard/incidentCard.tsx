@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useStyles } from "./incidentCard.styles";
 import { Person, PersonCardInteraction, PersonViewType } from "@microsoft/mgt-react";
 import { IIncidentModel } from "../../models/IIncidentModel";
+import { Routes } from "../../common";
 
 export const IncidentCard = (props: { incident: IIncidentModel }) => {
     const { t } = useTranslation();
@@ -33,7 +34,7 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                         primary
                         content={t("seeFullIncidentBtnLabel")}
                         onClick={() => {
-                            history.push(`/incident/${incident.id}`);
+                            history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incident.id)));
                         }}
                     />
                     <Button primary content={t("goToChatThredBtnLabel")} />

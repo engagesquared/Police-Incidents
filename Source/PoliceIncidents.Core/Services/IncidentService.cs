@@ -26,26 +26,30 @@ namespace PoliceIncidents.Core.Services
             this.logger = logger;
         }
 
-        public async Task CreateDistrict(string channelId, string channelName, string conversationId)
+        public async Task CreateDistrict(Guid groupId, string teamName, string conversationId)
         {
             try
             {
-                var districts = this.dbContext.Districts.Where(v => v.TeamGroupId == channelId).Select(v => v.Id).ToList();
-                if (!districts.Any())
+                var district = this.dbContext.Districts.Where(v => v.TeamGroupId == groupId).FirstOrDefault();
+                if (district == null)
                 {
                     var newDistrict = new DistrictEntity()
                     {
-                        TeamGroupId = channelId,
-                        TeamGroupName = channelName,
+                        RegionName = teamName,
+                        TeamGroupId = groupId,
                         ConversationId = conversationId,
                     };
                     this.dbContext.Districts.Add(newDistrict);
+                    await this.dbContext.SaveChangesAsync();
+                } else if (district.ConversationId != conversationId)
+                {
+                    district.ConversationId = conversationId;
                     await this.dbContext.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Failed to create district for channel {channelId} {channelName}");
+                this.logger.LogError(ex, $"Failed to create district for team {groupId} {teamName}");
                 throw;
             }
         }
@@ -56,6 +60,18 @@ namespace PoliceIncidents.Core.Services
             {
                 IncidentDetailsEntity newIncident = this.MapFromInputModel(model);
                 var districtId = await this.GetDistrictByRegionAsync(model.Region);
+                if (model.ManagerId.HasValue)
+                {
+                    var manager = await this.EnsureUserAsync(model.ManagerId.Value);
+                    newIncident.Manager = manager;
+                }
+
+                if (model.Author.HasValue)
+                {
+                    var author = await this.EnsureUserAsync(model.Author.Value);
+                    newIncident.CreatedById = model.Author;
+                }
+
                 newIncident.DistrictId = districtId;
                 this.dbContext.IncidentDetails.Add(newIncident);
                 await this.dbContext.SaveChangesAsync();
@@ -63,7 +79,28 @@ namespace PoliceIncidents.Core.Services
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Failed to create incident {model.Id} {model.Title} {model.WebEOCLink}");
+                this.logger.LogError(ex, $"Failed to create incident {model.ExternalId} {model.Title} {model.ExternalLink}");
+                throw;
+            }
+        }
+
+        public async Task UpdateIncidentConversationId(long incidentId, string conversationId)
+        {
+            try
+            {
+                var incident = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId).FirstOrDefault();
+                if (incident == null)
+                {
+                    this.logger.LogWarning($"No incident was found with '{incidentId}' Id.");
+                    return;
+                }
+
+                incident.ChatConverstaionId = conversationId;
+                await this.dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to update incident {incidentId}");
                 throw;
             }
         }
@@ -107,15 +144,22 @@ namespace PoliceIncidents.Core.Services
         /// </summary>
         /// <param name="region">Name of district.</param>
         /// <returns>District id.</returns>
-        private async Task<long> GetDistrictByRegionAsync(string region)
+        private async Task<long> GetDistrictByRegionAsync(string region, Guid? teamRegionId = null)
         {
             try
             {
-                var districts = this.dbContext.Districts.Where(v => v.RegionName == region).Select(v => v.Id).ToList();
+                var districtIdQuery = this.dbContext.Districts.Where(v => v.RegionName == region).Select(v => v.Id);
+                if (teamRegionId.HasValue)
+                {
+                    var tid = teamRegionId.Value;
+                    districtIdQuery = this.dbContext.Districts.Where(v => v.TeamGroupId == tid).Select(v => v.Id);
+                }
+
+                var districts = districtIdQuery.ToList();
                 var districtId = districts.FirstOrDefault();
                 if (!districts.Any())
                 {
-                    this.logger.LogInformation($"No district was found with '{region}' name. Trying to return default district");
+                    this.logger.LogInformation($"No district was found with '{region}' name and/or {teamRegionId} team Id. Trying to return default district");
                     districts = this.dbContext.Districts.Where(v => v.IsDefault).Select(v => v.Id).ToList();
                     districtId = districts.FirstOrDefault();
                     if (!districts.Any())
@@ -125,6 +169,7 @@ namespace PoliceIncidents.Core.Services
                         var newDistrict = new DistrictEntity()
                         {
                             RegionName = region,
+                            TeamGroupId = teamRegionId,
                         };
                         this.dbContext.Districts.Add(newDistrict);
                         await this.dbContext.SaveChangesAsync();
@@ -141,13 +186,32 @@ namespace PoliceIncidents.Core.Services
             }
         }
 
+        private async Task<UserEntity> EnsureUserAsync(Guid userId)
+        {
+
+            var userQuery = this.dbContext.UserEntities.Where(x => x.AadUserId == userId);
+            var user = userQuery.FirstOrDefault();
+            if (user == null)
+            {
+                user = new UserEntity
+                {
+                    AadUserId = userId,
+                };
+
+                this.dbContext.Add(user);
+                await this.dbContext.SaveChangesAsync();
+            }
+
+            return user;
+        }
+
         private NewIncidentInfoModel MapFromEntity(IncidentDetailsEntity incident)
         {
             return new NewIncidentInfoModel()
             {
                 Title = incident.Title,
                 Description = incident.Description,
-                Link = incident.WebEOCLink,
+                Link = incident.ExternalLink,
             };
         }
 
@@ -155,13 +219,14 @@ namespace PoliceIncidents.Core.Services
         {
             var newIncident = new IncidentDetailsEntity();
             newIncident.Title = model.Title;
-            newIncident.IncidentLegacyId = model.Id;
+            newIncident.ExternalId = model.ExternalId;
             newIncident.Location = model.Location;
             newIncident.Description = model.Description;
             newIncident.Status = IncidentStatus.New;
-            newIncident.IncidentRaised = DateTime.UtcNow;
-            newIncident.WebEOCLink = model.WebEOCLink;
+            newIncident.CreatedUtc = DateTime.UtcNow;
+            newIncident.ExternalLink = model.ExternalLink;
             return newIncident;
         }
+
     }
 }

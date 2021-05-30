@@ -12,9 +12,7 @@ namespace PoliceIncidents.Core.DB.Entities
 
         public string RegionName { get; set; }
 
-        public string TeamGroupName { get; set; }
-
-        public string TeamGroupId { get; set; }
+        public Guid? TeamGroupId { get; set; }
 
         public bool IsDefault { get; set; }
 

@@ -4,6 +4,7 @@
 
 namespace PoliceIncidents.Core.Interfaces
 {
+    using System;
     using System.Threading.Tasks;
     using PoliceIncidents.Core.DB.Entities;
     using PoliceIncidents.Core.Models;
@@ -12,9 +13,11 @@ namespace PoliceIncidents.Core.Interfaces
     {
         Task<long> CreateIncident(IncidentInputModel model);
 
+        Task UpdateIncidentConversationId(long incidentId, string conversationId);
+
         NewIncidentInfoModel GetIncident(long incidentId);
 
-        Task CreateDistrict(string channelId, string channelName, string conversationId);
+        Task CreateDistrict(Guid groupId, string teamName, string conversationId);
 
         DistrictEntity GetDistricForIncident(long incidentId);
     }

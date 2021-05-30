@@ -86,7 +86,7 @@ namespace PoliceIncidents.Functions.Functions
                 throw;
             }
 
-            if (string.IsNullOrEmpty(inputModel.Id))
+            if (string.IsNullOrEmpty(inputModel.ExternalId))
             {
                 throw new ValidationException("Id field can't be empty");
             }

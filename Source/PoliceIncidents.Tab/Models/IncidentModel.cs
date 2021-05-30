@@ -27,6 +27,5 @@ namespace PoliceIncidents.Tab.Models
         public List<IncidentUpdateModel> IncidentUpdates { get; set; }
 
         public DateTime IncidentRaised { get; set; }
-
     }
 }

@@ -2,7 +2,6 @@
 
 import { createUseStyles } from "react-jss";
 export const useStyles = createUseStyles((theme: ITheme) => {
-    console.log(theme);
     return {
         container: {
             wordBreak: "break-word",

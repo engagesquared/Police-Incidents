@@ -1,10 +1,10 @@
-import { IncedentUpdateType } from "./IncidentUpdateType";
+import { IncidentUpdateType } from "./IncidentUpdateType";
 
 export interface IIncidentUpdateModel {
     id: number;
     title: string;
     body: string;
-    updateType: IncedentUpdateType;
+    updateType: IncidentUpdateType;
     createdAt: Date;
     createdById: string;
 }

@@ -4,7 +4,7 @@ import { createUseStyles } from "react-jss";
 export const useStyles = createUseStyles((theme: ITheme) => {
     return {
         container: {
-            wordBreak: "break-word",
+            color: theme.siteVariables.colorScheme.red.foreground,
         },
     };
 });

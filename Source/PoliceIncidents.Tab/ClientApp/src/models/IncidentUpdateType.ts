@@ -1,5 +1,5 @@
-export enum IncedentUpdateType {
+export enum IncidentUpdateType {
     Manual = 1,
-    WebEOC = 2,
-    Critical = 3,
+    Critical = 2,
+    WebEOC = 3,
 }

@@ -5,16 +5,17 @@ import ErrorPage from "./components/error-page/error-page";
 import SignInPage from "./components/sign-in-page/sign-in-page";
 import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
 import SignInSimpleEnd from "./components/sign-in-page/sign-in-simple-end";
-import { PersonalTab } from "./components/personalTab/personalTab";
+import { Home } from "./components/home/home";
 import { IncidentPage } from "./components/incidentPage/incidentPage";
+import { NewIncidentPage } from "./components/newIncident/newIncidentPage";
 import { Providers, MgtPersonCard, TeamsHelper } from "@microsoft/mgt-react";
 import { MgtTokenProvider } from "./providers/MgtTokenProvider";
+import { Routes } from "./common";
 
 import { Flex } from "@fluentui/react-northstar";
 import { useStyles } from "./App.styles";
 import { GlobalContext } from "./providers/GlobalContextProvider";
 import * as microsoftTeams from "@microsoft/teams-js";
-import { HostClientType } from "@microsoft/teams-js";
 
 TeamsHelper.microsoftTeamsLib = microsoftTeams;
 
@@ -26,9 +27,8 @@ Providers.globalProvider = new MgtTokenProvider();
 
 const App = () => {
     const classes = useStyles();
-    const { teamsContext } = React.useContext(GlobalContext);
-    const clientDeviceType = teamsContext.hostClientType;
-    const isMobileDevice = clientDeviceType === HostClientType.android || clientDeviceType === HostClientType.ios;
+    const { isMobileDevice } = React.useContext(GlobalContext);
+
     return (
         <Flex className={classes.root} column>
             <div className={[classes.scrollRegion, isMobileDevice ? classes.mobileGap : ""].join(" ")}>
@@ -37,9 +37,9 @@ const App = () => {
                         <Switch>
                             {/* Do not remove this pseudo-contatiner. Routes on mobile don't work without it */}
                             <>
-                                <Route exact path="/home" component={PersonalTab} />
-                                <Route exact path="/personal" component={PersonalTab} />
-                                <Route exact path="/incident/:id" component={IncidentPage} />
+                                <Route exact path={Routes.home} component={Home} />
+                                <Route exact path={Routes.incidentPage} component={IncidentPage} />
+                                <Route exact path={Routes.newIncidentPage} component={NewIncidentPage} />
                                 <Route exact path="/errorpage" component={ErrorPage} />
                                 <Route exact path="/errorpage/:id" component={ErrorPage} />
                                 <Route exact path="/signin" component={SignInPage} />

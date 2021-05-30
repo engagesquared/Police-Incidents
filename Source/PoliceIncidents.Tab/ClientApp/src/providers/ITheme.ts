@@ -7,6 +7,7 @@ export interface ITheme {
         colorScheme: {
             default: ColorScheme;
             brand: ColorScheme;
+            red: ColorScheme;
         };
     };
 }

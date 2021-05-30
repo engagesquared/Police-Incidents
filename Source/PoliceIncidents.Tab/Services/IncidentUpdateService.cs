@@ -52,7 +52,6 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-
         public async Task<List<IncidentUpdateModel>> GetIncidentUpdates(long incidentId)
         {
             try

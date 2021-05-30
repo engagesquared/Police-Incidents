@@ -31,10 +31,10 @@ namespace PoliceIncidents.Tab.Services
                 var update = new IncidentUpdateModel()
                 {
                     Body = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
-                    CreatedAt = DateTime.Now.AddHours(-3 * 1),
+                    CreatedAt = DateTime.Now.AddHours(-3 * i),
                     Id = i,
                     Title = $"Update {i}",
-                    UpdateType = (IncedentUpdateType)((i % 3) + 1),
+                    UpdateType = (IncedentUpdateType)((i % 2) + 1),
                 };
                 updates.Add(update);
             }

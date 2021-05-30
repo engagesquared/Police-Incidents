@@ -35,7 +35,7 @@ namespace PoliceIncidents.Tab.Services
             {
                 var userIncidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Id == id)
-                    .Include(v => v.IncidentUpdates);
+                    .Include(v => v.Updates);
                 var incidents = await userIncidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentItem))
                     .FirstOrDefaultAsync();
@@ -55,7 +55,7 @@ namespace PoliceIncidents.Tab.Services
                 var userIncidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
                     .Where(v => v.Participants.Any(p => p.TeamMemberId == userId))
-                    .Include(v => v.IncidentUpdates);
+                    .Include(v => v.Updates);
                 var incidents = await userIncidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
                     .ToListAsync();
@@ -76,7 +76,7 @@ namespace PoliceIncidents.Tab.Services
                 var incident = await incidentQuery.FirstOrDefaultAsync();
                 if (incident != null)
                 {
-                    incident.IncidentManagerId = managerId;
+                    incident.ManagerId = managerId;
                     this.dbContext.Update(incident);
                     await this.dbContext.SaveChangesAsync();
                 }

@@ -10,5 +10,7 @@ namespace PoliceIncidents.Core.Interfaces
     public interface IUserService
     {
         Task<UserEntity> EnsureUserAsync(string aadObjectId, string conversationId, string botUserId);
+
+        Task<UserEntity> EnsureUserAsync(string aadObjectId);
     }
 }

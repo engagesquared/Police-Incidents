@@ -12,13 +12,13 @@ namespace PoliceIncidents.Core.DB.Entities
         Manual = 1,
 
         /// <summary>
-        /// WebEOC
-        /// </summary>
-        WebEOC = 2,
-
-        /// <summary>
         /// Critical
         /// </summary>
-        Critical = 3,
+        Critical = 2,
+
+        /// <summary>
+        /// WebEOC
+        /// </summary>
+        WebEOC = 3,
     }
 }
