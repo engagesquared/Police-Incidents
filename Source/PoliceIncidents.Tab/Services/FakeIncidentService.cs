@@ -22,6 +22,11 @@ namespace PoliceIncidents.Tab.Services
             return;
         }
 
+        public Task<long> CreateIncident(IncidentInputModel incident, Guid authorId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<IncidentModel> GetIncidentById(long id)
         {
             var updates = new List<IncidentUpdateModel>();
@@ -41,15 +46,20 @@ namespace PoliceIncidents.Tab.Services
             var incident = new IncidentModel()
             {
                 Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                IncidentRaised = DateTime.Now.AddHours(-3 * 1),
+                Created = DateTime.Now.AddHours(-3 * 1),
                 Id = 1,
                 Title = $"Police incident #{id}",
                 IncidentUpdates = updates,
                 Location = "Perth, Corner of Hay Street and Barrack Street",
                 Status = IncidentStatus.Active,
-                WebEOCLink = "https://google.com",
+                ExternalLink = "https://google.com",
             };
             return incident;
+        }
+
+        public Task<List<IncidentModel>> GetTeamIncidents(Guid teamId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<List<IncidentModel>> GetUserIncidents(Guid userId)
@@ -75,14 +85,14 @@ namespace PoliceIncidents.Tab.Services
                 var incident = new IncidentModel()
                 {
                     Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                    IncidentRaised = DateTime.Now.AddHours(-3 * i),
-                    IncidentManagerId = userId,
+                    Created = DateTime.Now.AddHours(-3 * i),
+                    ManagerId = userId,
                     Id = i,
                     Title = $"Police incident #{i}",
                     IncidentUpdates = updates,
                     Location = "Perth, Corner of Hay Street and Barrack Street",
                     Status = IncidentStatus.Active,
-                    WebEOCLink = "https://google.com",
+                    ExternalLink = "https://google.com",
                 };
                 result.Add(incident);
             }
