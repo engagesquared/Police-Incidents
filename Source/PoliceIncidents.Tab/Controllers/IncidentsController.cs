@@ -10,15 +10,13 @@ namespace PoliceIncidents.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
-    using PoliceIncidents.Core.DB;
+    using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
-    using PoliceIncidents.Tab.Services;
 
     [Authorize]
     [Route("api/[controller]")]
@@ -42,8 +40,22 @@ namespace PoliceIncidents.Controllers
             this.incidentUpdateService = incidentUpdateService;
         }
 
-        [HttpGet("UserIncidents")]
-        public async Task<List<IncidentModel>> GetUserIncidents()
+        [HttpPost("")]
+        public async Task<long> CreateIncident(IncidentInputModel incident)
+        {
+            try
+            {
+                return await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in CreateIncident {incident.Title}: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("user/all")]
+        public async Task<List<IncidentModel>> GetAllUserIncidents()
         {
             try
             {
@@ -52,7 +64,50 @@ namespace PoliceIncidents.Controllers
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"An error occurred in GetUserIncidents: {ex.Message}");
+                this.logger.LogError(ex, $"An error occurred in GetAllUserIncidents: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("user/managed")]
+        public async Task<List<IncidentModel>> GetManagedUserIncidents()
+        {
+            try
+            {
+                var userId = new Guid(this.UserObjectId);
+                return await this.incidentService.GetUserIncidents(userId);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in GetManagedUserIncidents: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("team/{teamId}/active")]
+        public async Task<List<IncidentModel>> GetActiveTeamIncidents(Guid teamId)
+        {
+            try
+            {
+                return await this.incidentService.GetTeamIncidents(teamId);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in GetActiveTeamIncidents: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("team/{teamId}/closed")]
+        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId)
+        {
+            try
+            {
+                return await this.incidentService.GetTeamIncidents(teamId);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in GetClosedTeamIncidents: {ex.Message}");
                 throw;
             }
         }
@@ -71,7 +126,7 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpPost("{id}/SetManager")]
+        [HttpPost("{id}/manager")]
         public async Task SetIncidentManager(long id, string managerId)
         {
             try
@@ -85,7 +140,7 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("{id}/Updates")]
+        [HttpGet("{id}/updates")]
         public async Task<List<IncidentUpdateModel>> GetIncidentUpdatesById(long id)
         {
             try
@@ -99,13 +154,43 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpPost("{id}/AddUpdate")]
+        [HttpPost("{id}/update")]
         public async Task AddIncidentUpdate(long id, IncidentUpdateInputModel incidentUpdate)
         {
             try
             {
                 incidentUpdate.ParentIncidentId = id;
                 await this.incidentUpdateService.AddIncidentUpdate(incidentUpdate);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in AddIncidentUpdate {id}: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("{id}/newMeetingLink")]
+        public async Task<string> GetNewMeetigLink(long id)
+        {
+            try
+            {
+                var incident = await this.incidentService.GetIncidentById(id);
+                var userIds = new List<Guid>();
+                if (incident.ManagerId.HasValue)
+                {
+                    userIds.Add(incident.ManagerId.Value);
+                }
+
+                userIds.AddRange(incident.Members);
+                userIds = userIds.Distinct().ToList();
+                var upns = new List<string>();
+                if (userIds.Any()) {
+                    var token = await this.GetAccessTokenAsync();
+                    var graphHelper = new GraphUtilityHelper(token);
+                    upns = await graphHelper.GetUserUpns(userIds);
+                }
+
+                return $"https://teams.microsoft.com/l/meeting/new?subject={Uri.EscapeDataString(incident.Title)}&attendees={string.Join(',', upns)}";
             }
             catch (Exception ex)
             {

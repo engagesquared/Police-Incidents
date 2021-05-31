@@ -16,9 +16,11 @@ namespace PoliceIncidents.Tab.Models
 
         public string Description { get; set; }
 
-        public string WebEOCLink { get; set; }
+        public string ExternalLink { get; set; }
 
-        public Guid? IncidentManagerId { get; set; }
+        public Guid? ManagerId { get; set; }
+
+        public List<Guid> Members { get; set; }
 
         public IncidentStatus Status { get; set; }
 
@@ -26,6 +28,6 @@ namespace PoliceIncidents.Tab.Models
 
         public List<IncidentUpdateModel> IncidentUpdates { get; set; }
 
-        public DateTime IncidentRaised { get; set; }
+        public DateTime Created { get; set; }
     }
 }

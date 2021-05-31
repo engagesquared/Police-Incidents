@@ -1,23 +1,26 @@
 ﻿import * as React from "react";
 import { Flex, Menu, Button } from "@fluentui/react-northstar";
-import { getUserIncidents } from "../../apis/api-list";
+import { getActiveTeamIncidents } from "../../apis/api-list";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./teamTab.styles";
 import { IncidentCard } from "../incidentCard/incidentCard";
 import { Routes } from "../../common";
+import { IIncidentModel } from "../../models";
+import { GlobalContext } from "../../providers/GlobalContextProvider";
 
 export const TeamTab = () => {
     const { t } = useTranslation();
     const history = useHistory();
     const classes = useStyles();
-    const [incidents, setIncidents] = React.useState<any[]>([]);
+    const ctx = React.useContext(GlobalContext);
+    const [incidents, setIncidents] = React.useState<IIncidentModel[]>([]);
     React.useEffect(() => {
         (async () => {
-            var incidents = (await getUserIncidents()).data;
+            var incidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "");
             setIncidents(incidents);
         })();
-    }, []);
+    }, [ctx]);
     const items = [
         {
             key: "all",

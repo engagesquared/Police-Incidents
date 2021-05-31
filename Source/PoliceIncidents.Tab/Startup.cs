@@ -84,7 +84,7 @@ namespace Microsoft.Teams.Apps.DLLookup
 
         private void ConfigureDataServices(IServiceCollection services)
         {
-            string connectionString = "";// this.Configuration.GetConnectionString("PoliceIncidents");
+            string connectionString = this.Configuration.GetConnectionString("PoliceIncidents");
 
             if (string.IsNullOrEmpty(connectionString))
             {

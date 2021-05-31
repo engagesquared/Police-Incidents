@@ -6,44 +6,40 @@ import { useParams } from "react-router-dom";
 import { IIncidentModel } from "../../models/IIncidentModel";
 import { IncidentDetailsCard } from "./incidentDetailsCard";
 import { IncidentUpdates } from "./incidentUpdates";
-import { getIncident } from "../../apis/api-list";
+import { getIncident, getScheduleMeetingLink } from "../../apis/api-list";
 import { Person, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
 import { IncidentUpdateType } from "../../models";
-import { GlobalContext } from "../../providers/GlobalContextProvider";
 import { executeDeepLink } from "@microsoft/teams-js";
 import { Routes } from "../../common";
 
 export const IncidentPage = () => {
     const { t } = useTranslation();
-    const ctx = React.useContext(GlobalContext);
     const { incidentId }: { incidentId?: string } = useParams();
     const classes = useStyles();
     const [incident, setIncident] = React.useState<IIncidentModel>();
+    const [isLoadingMeetingLink, setIsLoadingMeetingLink] = React.useState(false);
     React.useEffect(() => {
         (async () => {
             if (!!incidentId) {
-                const incident = (await getIncident(Number(incidentId))).data;
+                const incident = await getIncident(Number(incidentId));
                 setIncident(incident);
             }
         })();
     }, [incidentId]);
 
-    //temp
-    var users = [
-        ctx.teamsContext.userObjectId,
-        ctx.teamsContext.userObjectId,
-        ctx.teamsContext.userObjectId,
-        ctx.teamsContext.userObjectId,
-        ctx.teamsContext.userObjectId,
-    ];
-
     const onLocationClick = () => {
         window.open(`https://www.bing.com/maps?where1=${incident?.location}`, "_blank");
     };
 
-    const onScheduleClick = () => {
-        var attendees = "IsaiahL@e2test.onmicrosoft.com,HenriettaM@e2test.onmicrosoft.com";
-        executeDeepLink(`https://teams.microsoft.com/l/meeting/new?subject=${encodeURIComponent(incident?.title || "")}&attendees=${attendees}`);
+    const onScheduleClick = async () => {
+        setIsLoadingMeetingLink(true);
+        try {
+            const link = await getScheduleMeetingLink(incident!.id);
+            executeDeepLink(link);
+        } catch (error) {
+        } finally {
+            setIsLoadingMeetingLink(false);
+        }
     };
 
     return (
@@ -67,10 +63,10 @@ export const IncidentPage = () => {
                             <Text content={incident.description} />
                         </Flex.Item>
                         <Flex.Item align="end">
-                            <Button content={t("scheduleMeetingBtnLabel")} onClick={onScheduleClick} />
+                            <Button content={t("scheduleMeetingBtnLabel")} disabled={!incident} loading={isLoadingMeetingLink} onClick={onScheduleClick} />
                         </Flex.Item>
                         <Flex.Item align="end">
-                            <Button primary content={t("goToChatThreadBtnLabel")} />
+                            <Button primary content={t("goToChatThreadBtnLabel")} disabled={!incident} />
                         </Flex.Item>
                     </Flex>
                     <Flex className={classes.contentGrid}>
@@ -80,19 +76,31 @@ export const IncidentPage = () => {
                                     header={t("incidentTeamLabel")}
                                     addButton={<Button primary icon={<EditIcon size="small" />} size="small" text content={t("editBtnLabel")} />}
                                 >
-                                    {users.map((u) => {
-                                        return (
-                                            <div className={classes.userItem}>
-                                                <Person
-                                                    userId={u}
-                                                    line2Property="jobTitle"
-                                                    showPresence={false}
-                                                    view={PersonViewType.twolines}
-                                                    personCardInteraction={PersonCardInteraction.hover}
-                                                />
-                                            </div>
-                                        );
-                                    })}
+                                    {!!incident?.managerId && (
+                                        <div className={classes.userItem}>
+                                            <Person
+                                                userId={incident.managerId}
+                                                line2Property="jobTitle"
+                                                showPresence={false}
+                                                view={PersonViewType.twolines}
+                                                personCardInteraction={PersonCardInteraction.hover}
+                                            />
+                                        </div>
+                                    )}
+                                    {!!incident?.members?.length &&
+                                        incident.members.map((u) => {
+                                            return (
+                                                <div className={classes.userItem}>
+                                                    <Person
+                                                        userId={u}
+                                                        line2Property="jobTitle"
+                                                        showPresence={false}
+                                                        view={PersonViewType.twolines}
+                                                        personCardInteraction={PersonCardInteraction.hover}
+                                                    />
+                                                </div>
+                                            );
+                                        })}
                                 </IncidentDetailsCard>
                                 <IncidentDetailsCard
                                     header={t("incidentLocationLabel")}

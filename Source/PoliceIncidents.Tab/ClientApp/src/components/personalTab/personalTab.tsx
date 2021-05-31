@@ -1,6 +1,6 @@
 ﻿import * as React from "react";
 import { Flex, Menu } from "@fluentui/react-northstar";
-import { getUserIncidents } from "../../apis/api-list";
+import { getAllUserIncidents } from "../../apis/api-list";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./personalTab.styles";
 import { IncidentCard } from "../incidentCard/incidentCard";
@@ -11,7 +11,7 @@ export const PersonalTab = () => {
     const [incidents, setIncidents] = React.useState<any[]>([]);
     React.useEffect(() => {
         (async () => {
-            var incidents = (await getUserIncidents()).data;
+            var incidents = await getAllUserIncidents();
             setIncidents(incidents);
         })();
     }, []);

@@ -37,10 +37,10 @@ namespace PoliceIncidents.Bot.Bots
         protected override async Task OnConversationUpdateActivityAsync(ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
             var conversationReference = turnContext.Activity.GetConversationReference();
-            string recipientId = turnContext.Activity.Recipient.Id;
+            string botId = turnContext.Activity.Recipient.Id;
 
-            if (turnContext.Activity?.MembersAdded?.Any(v => v.Id == recipientId) == true
-                && turnContext.Activity?.Conversation?.ConversationType == "channel")
+            // Bot added to the team channel
+            if (turnContext.Activity.MembersAdded?.Any(v => v.Id == botId) == true && turnContext.Activity.Conversation?.ConversationType == "channel")
             {
                 string conversationId = conversationReference.Conversation.Id;
                 var team = turnContext.Activity.TeamsGetTeamInfo();

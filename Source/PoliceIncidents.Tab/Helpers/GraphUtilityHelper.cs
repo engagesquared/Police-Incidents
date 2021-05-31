@@ -4,6 +4,9 @@
 
 namespace PoliceIncidents.Helpers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
     using Microsoft.Graph;
@@ -29,7 +32,12 @@ namespace PoliceIncidents.Helpers
                                 accessToken);
                         });
                     }));
+        }
 
+        public async Task<List<string>> GetUserUpns(List<Guid> ids)
+        {
+            var users = await this.graphClient.Users.Request().Filter(string.Join(" or ", ids.Select(x => $"id eq '{x}'"))).Select(x => x.UserPrincipalName).GetAsync();
+            return users.Select(x => x.UserPrincipalName).ToList();
         }
     }
 }

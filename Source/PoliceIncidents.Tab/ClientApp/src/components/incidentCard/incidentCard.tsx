@@ -18,7 +18,7 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                 <Flex gap="gap.smaller" vAlign="center">
                     <Text content={incident.title} as="h3" />
                     <Text content={incident.description} />
-                    <Person userId={incident.incidentManagerId} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
+                    <Person userId={incident.managerId} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
                 </Flex>
                 <Divider size={1} />
                 <List

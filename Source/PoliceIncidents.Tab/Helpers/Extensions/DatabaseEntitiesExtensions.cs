@@ -29,12 +29,13 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.Title = incidentEntity.Title;
             result.Description = incidentEntity.Description;
             result.Id = incidentEntity.Id;
-            result.IncidentManagerId = incidentEntity.ManagerId;
+            result.ManagerId = incidentEntity.ManagerId;
             result.Description = incidentEntity.Description;
-            result.IncidentRaised = incidentEntity.CreatedUtc;
+            result.Created = incidentEntity.CreatedUtc;
             result.Location = incidentEntity.Location;
             result.Status = incidentEntity.Status;
-            result.WebEOCLink = incidentEntity.ExternalLink;
+            result.ExternalLink = incidentEntity.ExternalLink;
+            result.Members = incidentEntity.Participants?.Select(x => x.TeamMemberId).ToList();
             result.IncidentUpdates = incidentEntity.Updates
                 .OrderBy(u => u.CreatedAt)
                 .Take(limitOfUpdates)

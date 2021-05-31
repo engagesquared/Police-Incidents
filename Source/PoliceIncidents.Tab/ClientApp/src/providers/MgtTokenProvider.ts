@@ -15,7 +15,7 @@ export class MgtTokenProvider extends SimpleProvider {
         if (!cachedTime || +new Date() - +cachedTime > 1 * 60 * 1000) {
             if (!getTokenFunc) {
                 getTokenFunc = (async () => {
-                    var data = (await getAccessTokenAsync()).data;
+                    var data = await getAccessTokenAsync();
                     getTokenFunc = undefined;
                     return data;
                 })();

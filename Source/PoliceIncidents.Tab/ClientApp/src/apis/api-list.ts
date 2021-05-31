@@ -1,13 +1,14 @@
 import axios from "./axios-jwt-decorator";
 import { AxiosResponse } from "axios";
 import { IncidentUpdateIModel } from "../models/IncidentUpdateIModel";
+import { IIncidentInputModel, IIncidentModel } from "../models";
 
 let baseAxiosUrl = "/api";
 
-export const getAccessToken = async (): Promise<AxiosResponse<string>> => {
+export const getAccessToken = async (): Promise<string> => {
     let url = baseAxiosUrl + "/user/getToken";
-    console.log(url);
-    return await axios.get(url);
+    const response = await axios.get(url);
+    return response.data as string;
 };
 
 export const getAuthenticationMetadata = async (windowLocationOriginDomain: string, loginHint: string): Promise<AxiosResponse<string>> => {
@@ -20,19 +21,40 @@ export const getClientId = async (): Promise<AxiosResponse<string>> => {
     return await axios.get(url);
 };
 
-export const getUserIncidents = async (): Promise<AxiosResponse<any>> => {
-    let url = baseAxiosUrl + "/Incidents/UserIncidents";
-    return await axios.get(url);
+export const getAllUserIncidents = async (): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + "/incidents/user/all";
+    const response = await axios.get(url);
+    return response.data as IIncidentModel[];
 };
 
-export const getIncident = async (id: number): Promise<AxiosResponse<any>> => {
-    let url = baseAxiosUrl + `/Incidents/${id}`;
-    return await axios.get(url);
+export const getManagedUserIncidents = async (): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + "/incidents/user/managed";
+    const response = await axios.get(url);
+    return response.data as IIncidentModel[];
 };
 
-export const setIncidentManager = async (id: number, managerId: string): Promise<AxiosResponse<void>> => {
+export const getActiveTeamIncidents = async (teamId: string): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + `/incidents/team/${teamId}/active`;
+    const response = await axios.get(url);
+    return response.data as IIncidentModel[];
+};
+
+export const getClosedTeamIncidents = async (teamId: string): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + `/incidents/team/${teamId}/closed`;
+    const response = await axios.get(url);
+    return response.data as IIncidentModel[];
+};
+
+export const getIncident = async (id: number): Promise<IIncidentModel> => {
+    let url = baseAxiosUrl + `/incidents/${id}`;
+    const response = await axios.get(url);
+    return response.data as IIncidentModel;
+};
+
+export const setIncidentManager = async (id: number, managerId: string): Promise<void> => {
     let url = baseAxiosUrl + `/Incidents/${id}/SetManager`;
-    return await axios.post(url, { managerId });
+    await axios.post(url, { managerId });
+    return;
 };
 
 export const getIncidentUpdates = async (id: number): Promise<AxiosResponse<any>> => {
@@ -40,8 +62,20 @@ export const getIncidentUpdates = async (id: number): Promise<AxiosResponse<any>
     return await axios.get(url);
 };
 
-export const addIncidentUpdates = async (id: number, incidentUpdate: IncidentUpdateIModel): Promise<AxiosResponse<void>> => {
+export const addIncidentUpdates = async (id: number, incidentUpdate: IncidentUpdateIModel): Promise<void> => {
     let url = baseAxiosUrl + `/Incidents/${id}/AddUpdate`;
-    console.log(url);
-    return await axios.post(url, incidentUpdate);
+    await axios.post(url, incidentUpdate);
+    return;
+};
+
+export const createIncident = async (incident: IIncidentInputModel): Promise<number> => {
+    let url = baseAxiosUrl + `/Incidents`;
+    const response = await axios.post(url, incident);
+    return response.data as number;
+};
+
+export const getScheduleMeetingLink = async (incidentId: number): Promise<string> => {
+    let url = baseAxiosUrl + `/incidents/${incidentId}/newMeetingLink`;
+    const response = await axios.get(url);
+    return response.data as string;
 };

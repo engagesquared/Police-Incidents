@@ -3,14 +3,20 @@ import { Flex, Text, Button, Breadcrumb, ChevronEndIcon, Input, Divider, TextAre
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./newIncidentPage.styles";
 import { useForm } from "react-hook-form";
+import { createIncident } from "../../apis/api-list";
 import { ErrorMessage } from "../form/errorMessage";
 
 import { PeoplePicker } from "@microsoft/mgt-react";
 import { Routes } from "../../common";
+import { GlobalContext } from "../../providers/GlobalContextProvider";
+import { useHistory } from "react-router-dom";
 
 export const NewIncidentPage = () => {
     const { t } = useTranslation();
+    const ctx = React.useContext(GlobalContext);
     const classes = useStyles();
+    const history = useHistory();
+    const [isLoading, setIsLoading] = React.useState(false);
     const getDefaultValues = () => {
         const result = {
             title: "",
@@ -53,8 +59,21 @@ export const NewIncidentPage = () => {
 
     const onConfirm = handleSubmit(async (data) => {
         try {
-            console.log(data);
-        } catch (ex) {}
+            setIsLoading(true);
+            const incidentId = await createIncident({
+                title: title,
+                description: description,
+                managerId: manager,
+                location: location,
+                regionId: ctx.teamsContext.groupId || "",
+                members: members,
+            });
+            history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incidentId)));
+        } catch (ex) {
+            console.log(ex);
+        } finally {
+            setIsLoading(false);
+        }
     });
 
     const onManagerChange = (e: any) => {
@@ -65,6 +84,10 @@ export const NewIncidentPage = () => {
     const onMembersChange = (e: any) => {
         const result = e.detail && e.detail.length ? e.detail.map((x: any) => x.id) : undefined;
         setValue("members", result, { shouldValidate: true });
+    };
+
+    const onGoBackClick = () => {
+        history.goBack();
     };
 
     return (
@@ -131,8 +154,8 @@ export const NewIncidentPage = () => {
                         {!!errors.members && <ErrorMessage errorMessage={(errors?.members as any).message} />}
                     </Flex>
                     <Flex gap="gap.medium">
-                        <Button content={t("goBackBtnLabel")} type="button" />
-                        <Button primary content={t("cancelBtnLabel")} type="submit" />
+                        <Button content={t("goBackBtnLabel")} type="button" onClick={onGoBackClick} />
+                        <Button primary content={t("newIncidentBtnLabel")} type="submit" loading={isLoading} />
                     </Flex>
                 </Flex>
             </form>

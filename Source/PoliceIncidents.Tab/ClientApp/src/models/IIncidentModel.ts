@@ -5,10 +5,11 @@ export interface IIncidentModel {
     id: number;
     title: string;
     description: string;
-    webEOCLink?: string;
-    incidentManagerId?: string;
+    externalLink?: string;
+    managerId?: string;
+    members: string[];
     status: IncidentStatus;
     location: string;
     incidentUpdates: IIncidentUpdateModel[];
-    incidentRaised: Date;
+    created: string;
 }

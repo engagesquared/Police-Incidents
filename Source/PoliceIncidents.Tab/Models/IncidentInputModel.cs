@@ -2,28 +2,23 @@
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
-namespace PoliceIncidents.Core.Models
+namespace PoliceIncidents.Tab.Models
 {
     using System;
+    using System.Collections.Generic;
 
     public class IncidentInputModel
     {
-        public string ExternalId { get; set; }
-
-        public string ExternalLink { get; set; }
-
         public string Title { get; set; }
 
         public string Description { get; set; }
 
         public string Location { get; set; }
 
-        public string Region { get; set; }
+        public Guid RegionId { get; set; }
 
-        public string RegionId { get; set; }
+        public Guid ManagerId { get; set; }
 
-        public Guid? ManagerId { get; set; }
-
-        public Guid? Author { get; set; }
+        public List<Guid> Members { get; set; }
     }
 }
