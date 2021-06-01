@@ -3,4 +3,5 @@ export const Routes = {
     incidentPage: "/incident/:incidentId",
     newIncidentPage: "/newincident",
     incidentIdPart: ":incidentId",
+    configPage: "/configTab",
 };

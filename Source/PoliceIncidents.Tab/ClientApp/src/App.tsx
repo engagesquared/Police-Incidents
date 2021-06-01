@@ -5,6 +5,7 @@ import ErrorPage from "./components/error-page/error-page";
 import SignInPage from "./components/sign-in-page/sign-in-page";
 import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
 import SignInSimpleEnd from "./components/sign-in-page/sign-in-simple-end";
+import { Configuration } from "./components/configTab/configuration";
 import { Home } from "./components/home/home";
 import { IncidentPage } from "./components/incidentPage/incidentPage";
 import { NewIncidentPage } from "./components/newIncident/newIncidentPage";
@@ -41,6 +42,7 @@ const App = () => {
                                 <Route exact path={Routes.incidentPage} component={IncidentPage} />
                                 <Route exact path={Routes.newIncidentPage} component={NewIncidentPage} />
                                 <Route exact path="/errorpage" component={ErrorPage} />
+                                <Route exact path={Routes.configPage} component={Configuration} />
                                 <Route exact path="/errorpage/:id" component={ErrorPage} />
                                 <Route exact path="/signin" component={SignInPage} />
                                 <Route exact path="/signin-simple-start" component={SignInSimpleStart} />

@@ -29,7 +29,14 @@
             "entityId": "Home",
             "name": "Home",
             "contentUrl": "https://<<app domain>>/home",
-            "scopes": ["personal", "team"]
+            "scopes": ["personal"]
+        }
+    ],
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://<<app domain>>/configTab",
+            "canUpdateConfiguration": true,
+            "scopes": ["team"]
         }
     ],
     "permissions": ["identity"],

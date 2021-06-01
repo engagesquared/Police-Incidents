@@ -35,5 +35,6 @@
     "locationFieldLabel": "Location",
     "managerFieldLabel": "Manager",
     "teamMembersFieldLabel": "Team members",
-    "descriptionFieldLabel": "Description"
+    "descriptionFieldLabel": "Description",
+    "configPageMessage": "Please click Save to get started"
 }
