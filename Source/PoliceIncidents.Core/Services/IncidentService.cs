@@ -211,7 +211,7 @@ namespace PoliceIncidents.Core.Services
             {
                 Title = incident.Title,
                 Description = incident.Description,
-                Link = incident.ExternalLink,
+                Location = incident.Location,
             };
         }
 

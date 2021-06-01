@@ -2,7 +2,7 @@
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
-namespace PoliceIncidents.Bot
+namespace PoliceIncidents.Tab
 {
     using Microsoft.Extensions.Configuration;
 
@@ -16,14 +16,11 @@ namespace PoliceIncidents.Bot
             this.Setup();
         }
 
-        public string BotAppId { get; private set; }
-
-        public string TenantId { get; private set; }
+        public string BotBaseUrl { get; private set; }
 
         private void Setup()
         {
-            this.BotAppId = this.configuration["MicrosoftAppId"];
-            this.TenantId = this.configuration["TenantId"];
+            this.BotBaseUrl = this.configuration["BotBaseUrl"];
         }
     }
 }

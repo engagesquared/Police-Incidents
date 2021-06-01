@@ -64,10 +64,8 @@ namespace PoliceIncidents.Bot.Resources {
         ///   Looks up a localized string similar to # New incident has been created:
         ///
         ///**Title:** {title}
-        ///
-        ///{description}
-        ///
-        ///[Open]({link}).
+        ///**Location:** {location}
+        ///{description}.
         /// </summary>
         internal static string IncidentCreatedTemplate {
             get {

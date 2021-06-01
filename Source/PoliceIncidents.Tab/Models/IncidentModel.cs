@@ -18,6 +18,8 @@ namespace PoliceIncidents.Tab.Models
 
         public string ExternalLink { get; set; }
 
+        public string ChatThreadLink { get; set; }
+
         public Guid? ManagerId { get; set; }
 
         public List<Guid> Members { get; set; }

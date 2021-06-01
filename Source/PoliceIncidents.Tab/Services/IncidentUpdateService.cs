@@ -29,21 +29,24 @@ namespace PoliceIncidents.Tab.Services
             this.dbContext = dbContext;
         }
 
-        public async Task AddIncidentUpdate(IncidentUpdateInputModel incidentUpdate)
+        public async Task<IncidentUpdateModel> AddIncidentUpdate(IncidentUpdateInputModel incidentUpdate)
         {
             try
             {
+                var user = await this.EnsureUserAsync(incidentUpdate.CreatedByUserId);
+
                 var newIncidentUpdate = new IncidentUpdateEntity();
 
-                newIncidentUpdate.CreatedById = incidentUpdate.CreatedByUserId;
+                newIncidentUpdate.CreatedBy = user;
                 newIncidentUpdate.CreatedAt = DateTime.UtcNow;
                 newIncidentUpdate.Title = incidentUpdate.Title;
                 newIncidentUpdate.Body = incidentUpdate.Body;
                 newIncidentUpdate.ParentIncidentId = incidentUpdate.ParentIncidentId;
                 newIncidentUpdate.UpdateType = incidentUpdate.UpdateType;
 
-                this.dbContext.IncidentUpdates.Add(newIncidentUpdate);
+                await this.dbContext.IncidentUpdates.AddAsync(newIncidentUpdate);
                 await this.dbContext.SaveChangesAsync();
+                return newIncidentUpdate.ToIncidentUpdateModel();
             }
             catch (Exception ex)
             {
@@ -65,6 +68,24 @@ namespace PoliceIncidents.Tab.Services
                 this.logger.LogError(ex, $"Failed to get incident update for incident id {incidentId}");
                 throw;
             }
+        }
+
+        private async Task<UserEntity> EnsureUserAsync(Guid userId)
+        {
+            var userQuery = this.dbContext.UserEntities.Where(x => x.AadUserId == userId);
+            var user = userQuery.FirstOrDefault();
+            if (user == null)
+            {
+                user = new UserEntity
+                {
+                    AadUserId = userId,
+                };
+
+                this.dbContext.Add(user);
+                await this.dbContext.SaveChangesAsync();
+            }
+
+            return user;
         }
     }
 }

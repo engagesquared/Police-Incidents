@@ -8,9 +8,10 @@ import { IncidentDetailsCard } from "./incidentDetailsCard";
 import { IncidentUpdates } from "./incidentUpdates";
 import { getIncident, getScheduleMeetingLink } from "../../apis/api-list";
 import { Person, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
-import { IncidentUpdateType } from "../../models";
+import { IncidentUpdateType, IIncidentUpdateModel } from "../../models";
 import { executeDeepLink } from "@microsoft/teams-js";
 import { Routes } from "../../common";
+import { UpdateCreationForm } from "./updateCreationForm";
 
 export const IncidentPage = () => {
     const { t } = useTranslation();
@@ -18,17 +19,37 @@ export const IncidentPage = () => {
     const classes = useStyles();
     const [incident, setIncident] = React.useState<IIncidentModel>();
     const [isLoadingMeetingLink, setIsLoadingMeetingLink] = React.useState(false);
+    const [isNewUpdateFormActive, setIsNewUpdateFormActive] = React.useState(false);
+    const [isNewCriticalUpdateFormActive, setIsNewCriticalUpdateFormActive] = React.useState(false);
+    const [manualUpdates, setManualUpdates] = React.useState<IIncidentUpdateModel[]>([]);
+    const [criticalUpdates, setCriticalUpdates] = React.useState<IIncidentUpdateModel[]>([]);
+
     React.useEffect(() => {
         (async () => {
             if (!!incidentId) {
                 const incident = await getIncident(Number(incidentId));
                 setIncident(incident);
+                setManualUpdates(incident.incidentUpdates.filter((x) => x.updateType === IncidentUpdateType.Manual));
+                setCriticalUpdates(incident.incidentUpdates.filter((x) => x.updateType === IncidentUpdateType.Critical));
             }
         })();
     }, [incidentId]);
 
     const onLocationClick = () => {
         window.open(`https://www.bing.com/maps?where1=${incident?.location}`, "_blank");
+    };
+
+    const onUpdateAdded = (update: IIncidentUpdateModel) => {
+        if (update.updateType === IncidentUpdateType.Manual) {
+            const updates = [...manualUpdates];
+            updates.splice(0, 0, update);
+            setManualUpdates(updates);
+        }
+        if (update.updateType === IncidentUpdateType.Critical) {
+            const updates = [...criticalUpdates];
+            updates.splice(0, 0, update);
+            setCriticalUpdates(updates);
+        }
     };
 
     const onScheduleClick = async () => {
@@ -40,6 +61,12 @@ export const IncidentPage = () => {
         } finally {
             setIsLoadingMeetingLink(false);
         }
+    };
+
+    const onGoChatClick = async () => {
+        try {
+            executeDeepLink(incident?.chatThreadLink || "");
+        } catch (error) {}
     };
 
     return (
@@ -66,7 +93,7 @@ export const IncidentPage = () => {
                             <Button content={t("scheduleMeetingBtnLabel")} disabled={!incident} loading={isLoadingMeetingLink} onClick={onScheduleClick} />
                         </Flex.Item>
                         <Flex.Item align="end">
-                            <Button primary content={t("goToChatThreadBtnLabel")} disabled={!incident} />
+                            <Button primary content={t("goToChatThreadBtnLabel")} disabled={!incident.chatThreadLink} onClick={onGoChatClick} />
                         </Flex.Item>
                     </Flex>
                     <Flex className={classes.contentGrid}>
@@ -124,17 +151,55 @@ export const IncidentPage = () => {
                         <div className={classes.column}>
                             <IncidentDetailsCard
                                 header={t("latestUpdatesLabel")}
-                                addButton={<Button primary icon={<AddIcon size="small" />} size="small" text content={t("addBtnLabel")} />}
+                                addButton={
+                                    <Button
+                                        primary
+                                        icon={<AddIcon size="small" />}
+                                        size="small"
+                                        text
+                                        content={t("addBtnLabel")}
+                                        onClick={() => setIsNewUpdateFormActive(true)}
+                                    />
+                                }
                             >
-                                <IncidentUpdates itemsToShow={2} updates={incident.incidentUpdates.filter((x) => x.updateType === IncidentUpdateType.Manual)} />
+                                {isNewUpdateFormActive && (
+                                    <UpdateCreationForm
+                                        incidentId={incident.id}
+                                        onAdded={onUpdateAdded}
+                                        onCancel={() => {
+                                            setIsNewUpdateFormActive(false);
+                                        }}
+                                        type={IncidentUpdateType.Manual}
+                                    />
+                                )}
+                                <IncidentUpdates itemsToShow={2} updates={manualUpdates} />
                             </IncidentDetailsCard>
                         </div>
                         <div className={classes.column}>
                             <IncidentDetailsCard
                                 header={t("criticalDecisionsLabel")}
-                                addButton={<Button primary icon={<AddIcon size="small" />} size="small" text content={t("addBtnLabel")} />}
+                                addButton={
+                                    <Button
+                                        primary
+                                        icon={<AddIcon size="small" />}
+                                        size="small"
+                                        text
+                                        content={t("addBtnLabel")}
+                                        onClick={() => setIsNewCriticalUpdateFormActive(true)}
+                                    />
+                                }
                             >
-                                <IncidentUpdates itemsToShow={2} updates={incident.incidentUpdates.filter((x) => x.updateType === IncidentUpdateType.Critical)} />
+                                {isNewCriticalUpdateFormActive && (
+                                    <UpdateCreationForm
+                                        incidentId={incident.id}
+                                        onAdded={onUpdateAdded}
+                                        onCancel={() => {
+                                            setIsNewCriticalUpdateFormActive(false);
+                                        }}
+                                        type={IncidentUpdateType.Critical}
+                                    />
+                                )}
+                                <IncidentUpdates itemsToShow={2} updates={criticalUpdates} />
                             </IncidentDetailsCard>
                         </div>
                     </Flex>

@@ -121,9 +121,7 @@
     <value># New incident has been created:
 
 **Title:** {title}
-
-{description}
-
-[Open]({link})</value>
+**Location:** {location}
+{description}</value>
   </data>
 </root>

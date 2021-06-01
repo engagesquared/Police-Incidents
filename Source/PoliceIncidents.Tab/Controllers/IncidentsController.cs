@@ -7,6 +7,7 @@ namespace PoliceIncidents.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace PoliceIncidents.Controllers
     using Microsoft.Identity.Client;
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
+    using PoliceIncidents.Tab;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
 
@@ -25,19 +27,25 @@ namespace PoliceIncidents.Controllers
     {
         private readonly ILogger<UserController> logger;
         private readonly IIncidentService incidentService;
+        private readonly HttpClient httpClient;
         private readonly IIncidentUpdateService incidentUpdateService;
+        private readonly AppSettings appSettings;
 
         public IncidentsController(
             IOptions<AzureAdOptions> azureAdOptions,
             ILogger<UserController> logger,
             IIncidentService incidentService,
             IIncidentUpdateService incidentUpdateService,
-            IConfidentialClientApplication confidentialClientApp)
+            IConfidentialClientApplication confidentialClientApp,
+            HttpClient httpClient,
+            AppSettings appSettings)
             : base(confidentialClientApp, azureAdOptions, logger)
         {
             this.logger = logger;
             this.incidentService = incidentService;
             this.incidentUpdateService = incidentUpdateService;
+            this.httpClient = httpClient;
+            this.appSettings = appSettings;
         }
 
         [HttpPost("")]
@@ -45,7 +53,17 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                return await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
+                var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
+                try
+                {
+                    var botNotifyPath = Core.Common.Constants.IncidentCreatedBotRoute.Replace("{id}", newIncidentId.ToString());
+                    await this.httpClient.GetAsync(this.appSettings.BotBaseUrl.Trim(new[] { '/' }) + botNotifyPath);
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, "Notifying bot error.");
+                }
+                return newIncidentId;
             }
             catch (Exception ex)
             {
@@ -154,13 +172,14 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpPost("{id}/update")]
-        public async Task AddIncidentUpdate(long id, IncidentUpdateInputModel incidentUpdate)
+        [HttpPost("{id}/updates")]
+        public async Task<IncidentUpdateModel> AddIncidentUpdate(long id, IncidentUpdateInputModel incidentUpdate)
         {
             try
             {
                 incidentUpdate.ParentIncidentId = id;
-                await this.incidentUpdateService.AddIncidentUpdate(incidentUpdate);
+                incidentUpdate.CreatedByUserId = new Guid(this.UserObjectId);
+                return await this.incidentUpdateService.AddIncidentUpdate(incidentUpdate);
             }
             catch (Exception ex)
             {
@@ -194,7 +213,7 @@ namespace PoliceIncidents.Controllers
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"An error occurred in AddIncidentUpdate {id}: {ex.Message}");
+                this.logger.LogError(ex, $"An error occurred in GetNewMeetigLink {id}: {ex.Message}");
                 throw;
             }
         }

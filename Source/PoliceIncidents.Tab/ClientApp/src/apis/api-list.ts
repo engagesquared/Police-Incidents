@@ -1,7 +1,6 @@
 import axios from "./axios-jwt-decorator";
 import { AxiosResponse } from "axios";
-import { IncidentUpdateIModel } from "../models/IncidentUpdateIModel";
-import { IIncidentInputModel, IIncidentModel } from "../models";
+import { IIncidentInputModel, IIncidentModel, IIncidentUpdateModel, IIncidentUpdateInputModel } from "../models";
 
 let baseAxiosUrl = "/api";
 
@@ -58,18 +57,18 @@ export const setIncidentManager = async (id: number, managerId: string): Promise
 };
 
 export const getIncidentUpdates = async (id: number): Promise<AxiosResponse<any>> => {
-    let url = baseAxiosUrl + `/Incidents/${id}/Updates`;
+    let url = baseAxiosUrl + `/incidents/${id}/updates`;
     return await axios.get(url);
 };
 
-export const addIncidentUpdates = async (id: number, incidentUpdate: IncidentUpdateIModel): Promise<void> => {
-    let url = baseAxiosUrl + `/Incidents/${id}/AddUpdate`;
-    await axios.post(url, incidentUpdate);
-    return;
+export const addIncidentUpdate = async (incidentId: number, incidentUpdate: IIncidentUpdateInputModel): Promise<IIncidentUpdateModel> => {
+    let url = baseAxiosUrl + `/incidents/${incidentId}/updates`;
+    const response = await axios.post(url, incidentUpdate);
+    return response.data as IIncidentUpdateModel;
 };
 
 export const createIncident = async (incident: IIncidentInputModel): Promise<number> => {
-    let url = baseAxiosUrl + `/Incidents`;
+    let url = baseAxiosUrl + `/incidents`;
     const response = await axios.post(url, incident);
     return response.data as number;
 };

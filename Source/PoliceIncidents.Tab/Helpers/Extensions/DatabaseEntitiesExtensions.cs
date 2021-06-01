@@ -35,6 +35,9 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.Location = incidentEntity.Location;
             result.Status = incidentEntity.Status;
             result.ExternalLink = incidentEntity.ExternalLink;
+            result.ChatThreadLink = incidentEntity.District == null
+                ? string.Empty
+                : $"https://teams.microsoft.com/l/message/{incidentEntity.District.ConversationId}/{incidentEntity.ChatConverstaionId}";
             result.Members = incidentEntity.Participants?.Select(x => x.TeamMemberId).ToList();
             result.IncidentUpdates = incidentEntity.Updates
                 .OrderBy(u => u.CreatedAt)

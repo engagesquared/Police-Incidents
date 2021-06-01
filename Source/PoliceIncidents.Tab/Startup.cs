@@ -16,8 +16,10 @@ namespace Microsoft.Teams.Apps.DLLookup
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
+    using PoliceIncidents.Tab;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Services;
+    using System.Net.Http;
 
     /// <summary>
     /// Default Startup class.
@@ -51,6 +53,8 @@ namespace Microsoft.Teams.Apps.DLLookup
                 .Build();
 
             services.AddMemoryCache();
+            services.AddSingleton(new HttpClient());
+            services.AddSingleton<AppSettings>();
             services.AddDistributedMemoryCache();
             services.AddSingleton<IConfidentialClientApplication>(confidentialClientApp);
             services.AddDLLookupAuthentication(this.Configuration);

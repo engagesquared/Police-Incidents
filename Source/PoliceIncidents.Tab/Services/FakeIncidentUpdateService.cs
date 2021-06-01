@@ -18,9 +18,9 @@ namespace PoliceIncidents.Tab.Services
         {
         }
 
-        public async Task AddIncidentUpdate(IncidentUpdateInputModel incidentUpdate)
+        public async Task<IncidentUpdateModel> AddIncidentUpdate(IncidentUpdateInputModel incidentUpdate)
         {
-            return;
+            return null;
         }
 
         public async Task<List<IncidentUpdateModel>> GetIncidentUpdates(long incidentId)

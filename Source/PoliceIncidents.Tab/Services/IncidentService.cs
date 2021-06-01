@@ -35,7 +35,7 @@ namespace PoliceIncidents.Tab.Services
             {
                 var userIncidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Id == id)
-                    .Include(v => v.Updates).Include(v => v.Participants);
+                    .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
                 var incidents = await userIncidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentItem))
                     .FirstOrDefaultAsync();
@@ -55,7 +55,7 @@ namespace PoliceIncidents.Tab.Services
                 var userIncidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
                     .Where(v => v.Participants.Any(p => p.TeamMemberId == userId))
-                    .Include(v => v.Updates).Include(v => v.Participants);
+                    .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
                 var incidents = await userIncidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
                     .ToListAsync();
@@ -75,7 +75,7 @@ namespace PoliceIncidents.Tab.Services
                 var incidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
                     .Where(v => v.District.TeamGroupId == teamId)
-                    .Include(v => v.Updates);
+                    .Include(v => v.Updates).Include(x => x.District);
                 var incidents = await incidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
                     .ToListAsync();

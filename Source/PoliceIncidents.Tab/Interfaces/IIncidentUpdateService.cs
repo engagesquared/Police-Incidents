@@ -10,7 +10,7 @@ namespace PoliceIncidents.Tab.Interfaces
 
     public interface IIncidentUpdateService
     {
-        Task AddIncidentUpdate(IncidentUpdateInputModel incidentUpdate);
+        Task<IncidentUpdateModel> AddIncidentUpdate(IncidentUpdateInputModel incidentUpdate);
 
         Task<List<IncidentUpdateModel>> GetIncidentUpdates(long incidentId);
     }

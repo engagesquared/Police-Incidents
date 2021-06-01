@@ -10,6 +10,6 @@ namespace PoliceIncidents.Core.Models
 
         public string Description { get; set; }
 
-        public string Link { get; set; }
+        public string Location { get; set; }
     }
 }
