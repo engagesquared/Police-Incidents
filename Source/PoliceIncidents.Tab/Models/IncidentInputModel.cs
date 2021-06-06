@@ -15,6 +15,8 @@ namespace PoliceIncidents.Tab.Models
 
         public string Location { get; set; }
 
+        public string PlannerLink { get; set; }
+
         public Guid RegionId { get; set; }
 
         public Guid ManagerId { get; set; }

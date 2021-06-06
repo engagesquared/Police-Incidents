@@ -59,6 +59,7 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.Description);
                 e.Property(e => e.ExternalId);
                 e.Property(e => e.CreatedUtc);
+                e.Property(e => e.PlannerLink).HasMaxLength(400);
                 e.Property(e => e.Location);
                 e.Property(e => e.Status);
                 e.Property(e => e.ChatConverstaionId);

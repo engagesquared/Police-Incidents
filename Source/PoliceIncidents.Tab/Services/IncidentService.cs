@@ -185,6 +185,7 @@ namespace PoliceIncidents.Tab.Services
         {
             var newIncident = new IncidentDetailsEntity();
             newIncident.Title = model.Title;
+            newIncident.PlannerLink = model.PlannerLink;
             newIncident.Location = model.Location;
             newIncident.Description = model.Description;
             newIncident.Status = IncidentStatus.New;

@@ -18,9 +18,12 @@ namespace PoliceIncidents.Tab
 
         public string BotBaseUrl { get; private set; }
 
+        public string PlannerId { get; private set; }
+
         private void Setup()
         {
             this.BotBaseUrl = this.configuration["BotBaseUrl"];
+            this.PlannerId = this.configuration["PlannerId"];
         }
     }
 }

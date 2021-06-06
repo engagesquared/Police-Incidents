@@ -69,6 +69,12 @@ export const IncidentPage = () => {
         } catch (error) {}
     };
 
+    const onGoPlannerClick = async () => {
+        try {
+            executeDeepLink(incident?.plannerLink || "");
+        } catch (error) {}
+    };
+
     return (
         <div className={classes.container}>
             {!incident && <Loader />}
@@ -88,6 +94,9 @@ export const IncidentPage = () => {
                     <Flex vAlign="center" wrap gap="gap.medium">
                         <Flex.Item grow={1}>
                             <Text content={incident.description} />
+                        </Flex.Item>
+                        <Flex.Item align="end">
+                            <Button content={t("openPlannerBtnLabel")} disabled={!incident.plannerLink} onClick={onGoPlannerClick} />
                         </Flex.Item>
                         <Flex.Item align="end">
                             <Button content={t("scheduleMeetingBtnLabel")} disabled={!incident} loading={isLoadingMeetingLink} onClick={onScheduleClick} />

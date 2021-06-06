@@ -53,6 +53,17 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
+                try
+                {
+                    var token = await this.GetAccessTokenAsync();
+                    var graphHelper = new GraphUtilityHelper(token);
+                    incident.PlannerLink = await graphHelper.CreateCopyOfPlanner(this.appSettings.PlannerId, incident);
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, "Planner creating error");
+                }
+
                 var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
                 try
                 {
@@ -63,6 +74,7 @@ namespace PoliceIncidents.Controllers
                 {
                     this.logger.LogError(ex, "Notifying bot error.");
                 }
+
                 return newIncidentId;
             }
             catch (Exception ex)

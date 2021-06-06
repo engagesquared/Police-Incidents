@@ -29,6 +29,8 @@ namespace PoliceIncidents.Core.DB.Entities
         /// </summary>
         public string ExternalLink { get; set; }
 
+        public string PlannerLink { get; set; }
+
         public string Description { get; set; }
 
         public UserEntity Manager { get; set; }

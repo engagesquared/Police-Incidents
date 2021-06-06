@@ -7,6 +7,7 @@ export interface IIncidentModel {
     description: string;
     externalLink?: string;
     chatThreadLink?: string;
+    plannerLink?: string;
     managerId?: string;
     members: string[];
     status: IncidentStatus;
