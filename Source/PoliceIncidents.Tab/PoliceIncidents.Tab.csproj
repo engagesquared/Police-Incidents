@@ -45,6 +45,14 @@
     <TypeScriptCompile Remove="Constants\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="ClientApp\src\components\incidentPage\updateLocationForm.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\closeIncidentForm.styles.tsx" />
+    <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\closeIncidentForm.tsx" />
+    <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\updateLocationForm.style.tsx" />
+  </ItemGroup>
+  <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" />
     <AdditionalFiles Include="..\.editorconfig" />
   </ItemGroup>

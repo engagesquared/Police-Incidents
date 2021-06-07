@@ -112,6 +112,56 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
+        public async Task ChangeLocation(long incidentId, string location)
+        {
+            try
+            {
+                var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId);
+                var incident = await incidentQuery.FirstOrDefaultAsync();
+                if (incident != null)
+                {
+                    incident.Location = location;
+                    this.dbContext.Update(incident);
+                    await this.dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    this.logger.LogError($"Failed to find incident by id: {incidentId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to change location. Incident id: {incidentId} Location: {location}");
+                throw;
+            }
+        }
+
+        public async Task<bool> CloseIncident(long incidentId)
+        {
+            try
+            {
+                var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId);
+                var incident = await incidentQuery.FirstOrDefaultAsync();
+                if (incident != null)
+                {
+                    incident.Status = IncidentStatus.Closed;
+                    this.dbContext.Update(incident);
+                    await this.dbContext.SaveChangesAsync();
+                    return true;
+                }
+                else
+                {
+                    this.logger.LogError($"Failed to find incident by id: {incidentId}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to close incident. Incident id: {incidentId}");
+                throw;
+            }
+        }
+
         public async Task<long> CreateIncident(IncidentInputModel incident, Guid authorId)
         {
             try

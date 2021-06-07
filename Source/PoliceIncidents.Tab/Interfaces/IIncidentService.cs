@@ -11,7 +11,11 @@ namespace PoliceIncidents.Tab.Interfaces
 
     public interface IIncidentService
     {
+        Task ChangeLocation(long incidentId, string location);
+
         Task ChangeIncidentManager(long incidentId, Guid managerId);
+
+        Task<bool> CloseIncident(long incidentId);
 
         Task<IncidentModel> GetIncidentById(long id);
 

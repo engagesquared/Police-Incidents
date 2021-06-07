@@ -22,6 +22,16 @@ namespace PoliceIncidents.Tab.Services
             return;
         }
 
+        public async Task ChangeLocation(long incidentId, string location)
+        {
+            return;
+        }
+
+        public async Task<bool> CloseIncident(long incidentId)
+        {
+            return true;
+        }
+
         public Task<long> CreateIncident(IncidentInputModel incident, Guid authorId)
         {
             throw new NotImplementedException();

@@ -151,7 +151,7 @@ export const NewIncidentPage = () => {
                     <Flex column>
                         <Text content={t("teamMembersFieldLabel")} />
                         <PeoplePicker placeholder=" " showMax={25} selectionChanged={onMembersChange} />
-                        {!!errors.members && <ErrorMessage errorMessage={(errors?.members as any).message} />}
+                        {!!errors.members && <ErrorMessage errorMessage={(errors.members as any).message} />}
                     </Flex>
                     <Flex gap="gap.medium">
                         <Button content={t("goBackBtnLabel")} type="button" onClick={onGoBackClick} />

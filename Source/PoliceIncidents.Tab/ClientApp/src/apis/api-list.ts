@@ -56,6 +56,18 @@ export const setIncidentManager = async (id: number, managerId: string): Promise
     return;
 };
 
+export const setIncidentLocation = async (id: number, location: string): Promise<void> => {
+    let url = baseAxiosUrl + `/Incidents/${id}/location`;
+    await axios.post(url, { location });
+    return;
+};
+
+export const closeIncident = async (id: number): Promise<Boolean> => {
+    let url = baseAxiosUrl + `/incidents/${id}/close`;
+    const response = await axios.get(url);
+    return response.data as Boolean;
+};
+
 export const getIncidentUpdates = async (id: number): Promise<AxiosResponse<any>> => {
     let url = baseAxiosUrl + `/incidents/${id}/updates`;
     return await axios.get(url);

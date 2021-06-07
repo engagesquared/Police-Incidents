@@ -170,6 +170,34 @@ namespace PoliceIncidents.Controllers
             }
         }
 
+        [HttpPost("{id}/location")]
+        public async Task SetIncidentLocation(long id, IncidentLocationUpdateModel location)
+        {
+            try
+            {
+                await this.incidentService.ChangeLocation(id, location.Location);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in SetIncidentLocation {id} {location}: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet("{id}/close")]
+        public async Task<bool> CloseIncident(long id)
+        {
+            try
+            {
+                return await this.incidentService.CloseIncident(id);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in CloseIncident: {ex.Message}");
+                throw;
+            }
+        }
+
         [HttpGet("{id}/updates")]
         public async Task<List<IncidentUpdateModel>> GetIncidentUpdatesById(long id)
         {
@@ -215,7 +243,8 @@ namespace PoliceIncidents.Controllers
                 userIds.AddRange(incident.Members);
                 userIds = userIds.Distinct().ToList();
                 var upns = new List<string>();
-                if (userIds.Any()) {
+                if (userIds.Any())
+                {
                     var token = await this.GetAccessTokenAsync();
                     var graphHelper = new GraphUtilityHelper(token);
                     upns = await graphHelper.GetUserUpns(userIds);
