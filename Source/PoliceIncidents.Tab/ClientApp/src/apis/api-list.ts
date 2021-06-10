@@ -1,6 +1,7 @@
 import axios from "./axios-jwt-decorator";
 import { AxiosResponse } from "axios";
 import { IIncidentInputModel, IIncidentModel, IIncidentUpdateModel, IIncidentUpdateInputModel } from "../models";
+import { IIncidentTeamMemberInputModel } from "../models/IIncidentTeamMemberInputModel";
 
 let baseAxiosUrl = "/api";
 
@@ -89,4 +90,10 @@ export const getScheduleMeetingLink = async (incidentId: number): Promise<string
     let url = baseAxiosUrl + `/incidents/${incidentId}/newMeetingLink`;
     const response = await axios.get(url);
     return response.data as string;
+};
+
+export const updateTeamMember = async (incidentId: number, teamMember: IIncidentTeamMemberInputModel): Promise<Boolean> => {
+    let url = baseAxiosUrl + `/Incidents/${incidentId}/updatemember`;
+    const response = await axios.post(url,teamMember);
+    return response.data as Boolean;
 };

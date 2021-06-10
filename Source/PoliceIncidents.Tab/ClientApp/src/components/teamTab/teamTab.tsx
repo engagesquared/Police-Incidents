@@ -1,6 +1,6 @@
 ﻿import * as React from "react";
 import { Flex, Menu, Button } from "@fluentui/react-northstar";
-import { getActiveTeamIncidents } from "../../apis/api-list";
+import { getActiveTeamIncidents, getClosedTeamIncidents } from "../../apis/api-list";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./teamTab.styles";
@@ -15,16 +15,21 @@ export const TeamTab = () => {
     const classes = useStyles();
     const ctx = React.useContext(GlobalContext);
     const [incidents, setIncidents] = React.useState<IIncidentModel[]>([]);
+    const [closedIncidents, setClosedIncidents] = React.useState<IIncidentModel[]>([]);
+    const [activeIndex, setActiveIndex] = React.useState<number>(0);
+
     React.useEffect(() => {
         (async () => {
-            var incidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "");
+            let incidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "");
+            let closedIncidents = await getClosedTeamIncidents(ctx.teamsContext.groupId || "");
             setIncidents(incidents);
+            setClosedIncidents(closedIncidents);
         })();
     }, [ctx]);
     const items = [
         {
             key: "all",
-            content: t("allIncidentsHeader"),
+            content: t("allIncidentsHeader") + " (" + incidents.length + ")",
         },
         {
             key: "closed",
@@ -33,7 +38,7 @@ export const TeamTab = () => {
     ];
 
     const onMenuChange = (event: React.SyntheticEvent<HTMLElement>, data?: any) => {
-        console.log(data);
+        setActiveIndex(data.activeIndex);
     };
 
     const onNewIncidentClick = () => {
@@ -51,7 +56,10 @@ export const TeamTab = () => {
             </Flex>
 
             <Flex column>
-                {incidents.map((incident) => (
+                {activeIndex === 0 && incidents.map((incident) => (
+                    <IncidentCard incident={incident} key={incident.id} />
+                ))}
+                {activeIndex === 1 && closedIncidents.map((incident) => (
                     <IncidentCard incident={incident} key={incident.id} />
                 ))}
             </Flex>

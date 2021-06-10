@@ -17,11 +17,17 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<bool> CloseIncident(long incidentId);
 
+        Task<bool> UpdateTeamMember(long id, IncidentTeamMemberInput teamMemberInput);
+
         Task<IncidentModel> GetIncidentById(long id);
 
         Task<List<IncidentModel>> GetUserIncidents(Guid userId);
 
+        Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId);
+
         Task<List<IncidentModel>> GetTeamIncidents(Guid teamId);
+
+        Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId);
 
         Task<long> CreateIncident(IncidentInputModel incident, Guid authorId);
     }

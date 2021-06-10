@@ -1,35 +1,89 @@
 ﻿import * as React from "react";
 import {
-    Flex, Text, Button, Image, Layout, Divider, TextArea
+    Flex, Text, Button, Image, Layout, Divider
 } from "@fluentui/react-northstar";
 import { useTranslation } from "react-i18next";
-import { useStyles } from "./closeIncidentForm.styles";
-import { addIncidentUpdate, closeIncident } from "../../apis/api-list";
-import { IncidentUpdateType, IIncidentUpdateModel } from "../../models";
+import { useStyles } from "./editIncidentTeamFrom.styles";
+import { ErrorMessage } from "../form/errorMessage";
+import { PeoplePicker } from "@microsoft/mgt-react";
+import { useForm } from "react-hook-form";
+import { updateTeamMember } from "../../apis/api-list";
+import { IIncidentTeamMemberInputModel } from "../../models/IIncidentTeamMemberInputModel";
 
-export interface ICloseIncidentFormProps {
+export interface IEditIncidentTeamFormProps {
     incidentId: number;
+    incidentManager: string | undefined;
+    incidentMembers: { item1: string, item2: number }[];
     onCancel(): void;
-    onAdded(update: IIncidentUpdateModel, isClosed?: boolean): void;
+    onAdded(update: IIncidentTeamMemberInputModel, isClosed?: boolean): void;
 }
 
-export const CloseIncidentForm = (props: React.PropsWithChildren<ICloseIncidentFormProps>) => {
+export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditIncidentTeamFormProps>) => {
     const { t } = useTranslation();
     const [isLoading, setIsLoading] = React.useState(false);
-    const [closingBody, setClosingBody] = React.useState('');
-    //const classes = useStyles();
+    const classes = useStyles();
+    const getDefaultValues = () => {
+        const result = {
+            incidentManager: props.incidentManager,
+            socLead: props.incidentMembers.filter(t => t.item2 === 3).length > 0 ?
+                props.incidentMembers.filter(t => t.item2 === 3)[0].item1 : "",
+            fieldOfficer: props.incidentMembers.filter(t => t.item2 === 1).length > 0 ?
+                props.incidentMembers.filter(t => t.item2 === 1)[0].item1 : "",
+            familyLiason: props.incidentMembers.filter(t => t.item2 === 4).length > 0 ?
+                props.incidentMembers.filter(t => t.item2 === 4)[0].item1 : "",
+            externalAgency: props.incidentMembers.filter(t => t.item2 === 2).length > 0 ?
+                props.incidentMembers.filter(t => t.item2 === 2)[0].item1 : ""
+        };
+        return result;
+    };
 
-    const onConfirm = (async () => {
+    const { handleSubmit, getValues, setValue, register, watch, errors } = useForm({
+        defaultValues: getDefaultValues(),
+    });
+
+    React.useEffect(() => {
+        const validationRules = {
+            incidentManager: {
+                required: t("requiredValidationMessage"),
+            },
+            socLead: undefined,
+            fieldOfficer: undefined,
+            familyLiason: undefined,
+            externalAgency: undefined
+        };
+
+        register({ name: "incidentManager" }, validationRules.incidentManager);
+        register({ name: "socLead" }, validationRules.socLead);
+        register({ name: "fieldOfficer" }, validationRules.fieldOfficer);
+        register({ name: "familyLiason" }, validationRules.familyLiason);
+        register({ name: "externalAgency" }, validationRules.externalAgency);
+    }, [getValues, register, t]);
+
+    const { incidentManager, socLead, fieldOfficer, familyLiason, externalAgency } = watch();
+
+    const onConfirm = handleSubmit(async () => {
         try {
             setIsLoading(true);
-            const update = await addIncidentUpdate(props.incidentId, {
-                title: 'Incident Closed',
-                body: closingBody,
-                updateType: IncidentUpdateType.Manual,
-            });
-            await closeIncident(props.incidentId);
-            props.onAdded(update, true);
-            props.onCancel();
+            const update: IIncidentTeamMemberInputModel = {
+                incidentManager: incidentManager ? incidentManager : ""
+            };
+            if (socLead) {
+                update['socLead'] = socLead;
+            }
+            if (fieldOfficer) {
+                update['fieldOfficer'] = fieldOfficer;
+            }
+            if (familyLiason) {
+                update['familyLiason'] = familyLiason;
+            }
+            if (externalAgency) {
+                update['externalAgency'] = externalAgency;
+            }
+            const checkUpdate = await updateTeamMember(props.incidentId, update);
+            if (checkUpdate) {
+                props.onAdded(update, true);
+                props.onCancel();
+            }
         } catch (ex) {
             console.log(ex);
         } finally {
@@ -37,8 +91,14 @@ export const CloseIncidentForm = (props: React.PropsWithChildren<ICloseIncidentF
         }
     });
 
+    const onUserChange = (e: any, type: "incidentManager" | "socLead" | "fieldOfficer" | "familyLiason" | "externalAgency") => {
+        //alert(JSON.stringify(e.detail));
+        const result = e ? e.detail && e.detail.length ? e.detail[0] ? e.detail[0].id : undefined : undefined : undefined;
+        setValue(type, result, { shouldValidate: true });
+    };
+
     return (
-        <Flex column>
+        <Flex className={classes.container} column >
             <Flex gap="gap.medium" padding="padding.medium" style={{ margin: 15 }}>
                 <Layout
                     styles={{
@@ -53,26 +113,49 @@ export const CloseIncidentForm = (props: React.PropsWithChildren<ICloseIncidentF
                 />
                 <Flex column>
                     <Text content="Incident App" weight="bold" size="larger" />
-                    <Text content={t("closeIncidentTitle")} /></Flex>
+                    <Text content={t("editTeamMemberTitle")} /></Flex>
             </Flex>
             <Divider size={3} color="brand" />
-            <Flex column padding="padding.medium" style={{ margin: 10 }}>
+            <form onSubmit={onConfirm}>
                 <Flex column padding="padding.medium" style={{ margin: 10 }}>
-                    <Text content="Information" />
-                    <TextArea variables={{ height: "100px" }} value={closingBody}
-                        fluid placeholder="Closing Information..."
-                        onChange={(ev: any, p) => {
-                            setClosingBody(p ? p.value as string : "");
-                        }} />
+                    <Flex column gap="gap.medium" padding="padding.medium" style={{ margin: 10 }}>
+                        <Flex column>
+                            <Text content={t("incidentManager")} />
+                            <PeoplePicker selectionMode="single" placeholder=" " showMax={25} defaultSelectedUserIds={[`${incidentManager}`]}
+                                selectionChanged={(e) => { onUserChange(e, "incidentManager"); }} />
+                            {!!errors.incidentManager && <ErrorMessage errorMessage={errors.incidentManager.message} />}
+                        </Flex>
+                        <Flex column>
+                            <Text content={t("socLead")} />
+                            <PeoplePicker selectionMode="single" placeholder=" " showMax={25} defaultSelectedUserIds={socLead ? [`${socLead}`] : []}
+                                selectionChanged={(e) => { onUserChange(e, "socLead"); }} />
+                        </Flex>
+                        <Flex column>
+                            <Text content={t("familyLiason")} />
+                            <PeoplePicker selectionMode="single" placeholder=" " showMax={25} defaultSelectedUserIds={familyLiason ? [`${familyLiason}`] : []}
+                                selectionChanged={(e) => { onUserChange(e, "familyLiason"); }} />
+                        </Flex>
+                        <Flex column>
+                            <Text content={t("fieldOfficer")} />
+                            <PeoplePicker selectionMode="single" placeholder=" " showMax={25} defaultSelectedUserIds={fieldOfficer ? [`${fieldOfficer}`] : []}
+                                selectionChanged={(e) => { onUserChange(e, "fieldOfficer"); }} />
+                        </Flex>
+                        <Flex column>
+                            <Text content={t("externalAgency")} />
+                            <PeoplePicker selectionMode="single" placeholder=" " showMax={25} defaultSelectedUserIds={externalAgency ? [`${externalAgency}`] : []}
+                                selectionChanged={(e) => { onUserChange(e, "externalAgency"); }} />
+                        </Flex>
+                    </Flex>
+
                 </Flex>
-            </Flex>
-            <Divider size={0} />
-            <Flex gap="gap.medium" padding="padding.medium" style={{ margin: 10 }}>
+                <Divider size={0} />
                 <Flex gap="gap.medium" padding="padding.medium" style={{ margin: 10 }}>
-                    <Button content={t("closeIncidentBtnLabel")} primary loading={isLoading} onClick={onConfirm} />
-                    <Button content={t("cancelBtnLabel")} onClick={props.onCancel} />
+                    <Flex gap="gap.medium" padding="padding.medium" style={{ margin: 10 }}>
+                        <Button content={t("updateTeamBtnLabel")} primary type="submit" loading={isLoading} />
+                        <Button content={t("cancelBtnLabel")} onClick={props.onCancel} />
+                    </Flex>
                 </Flex>
-            </Flex>
+            </form>
         </Flex>
     );
 };

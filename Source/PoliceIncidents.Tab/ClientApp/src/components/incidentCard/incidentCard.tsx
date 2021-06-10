@@ -6,12 +6,20 @@ import { useStyles } from "./incidentCard.styles";
 import { Person, PersonCardInteraction, PersonViewType } from "@microsoft/mgt-react";
 import { IIncidentModel } from "../../models/IIncidentModel";
 import { Routes } from "../../common";
+import { executeDeepLink } from "@microsoft/teams-js";
 
 export const IncidentCard = (props: { incident: IIncidentModel }) => {
     const { t } = useTranslation();
     const history = useHistory();
     const classes = useStyles();
     const { incident } = props;
+
+    const onGoChatClick = async () => {
+        try {
+            executeDeepLink(incident?.chatThreadLink || "");
+        } catch (error) { }
+    };
+
     return (
         <div className={classes.container}>
             <Segment color="brand" style={{ borderTopWidth: "5px" }}>
@@ -37,7 +45,7 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                             history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incident.id)));
                         }}
                     />
-                    <Button primary content={t("goToChatThredBtnLabel")} />
+                    <Button primary content={t("goToChatThredBtnLabel")} onClick={onGoChatClick}/>
                 </Flex>
             </Segment>
         </div>

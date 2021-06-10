@@ -4,8 +4,10 @@
 
 namespace PoliceIncidents.Tab.Helpers.Extensions
 {
+    using System;
     using System.Linq;
     using PoliceIncidents.Core.DB.Entities;
+    using PoliceIncidents.Core.Models;
     using PoliceIncidents.Tab.Models;
 
     public static class DatabaseEntitiesExtensions
@@ -36,10 +38,11 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.Status = incidentEntity.Status;
             result.ExternalLink = incidentEntity.ExternalLink;
             result.ChatThreadLink = incidentEntity.District == null
-                ? string.Empty
-                : $"https://teams.microsoft.com/l/message/{incidentEntity.District.ConversationId}/{incidentEntity.ChatConverstaionId}";
+                ? string.Empty : $"https://teams.microsoft.com/l/groups/{incidentEntity.District.TeamGroupId}";
+
+            // : $"https://teams.microsoft.com/l/message/{incidentEntity.District.ConversationId}/{incidentEntity.ChatConverstaionId}";
             result.PlannerLink = incidentEntity.PlannerLink;
-            result.Members = incidentEntity.Participants?.Select(x => x.TeamMemberId).ToList();
+            result.Members = incidentEntity.Participants?.Select(v => new Tuple<Guid, int>(v.TeamMemberId, v.UserRoleId)).ToList();
             result.IncidentUpdates = incidentEntity.Updates
                 .OrderBy(u => u.CreatedAt)
                 .Take(limitOfUpdates)

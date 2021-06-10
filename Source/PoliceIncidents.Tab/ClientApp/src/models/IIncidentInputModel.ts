@@ -4,5 +4,4 @@ export interface IIncidentInputModel {
     managerId: string;
     location: string;
     regionId: string;
-    members: string[];
 }

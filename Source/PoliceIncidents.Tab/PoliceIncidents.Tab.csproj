@@ -50,7 +50,10 @@
   <ItemGroup>
     <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\closeIncidentForm.styles.tsx" />
     <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\closeIncidentForm.tsx" />
+    <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\editIncidentTeamFrom.styles.tsx" />
+    <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\editIncidentTeamFrom.tsx" />
     <TypeScriptCompile Remove="ClientApp\src\components\incidentPage\updateLocationForm.style.tsx" />
+    <TypeScriptCompile Remove="ClientApp\src\models\IIncidentTeamMemberInputModel.ts" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" />

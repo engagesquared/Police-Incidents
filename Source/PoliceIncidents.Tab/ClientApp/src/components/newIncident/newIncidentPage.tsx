@@ -22,8 +22,7 @@ export const NewIncidentPage = () => {
             title: "",
             description: "",
             location: "",
-            manager: "",
-            members: [],
+            manager: ""
         };
         return result;
     };
@@ -44,18 +43,16 @@ export const NewIncidentPage = () => {
             location: {
                 required: t("requiredValidationMessage"),
             },
-            description: undefined,
-            members: undefined,
+            description: undefined
         };
 
         register({ name: "title" }, validationRules.title);
         register({ name: "description" }, validationRules.description);
         register({ name: "location" }, validationRules.location);
         register({ name: "manager" }, validationRules.manager);
-        register({ name: "members" }, validationRules.members);
     }, [getValues, register, t]);
 
-    const { title, manager, location, members, description } = watch();
+    const { title, manager, location, description } = watch();
 
     const onConfirm = handleSubmit(async (data) => {
         try {
@@ -65,8 +62,7 @@ export const NewIncidentPage = () => {
                 description: description,
                 managerId: manager,
                 location: location,
-                regionId: ctx.teamsContext.groupId || "",
-                members: members,
+                regionId: ctx.teamsContext.groupId || ""
             });
             history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incidentId)));
         } catch (ex) {
@@ -79,11 +75,6 @@ export const NewIncidentPage = () => {
     const onManagerChange = (e: any) => {
         const result = e.detail && e.detail.length ? e.detail[0].id : undefined;
         setValue("manager", result, { shouldValidate: true });
-    };
-
-    const onMembersChange = (e: any) => {
-        const result = e.detail && e.detail.length ? e.detail.map((x: any) => x.id) : undefined;
-        setValue("members", result, { shouldValidate: true });
     };
 
     const onGoBackClick = () => {
@@ -148,11 +139,11 @@ export const NewIncidentPage = () => {
                         <PeoplePicker placeholder=" " selectionMode="single" selectionChanged={onManagerChange} />
                         {!!errors.manager && <ErrorMessage errorMessage={errors.manager.message} />}
                     </Flex>
-                    <Flex column>
-                        <Text content={t("teamMembersFieldLabel")} />
-                        <PeoplePicker placeholder=" " showMax={25} selectionChanged={onMembersChange} />
-                        {!!errors.members && <ErrorMessage errorMessage={(errors.members as any).message} />}
-                    </Flex>
+                    {/*<Flex column>*/}
+                    {/*    <Text content={t("teamMembersFieldLabel")} />*/}
+                    {/*    <PeoplePicker placeholder=" " showMax={25} selectionChanged={onMembersChange} />*/}
+                    {/*    {!!errors.members && <ErrorMessage errorMessage={(errors.members as any).message} />}*/}
+                    {/*</Flex>*/}
                     <Flex gap="gap.medium">
                         <Button content={t("goBackBtnLabel")} type="button" onClick={onGoBackClick} />
                         <Button primary content={t("newIncidentBtnLabel")} type="submit" loading={isLoading} />

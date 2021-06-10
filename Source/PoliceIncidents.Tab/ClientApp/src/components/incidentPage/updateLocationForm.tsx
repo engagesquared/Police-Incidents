@@ -41,7 +41,7 @@ export const UpdateLocationForm = (props: React.PropsWithChildren<IUpdateLocatio
             </Flex>
             <Flex gap="gap.medium">
                 <Button content={t("cancelBtnLabel")} type="button" onClick={props.onCancel} />
-                <Button primary content={t("editBtnLabel")} onClick={onConfirm}
+                <Button primary content={t("updateLocationBtnLabel")} onClick={onConfirm}
                     type="button" loading={isLoading} />
             </Flex>
         </Flex>

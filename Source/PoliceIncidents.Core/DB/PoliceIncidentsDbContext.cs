@@ -124,8 +124,9 @@ namespace PoliceIncidents.Core.DB
             // Seed data
             modelBuilder.Entity<UserRoleEntity>().HasData(
                 new UserRoleEntity { Id = 1, Title = "Field Officer" },
-                new UserRoleEntity { Id = 2, Title = "External Support" },
-                new UserRoleEntity { Id = 3, Title = "Member" });
+                new UserRoleEntity { Id = 2, Title = "External User" },
+                new UserRoleEntity { Id = 3, Title = "SOC Lead" },
+                new UserRoleEntity { Id = 4, Title = "Family Liason Officer" });
         }
     }
 }

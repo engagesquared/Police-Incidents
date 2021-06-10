@@ -1,6 +1,6 @@
 ﻿import * as React from "react";
 import { Flex, Menu } from "@fluentui/react-northstar";
-import { getAllUserIncidents } from "../../apis/api-list";
+import { getAllUserIncidents, getManagedUserIncidents } from "../../apis/api-list";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./personalTab.styles";
 import { IncidentCard } from "../incidentCard/incidentCard";
@@ -9,10 +9,14 @@ export const PersonalTab = () => {
     const { t } = useTranslation();
     const classes = useStyles();
     const [incidents, setIncidents] = React.useState<any[]>([]);
+    const [managedIncidents, setManagedIncidents] = React.useState<any[]>([]);
+    const [activeIndex, setActiveIndex] = React.useState<number>(0);
     React.useEffect(() => {
         (async () => {
-            var incidents = await getAllUserIncidents();
+            let incidents = await getAllUserIncidents();
+            let managedIncidents = await getManagedUserIncidents();
             setIncidents(incidents);
+            setManagedIncidents(managedIncidents);
         })();
     }, []);
     const items = [
@@ -26,7 +30,7 @@ export const PersonalTab = () => {
         },
     ];
     const onMenuChange = (event: React.SyntheticEvent<HTMLElement>, data?: any) => {
-        console.log(data);
+        setActiveIndex(data.activeIndex);
     };
     return (
         <div className={classes.container}>
@@ -35,7 +39,10 @@ export const PersonalTab = () => {
             </Flex>
 
             <Flex column>
-                {incidents.map((incident) => (
+                {activeIndex === 0 && incidents.map((incident) => (
+                    <IncidentCard incident={incident} key={incident.id} />
+                ))}
+                {activeIndex === 1 && managedIncidents.map((incident) => (
                     <IncidentCard incident={incident} key={incident.id} />
                 ))}
             </Flex>

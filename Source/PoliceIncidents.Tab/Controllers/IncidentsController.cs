@@ -105,7 +105,7 @@ namespace PoliceIncidents.Controllers
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await this.incidentService.GetUserIncidents(userId);
+                return await this.incidentService.GetUserManagedIncidents(userId);
             }
             catch (Exception ex)
             {
@@ -133,7 +133,7 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                return await this.incidentService.GetTeamIncidents(teamId);
+                return await this.incidentService.GetClosedTeamIncidents(teamId);
             }
             catch (Exception ex)
             {
@@ -180,6 +180,20 @@ namespace PoliceIncidents.Controllers
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"An error occurred in SetIncidentLocation {id} {location}: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost("{id}/updatemember")]
+        public async Task<bool> AddUpdateTeamMember(long id, IncidentTeamMemberInput teamMemberInput)
+        {
+            try
+            {
+                return await this.incidentService.UpdateTeamMember(id, teamMemberInput);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occured in UpdateTeamMember {id} ");
                 throw;
             }
         }
@@ -240,7 +254,7 @@ namespace PoliceIncidents.Controllers
                     userIds.Add(incident.ManagerId.Value);
                 }
 
-                userIds.AddRange(incident.Members);
+                userIds.AddRange(incident.Members.Select(t => t.Item1).ToList());
                 userIds = userIds.Distinct().ToList();
                 var upns = new List<string>();
                 if (userIds.Any())

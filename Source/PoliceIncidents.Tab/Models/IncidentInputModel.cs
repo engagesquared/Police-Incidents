@@ -21,6 +21,5 @@ namespace PoliceIncidents.Tab.Models
 
         public Guid ManagerId { get; set; }
 
-        public List<Guid> Members { get; set; }
     }
 }
