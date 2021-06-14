@@ -202,7 +202,7 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<bool> UpdateTeamMember(long incidentId, IncidentTeamMemberInput teamMembers)
+        public async Task<bool> UpdateTeamMember(long incidentId, IncidentTeamMemberInput teamMember)
         {
             try
             {
@@ -210,42 +210,42 @@ namespace PoliceIncidents.Tab.Services
                 var incident = await incidentQuery.FirstOrDefaultAsync();
                 if (incident != null)
                 {
-                    incident.ManagerId = teamMembers.IncidentManager;
+                    incident.ManagerId = teamMember.IncidentManager;
 
                     var incidentTeams = this.dbContext.IncidentTeamMembers.Where(t => t.IncidentId == incidentId);
                     var incidentTeamMembers = await incidentTeams.ToListAsync();
                     this.dbContext.IncidentTeamMembers.RemoveRange(incidentTeamMembers);
-                    if (teamMembers.FieldOfficer != null)
+                    if (teamMember.FieldOfficer != null)
                     {
-                        Guid temp = (Guid)teamMembers.FieldOfficer;
+                        Guid temp = (Guid)teamMember.FieldOfficer;
                         var fieldOfficer = await this.EnsureUserAsync(temp);
                         incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 1 });
                     }
 
-                    if (teamMembers.ExternalAgency != null)
+                    if (teamMember.ExternalAgency != null)
                     {
-                        Guid temp = (Guid)teamMembers.ExternalAgency;
+                        Guid temp = (Guid)teamMember.ExternalAgency;
                         var fieldOfficer = await this.EnsureUserAsync(temp);
                         incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 2 });
                     }
 
-                    if (teamMembers.SocLead != null)
+                    if (teamMember.SocLead != null)
                     {
-                        Guid temp = (Guid)teamMembers.SocLead;
+                        Guid temp = (Guid)teamMember.SocLead;
                         var fieldOfficer = await this.EnsureUserAsync(temp);
                         incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 3 });
                     }
 
-                    if (teamMembers.FamilyLiason != null)
+                    if (teamMember.FamilyLiason != null)
                     {
-                        Guid temp = (Guid)teamMembers.FamilyLiason;
+                        Guid temp = (Guid)teamMember.FamilyLiason;
                         var fieldOfficer = await this.EnsureUserAsync(temp);
                         incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 4 });
                     }
 
                     this.dbContext.Update(incident);
 
-                    // this.dbContext.Update(incidentTeamMembers);
+                    // this.dbContext.Update(incidentTeamMember);
                     await this.dbContext.SaveChangesAsync();
                     return true;
                 }
@@ -262,7 +262,7 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<long> CreateIncident(IncidentInputModel incident, Guid authorId)
+        public async Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds)
         {
             try
             {
@@ -274,6 +274,18 @@ namespace PoliceIncidents.Tab.Services
 
                 var author = await this.EnsureUserAsync(authorId);
                 newIncident.CreatedById = authorId;
+
+                if (participantIds.Length > 0)
+                {
+                    foreach (var userId in participantIds)
+                    {
+                        if (newIncident.Participants.Find(p => p.TeamMember.AadUserId.ToString() == userId.ToString()) == null)
+                        {
+                            var user = await this.EnsureUserAsync(userId);
+                            newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRoleId = 2 });
+                        }
+                    }
+                }
 
                 newIncident.DistrictId = districtId;
                 this.dbContext.IncidentDetails.Add(newIncident);

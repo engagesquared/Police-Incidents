@@ -29,6 +29,6 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId);
 
-        Task<long> CreateIncident(IncidentInputModel incident, Guid authorId);
+        Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds);
     }
 }

@@ -121,6 +121,16 @@ namespace PoliceIncidents.Helpers
             return $"https://tasks.office.com/#/plantaskboard?groupId={incidentInput.RegionId}&planId={createdPlan.Id}";
         }
 
+        public async Task<Guid[]> GetUsersByGroupId(string groupId)
+        {
+            var members = await this.graphClient.Groups[groupId].Members.Request().Select(x => x.Id).GetAsync();
+            var owners = await this.graphClient.Groups[groupId].Owners.Request().Select(x => x.Id).GetAsync();
+            var result = members.Select(x => new Guid(x.Id)).ToList();
+            result.AddRange(owners.Select(x => new Guid(x.Id)).ToList());
+
+            return result.ToArray();
+        }
+
         private string IncidentModelTempating(string input, IncidentInputModel incidentInput)
         {
             return input

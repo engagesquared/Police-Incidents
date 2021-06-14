@@ -37,7 +37,7 @@ namespace PoliceIncidents.Tab.Services
             return true;
         }
 
-        public Task<long> CreateIncident(IncidentInputModel incident, Guid authorId)
+        public Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds)
         {
             throw new NotImplementedException();
         }

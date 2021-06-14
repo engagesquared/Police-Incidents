@@ -53,10 +53,11 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
+                var token = await this.GetAccessTokenAsync();
+                var graphHelper = new GraphUtilityHelper(token);
+
                 try
                 {
-                    var token = await this.GetAccessTokenAsync();
-                    var graphHelper = new GraphUtilityHelper(token);
                     incident.PlannerLink = await graphHelper.CreateCopyOfPlanner(this.appSettings.PlannerId, incident);
                 }
                 catch (Exception ex)
@@ -64,7 +65,24 @@ namespace PoliceIncidents.Controllers
                     this.logger.LogError(ex, "Planner creating error");
                 }
 
-                var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
+                var participantIds = incident.MemberIds != null ? incident.MemberIds.ToList() : new List<Guid>();
+                if (incident.GroupIds.Length > 0)
+                {
+                    foreach (var groupId in incident.GroupIds)
+                    {
+                        try
+                        {
+                            var memberIds = await graphHelper.GetUsersByGroupId(groupId.ToString());
+                            participantIds.AddRange(memberIds);
+                        }
+                        catch (Exception ex)
+                        {
+                            this.logger.LogError(ex, $"Can't retrieve owners and members from group '{groupId}'");
+                        }
+                    }
+                }
+
+                var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId), participantIds.ToArray());
                 try
                 {
                     var botNotifyPath = Core.Common.Constants.IncidentCreatedBotRoute.Replace("{id}", newIncidentId.ToString());

@@ -120,6 +120,13 @@ export const IncidentPage = () => {
         } catch (error) { }
     };
 
+    const membersToShow: string[] = [];
+    [{ item1: incident?.managerId || "" }, ...incident?.members || []].forEach(user => {
+        if (user.item1 && (membersToShow.findIndex((id: string) => id === user.item1) == -1)) {
+            membersToShow.push(user.item1);
+        }
+    });
+
     return (
         <div className={classes.container}>
             {!incident && <Loader />}
@@ -193,31 +200,19 @@ export const IncidentPage = () => {
                                         />
                                         : <></>}
                                 >
-                                    {!!incident?.managerId && (
-                                        <div className={classes.userItem}>
-                                            <Person
-                                                userId={incident.managerId}
-                                                line2Property="jobTitle"
-                                                showPresence={false}
-                                                view={PersonViewType.twolines}
-                                                personCardInteraction={PersonCardInteraction.hover}
-                                            />
-                                        </div>
-                                    )}
-                                    {!!incident?.members?.length &&
-                                        incident.members.map((u) => {
-                                            return (
-                                                <div className={classes.userItem}>
-                                                    <Person
-                                                        userId={u.item1}
-                                                        line2Property="jobTitle"
-                                                        showPresence={false}
-                                                        view={PersonViewType.twolines}
-                                                        personCardInteraction={PersonCardInteraction.hover}
-                                                    />
-                                                </div>
-                                            );
-                                        })}
+                                    {membersToShow.map((userId) => {
+                                        return (
+                                            <div className={classes.userItem}>
+                                                <Person
+                                                    userId={userId}
+                                                    line2Property="jobTitle"
+                                                    showPresence={false}
+                                                    view={PersonViewType.twolines}
+                                                    personCardInteraction={PersonCardInteraction.hover}
+                                                />
+                                            </div>
+                                        );
+                                    })}
                                 </IncidentDetailsCard>
                                 <IncidentDetailsCard
                                     header={t("incidentLocationLabel")}

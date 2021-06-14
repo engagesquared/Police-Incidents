@@ -44,7 +44,7 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
     React.useEffect(() => {
         const validationRules = {
             incidentManager: {
-                required: t("requiredValidationMessage"),
+                required: t("requiredValidationMessage")
             },
             socLead: undefined,
             fieldOfficer: undefined,

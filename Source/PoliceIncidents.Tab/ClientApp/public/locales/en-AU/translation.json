@@ -38,6 +38,7 @@
   "locationFieldLabel": "Location",
   "managerFieldLabel": "Manager",
   "teamMembersFieldLabel": "Team members",
+  "groupsFieldLabel": "Groups",
   "descriptionFieldLabel": "Description",
   "configPageMessage": "Please click Save to get started",
   "closeIncidentBtnLabel": "Close Incident",

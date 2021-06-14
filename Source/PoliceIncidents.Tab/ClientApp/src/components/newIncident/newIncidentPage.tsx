@@ -2,11 +2,11 @@
 import { Flex, Text, Button, Breadcrumb, ChevronEndIcon, Input, Divider, TextArea } from "@fluentui/react-northstar";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./newIncidentPage.styles";
-import { useForm } from "react-hook-form";
+import { RegisterOptions, useForm } from "react-hook-form";
 import { createIncident } from "../../apis/api-list";
 import { ErrorMessage } from "../form/errorMessage";
 
-import { PeoplePicker } from "@microsoft/mgt-react";
+import { GroupType, PeoplePicker, PersonType } from "@microsoft/mgt-react";
 import { Routes } from "../../common";
 import { GlobalContext } from "../../providers/GlobalContextProvider";
 import { useHistory } from "react-router-dom";
@@ -22,7 +22,9 @@ export const NewIncidentPage = () => {
             title: "",
             description: "",
             location: "",
-            manager: ""
+            manager: "",
+            groups: [],
+            members: []
         };
         return result;
     };
@@ -30,6 +32,8 @@ export const NewIncidentPage = () => {
     const { handleSubmit, getValues, setValue, register, watch, errors } = useForm({
         defaultValues: getDefaultValues(),
     });
+
+    const { title, manager, location, description, groups, members } = watch();
 
     React.useEffect(() => {
         const validationRules = {
@@ -43,6 +47,18 @@ export const NewIncidentPage = () => {
             location: {
                 required: t("requiredValidationMessage"),
             },
+            members: {
+                required: t("requiredValidationMessage"),
+                validate: {
+                    hasValue: ((val: any[]) => { return val.length || groups.length || t("requiredValidationMessage"); })
+                }
+            } as RegisterOptions,
+            groups: {
+                required: t("requiredValidationMessage"),
+                validate: {
+                    hasValue: ((val: any[]) => { return val.length || members.length || t("requiredValidationMessage"); })
+                }
+            } as RegisterOptions,
             description: undefined
         };
 
@@ -50,9 +66,11 @@ export const NewIncidentPage = () => {
         register({ name: "description" }, validationRules.description);
         register({ name: "location" }, validationRules.location);
         register({ name: "manager" }, validationRules.manager);
-    }, [getValues, register, t]);
+        register({ name: "members" }, validationRules.members);
+        register({ name: "groups" }, validationRules.groups);
+    }, [getValues, register, t, groups, members]);
 
-    const { title, manager, location, description } = watch();
+
 
     const onConfirm = handleSubmit(async (data) => {
         try {
@@ -62,7 +80,9 @@ export const NewIncidentPage = () => {
                 description: description,
                 managerId: manager,
                 location: location,
-                regionId: ctx.teamsContext.groupId || ""
+                regionId: ctx.teamsContext.groupId || "",
+                memberIds: members,
+                groupIds: groups
             });
             history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incidentId)));
         } catch (ex) {
@@ -77,9 +97,27 @@ export const NewIncidentPage = () => {
         setValue("manager", result, { shouldValidate: true });
     };
 
+    const onMembersChange = (e: any) => {
+        const result = e.detail && e.detail.length ? e.detail.map((g: any) => g.id) : [];
+        setValue("members", result, { shouldValidate: true });
+    };
+
+    const onGroupsChange = (e: any) => {
+        const result = e.detail && e.detail.length ? e.detail.map((g: any) => g.id) : [];
+        setValue("groups", result, { shouldValidate: true });
+    }
+
     const onGoBackClick = () => {
         history.goBack();
     };
+
+    // const isO365Group = (group: any) => {
+    //     return group.groupTypes.some((type: string) => type === "Unified");
+    // }
+
+    // const isSecurityGroup = (group: any) => {
+    //     return !group.mailEnabled && group.securityEnabled;
+    // }
 
     return (
         <Flex className={classes.container} column gap="gap.large">
@@ -139,11 +177,16 @@ export const NewIncidentPage = () => {
                         <PeoplePicker placeholder=" " selectionMode="single" selectionChanged={onManagerChange} />
                         {!!errors.manager && <ErrorMessage errorMessage={errors.manager.message} />}
                     </Flex>
-                    {/*<Flex column>*/}
-                    {/*    <Text content={t("teamMembersFieldLabel")} />*/}
-                    {/*    <PeoplePicker placeholder=" " showMax={25} selectionChanged={onMembersChange} />*/}
-                    {/*    {!!errors.members && <ErrorMessage errorMessage={(errors.members as any).message} />}*/}
-                    {/*</Flex>*/}
+                    <Flex column>
+                        <Text content={t("teamMembersFieldLabel")} />
+                        <PeoplePicker placeholder=" " type={PersonType.person} showMax={25} selectionChanged={onMembersChange} />
+                        {!!errors.members && <ErrorMessage errorMessage={(errors.members as any).message} />}
+                    </Flex>
+                    <Flex column>
+                        <Text content={t("groupsFieldLabel")} />
+                        <PeoplePicker placeholder=" " type={PersonType.group} groupType={GroupType.any} showMax={25} selectionChanged={onGroupsChange} />
+                        {!!errors.groups && <ErrorMessage errorMessage={(errors.groups as any).message} />}
+                    </Flex>
                     <Flex gap="gap.medium">
                         <Button content={t("goBackBtnLabel")} type="button" onClick={onGoBackClick} />
                         <Button primary content={t("newIncidentBtnLabel")} type="submit" loading={isLoading} />
