@@ -237,7 +237,7 @@ namespace PoliceIncidents.Tab.Services
                 var incident = await incidentQuery.FirstOrDefaultAsync();
                 if (incident != null)
                 {
-                    incident.ManagerId = teamMember.IncidentManager;
+                    incident.ManagerId = teamMembers.IncidentManager;
 
                     var incidentTeams = this.dbContext.IncidentTeamMembers.Where(t => t.IncidentId == incidentId);
                     var incidentTeamMembers = await incidentTeams.ToListAsync();
