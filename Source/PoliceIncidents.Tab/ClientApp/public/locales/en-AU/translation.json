@@ -50,5 +50,9 @@
   "fieldOfficer": "Field Officer",
   "externalAgency": "External Agency",
   "updateTeamBtnLabel": "Update team",
-  "updateLocationBtnLabel": "Change Location"
+  "updateLocationBtnLabel": "Change Location",
+  "loadMoreBtnLabel": "Load More",
+  "reassignIncidentBtnLabel": "Reassign My Incidents",
+  "reassignIncidentNoDataMsg": "There are not incidents to assign",
+  "reassignBtnLabel": "Reassign"
 }

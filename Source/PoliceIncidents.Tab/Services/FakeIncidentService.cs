@@ -17,6 +17,11 @@ namespace PoliceIncidents.Tab.Services
         {
         }
 
+        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        {
+            return true;
+        }
+
         public async Task<bool> UpdateTeamMember(long id, IncidentTeamMemberInput teamMemberInput)
         {
             return true;
@@ -72,17 +77,17 @@ namespace PoliceIncidents.Tab.Services
             return incident;
         }
 
-        public Task<List<IncidentModel>> GetTeamIncidents(Guid teamId)
+        public Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId)
+        public Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<IncidentModel>> GetUserIncidents(Guid userId)
+        public async Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber)
         {
             var result = new List<IncidentModel>();
             var updates = new List<IncidentUpdateModel>();
@@ -120,7 +125,7 @@ namespace PoliceIncidents.Tab.Services
             return result;
         }
 
-        public async Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId)
+        public async Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId, int pagenumber)
         {
             var result = new List<IncidentModel>();
             var updates = new List<IncidentUpdateModel>();

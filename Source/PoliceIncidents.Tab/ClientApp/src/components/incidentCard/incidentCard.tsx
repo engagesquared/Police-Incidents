@@ -7,6 +7,7 @@ import { Person, PersonCardInteraction, PersonViewType } from "@microsoft/mgt-re
 import { IIncidentModel } from "../../models/IIncidentModel";
 import { Routes } from "../../common";
 import { executeDeepLink } from "@microsoft/teams-js";
+import { IncidentUpdateType } from "../../models";
 
 export const IncidentCard = (props: { incident: IIncidentModel }) => {
     const { t } = useTranslation();
@@ -32,7 +33,8 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                 <List
                     items={incident.incidentUpdates.map((iu) => ({
                         content: iu.body,
-                        header: iu.title,
+                        header: iu.updateType === IncidentUpdateType.Critical ? `Critical Decision: ${iu.title}` :
+                            iu.updateType === IncidentUpdateType.Manual ? `Update: ${iu.title}` : iu.title,
                         headerMedia: iu.createdAt,
                         key: iu.id,
                     }))}
@@ -45,7 +47,7 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                             history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incident.id)));
                         }}
                     />
-                    <Button primary content={t("goToChatThredBtnLabel")} onClick={onGoChatClick}/>
+                    <Button primary content={t("goToChatThredBtnLabel")} onClick={onGoChatClick} />
                 </Flex>
             </Segment>
         </div>

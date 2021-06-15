@@ -10,7 +10,7 @@ import { IIncidentModel } from "../../models/IIncidentModel";
 import { IncidentDetailsCard } from "./incidentDetailsCard";
 import { IncidentUpdates } from "./incidentUpdates";
 import { getIncident, getScheduleMeetingLink } from "../../apis/api-list";
-import { Person, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
+import { Person, MgtTemplateProps, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
 import { IncidentUpdateType, IIncidentUpdateModel } from "../../models";
 import { executeDeepLink } from "@microsoft/teams-js";
 import { Routes } from "../../common";
@@ -76,20 +76,32 @@ export const IncidentPage = () => {
                 tempIncident.managerId = update.incidentManager;
                 let temp: { item1: string, item2: number }[] = [];
                 if (update.fieldOfficer) {
-                    let tempitem = { item1: update.fieldOfficer, item2: 1 };
-                    temp.push(tempitem);
+                    update.fieldOfficer.map((val) => {
+                        let tempitem = { item1: val, item2: 1 };
+                        temp.push(tempitem);
+                        return val;
+                    });
                 }
                 if (update.externalAgency) {
-                    let tempitem = { item1: update.externalAgency, item2: 2 };
-                    temp.push(tempitem);
+                    update.externalAgency.map((val) => {
+                        let tempitem = { item1: val, item2: 2 };
+                        temp.push(tempitem);
+                        return val;
+                    });
                 }
                 if (update.socLead) {
-                    let tempitem = { item1: update.socLead, item2: 3 };
-                    temp.push(tempitem);
+                    update.socLead.map((val) => {
+                        let tempitem = { item1: val, item2: 3 };
+                        temp.push(tempitem);
+                        return val;
+                    });
                 }
                 if (update.familyLiason) {
-                    let tempitem = { item1: update.familyLiason, item2: 4 };
-                    temp.push(tempitem);
+                    update.familyLiason.map((val) => {
+                        let tempitem = { item1: val, item2: 4 };
+                        temp.push(tempitem);
+                        return val;
+                    });
                 }
                 tempIncident.members = temp;
                 setIncident(tempIncident);
@@ -119,7 +131,32 @@ export const IncidentPage = () => {
             executeDeepLink(incident?.plannerLink || "");
         } catch (error) { }
     };
+    const CustomIncidentManager = (props: MgtTemplateProps) => {
+        return <div>{t("incidentManager")}</div>;
+    };
+    type MgtTemplatePropsTemp = {
+        roleNumber: number;
+    }
+    type Itemp = MgtTemplateProps & MgtTemplatePropsTemp;
 
+    const CustomIncidentMembers = (props: Itemp) => {
+        switch (props.roleNumber) {
+            case 1: {
+                return <div>{t("fieldOfficer")}</div>;
+            }
+            case 2: {
+                return <div>{t("externalAgency")}</div>;
+            }
+            case 3: {
+                return <div>{t("socLead")}</div>;
+            }
+            case 4: {
+                return <div>{t("familyLiason")}</div>;
+            }
+            default:
+        }
+        return <div>{props.roleNumber}</div>;
+    };
     const membersToShow: string[] = [];
     [{ item1: incident?.managerId || "" }, ...incident?.members || []].forEach(user => {
         if (user.item1 && (membersToShow.findIndex((id: string) => id === user.item1) == -1)) {
@@ -200,19 +237,31 @@ export const IncidentPage = () => {
                                         />
                                         : <></>}
                                 >
-                                    {membersToShow.map((userId) => {
-                                        return (
-                                            <div className={classes.userItem}>
-                                                <Person
-                                                    userId={userId}
-                                                    line2Property="jobTitle"
-                                                    showPresence={false}
-                                                    view={PersonViewType.twolines}
-                                                    personCardInteraction={PersonCardInteraction.hover}
-                                                />
-                                            </div>
-                                        );
-                                    })}
+{!!incident?.managerId && (
+                                        <div className={classes.userItem}>
+                                            <Person
+                                                userId={incident.managerId}
+                                                line2Property="jobTitle"
+                                                showPresence={false}
+                                                view={PersonViewType.twolines}
+                                                personCardInteraction={PersonCardInteraction.hover}
+                                            ><CustomIncidentManager template="line2" /></Person>
+                                        </div>
+                                    )}
+                                    {!!incident?.members?.length &&
+                                        incident.members.map((u) => {
+                                            return (
+                                                <div className={classes.userItem}>
+                                                    <Person
+                                                        userId={u.item1}
+                                                        line2Property="jobTitle"
+                                                        showPresence={false}
+                                                        view={PersonViewType.twolines}
+                                                        personCardInteraction={PersonCardInteraction.hover}
+                                                    ><CustomIncidentMembers template="line2" roleNumber={u.item2} /></Person>
+                                                </div>
+                                            );
+                                        })}
                                 </IncidentDetailsCard>
                                 <IncidentDetailsCard
                                     header={t("incidentLocationLabel")}

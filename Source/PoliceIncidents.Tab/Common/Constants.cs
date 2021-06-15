@@ -6,7 +6,7 @@ namespace PoliceIncidents.Tab.Common
 {
     public class Constants
     {
-        public const int MaxUpdatesInIncedentList = 3;
+        public const int MaxUpdatesInIncedentList = 5;
         public const int MaxUpdatesInIncedentItem = 500;
     }
 }

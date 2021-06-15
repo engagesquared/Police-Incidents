@@ -48,13 +48,14 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetUserIncidents(Guid userId)
+        public async Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber)
         {
             try
             {
                 var userIncidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
                     .Where(v => v.Participants.Any(p => p.TeamMemberId == userId) || v.ManagerId == userId)
+                    .Skip((pagenumber - 1) * 10).Take(10)
                     .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
                 var incidents = await userIncidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
@@ -68,13 +69,13 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId)
+        public async Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId, int pagenumber)
         {
             try
             {
                 var userIncidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
-                    .Where(v => v.ManagerId == userId)
+                    .Where(v => v.ManagerId == userId).Skip((pagenumber - 1) * 10).Take(10)
                     .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
                 var incidents = await userIncidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
@@ -88,13 +89,13 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetTeamIncidents(Guid teamId)
+        public async Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber)
         {
             try
             {
                 var incidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
-                    .Where(v => v.District.TeamGroupId == teamId)
+                    .Where(v => v.District.TeamGroupId == teamId).Skip((pagenumber - 1) * 10).Take(10)
                     .Include(v => v.Updates).Include(x => x.District);
                 var incidents = await incidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
@@ -108,13 +109,13 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId)
+        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber)
         {
             try
             {
                 var incidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status == IncidentStatus.Closed)
-                    .Where(v => v.District.TeamGroupId == teamId)
+                    .Where(v => v.District.TeamGroupId == teamId).Skip((pagenumber - 1) * 10).Take(10)
                     .Include(v => v.Updates).Include(x => x.District);
                 var incidents = await incidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
@@ -202,7 +203,33 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<bool> UpdateTeamMember(long incidentId, IncidentTeamMemberInput teamMember)
+
+        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        {
+            try
+            {
+                foreach (ReAssignInput incidentManager in incidentManagerArray)
+                {
+                    var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentManager.IncidentId);
+                    var incident = await incidentQuery.FirstOrDefaultAsync();
+                    if (incident != null)
+                    {
+                        incident.ManagerId = incidentManager.IncidentManagerId;
+                        this.dbContext.Update(incident);
+                        await this.dbContext.SaveChangesAsync();
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to Re Assign Incident");
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateTeamMember(long incidentId, IncidentTeamMemberInput teamMembers)
         {
             try
             {
@@ -215,32 +242,39 @@ namespace PoliceIncidents.Tab.Services
                     var incidentTeams = this.dbContext.IncidentTeamMembers.Where(t => t.IncidentId == incidentId);
                     var incidentTeamMembers = await incidentTeams.ToListAsync();
                     this.dbContext.IncidentTeamMembers.RemoveRange(incidentTeamMembers);
-                    if (teamMember.FieldOfficer != null)
+                    if (teamMembers.FieldOfficer != null)
                     {
-                        Guid temp = (Guid)teamMember.FieldOfficer;
-                        var fieldOfficer = await this.EnsureUserAsync(temp);
-                        incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 1 });
+                        foreach (Guid temp in teamMembers.FieldOfficer)
+                        {
+                            var fieldOfficer = await this.EnsureUserAsync(temp);
+                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 1 });
+                        }
+                    }
+                    if (teamMembers.ExternalAgency != null)
+                    {
+                        foreach (Guid temp in teamMembers.ExternalAgency)
+                        {
+                            var fieldOfficer = await this.EnsureUserAsync(temp);
+                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 2 });
+                        }
+                    }
+                    if (teamMembers.SocLead != null)
+                    {
+                        foreach (Guid temp in teamMembers.SocLead)
+                        {
+                            var fieldOfficer = await this.EnsureUserAsync(temp);
+                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 3 });
+                        }
                     }
 
-                    if (teamMember.ExternalAgency != null)
+                    if (teamMembers.FamilyLiason != null)
                     {
-                        Guid temp = (Guid)teamMember.ExternalAgency;
-                        var fieldOfficer = await this.EnsureUserAsync(temp);
-                        incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 2 });
-                    }
+                        foreach (Guid temp in teamMembers.FamilyLiason)
+                        {
 
-                    if (teamMember.SocLead != null)
-                    {
-                        Guid temp = (Guid)teamMember.SocLead;
-                        var fieldOfficer = await this.EnsureUserAsync(temp);
-                        incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 3 });
-                    }
-
-                    if (teamMember.FamilyLiason != null)
-                    {
-                        Guid temp = (Guid)teamMember.FamilyLiason;
-                        var fieldOfficer = await this.EnsureUserAsync(temp);
-                        incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 4 });
+                            var fieldOfficer = await this.EnsureUserAsync(temp);
+                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 4 });
+                        }
                     }
 
                     this.dbContext.Update(incident);

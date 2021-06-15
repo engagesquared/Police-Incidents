@@ -5,17 +5,18 @@
 namespace PoliceIncidents.Tab.Models
 {
     using System;
+    using System.Collections.Generic;
 
     public class IncidentTeamMemberInput
     {
         public Guid? IncidentManager { get; set; }
 
-        public Guid? SocLead { get; set; }
+        public List<Guid> SocLead { get; set; }
 
-        public Guid? FieldOfficer { get; set; }
+        public List<Guid> FieldOfficer { get; set; }
 
-        public Guid? FamilyLiason { get; set; }
+        public List<Guid> FamilyLiason { get; set; }
 
-        public Guid? ExternalAgency { get; set; }
+        public List<Guid> ExternalAgency { get; set; }
     }
 }

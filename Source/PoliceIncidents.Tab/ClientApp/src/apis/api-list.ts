@@ -21,26 +21,26 @@ export const getClientId = async (): Promise<AxiosResponse<string>> => {
     return await axios.get(url);
 };
 
-export const getAllUserIncidents = async (): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + "/incidents/user/all";
+export const getAllUserIncidents = async (pageNumber: number): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + `/incidents/user/all/${pageNumber}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
 
-export const getManagedUserIncidents = async (): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + "/incidents/user/managed";
+export const getManagedUserIncidents = async (pageNumber: number): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + `/incidents/user/managed/${pageNumber}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
 
-export const getActiveTeamIncidents = async (teamId: string): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + `/incidents/team/${teamId}/active`;
+export const getActiveTeamIncidents = async (teamId: string, pageNumber: number): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + `/incidents/team/${teamId}/active/${pageNumber}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
 
-export const getClosedTeamIncidents = async (teamId: string): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + `/incidents/team/${teamId}/closed`;
+export const getClosedTeamIncidents = async (teamId: string, pageNumber: number): Promise<IIncidentModel[]> => {
+    let url = baseAxiosUrl + `/incidents/team/${teamId}/closed/${pageNumber}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
@@ -94,6 +94,12 @@ export const getScheduleMeetingLink = async (incidentId: number): Promise<string
 
 export const updateTeamMember = async (incidentId: number, teamMember: IIncidentTeamMemberInputModel): Promise<Boolean> => {
     let url = baseAxiosUrl + `/Incidents/${incidentId}/updatemember`;
-    const response = await axios.post(url,teamMember);
+    const response = await axios.post(url, teamMember);
+    return response.data as Boolean;
+};
+
+export const reAssignIncident = async (updatedIncidentManagers: { incidentId: number, incidentManagerId: number }[]): Promise<Boolean> => {
+    let url = baseAxiosUrl + `/Incidents/reassignincident`;
+    const response = await axios.post(url, updatedIncidentManagers);
     return response.data as Boolean;
 };

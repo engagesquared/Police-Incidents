@@ -17,13 +17,28 @@ export const TeamTab = () => {
     const [incidents, setIncidents] = React.useState<IIncidentModel[]>([]);
     const [closedIncidents, setClosedIncidents] = React.useState<IIncidentModel[]>([]);
     const [activeIndex, setActiveIndex] = React.useState<number>(0);
+    const [pageIndex, setPageIndex] = React.useState<number>(2);
+    const [showIncidentLoadMore, setShowIncidentLoadMore] = React.useState<Boolean>(false);
+    const [showClosedIncidentLoadMore, setShowClosedIncidentLoadMore] = React.useState<Boolean>(false);
 
     React.useEffect(() => {
         (async () => {
-            let incidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "");
-            let closedIncidents = await getClosedTeamIncidents(ctx.teamsContext.groupId || "");
-            setIncidents(incidents);
-            setClosedIncidents(closedIncidents);
+            const tempincidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "", 1);
+            const tempclosedIncidents = await getClosedTeamIncidents(ctx.teamsContext.groupId || "", 1);
+            const incidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "", 2);
+            if (incidents.length === 0) {
+                setShowIncidentLoadMore(false);
+            } else {
+                setShowIncidentLoadMore(true);
+            }
+            setIncidents(tempincidents.concat(incidents));
+            const closedIncidents = await getClosedTeamIncidents(ctx.teamsContext.groupId || "", 2);
+            if (closedIncidents.length === 0) {
+                setShowClosedIncidentLoadMore(false);
+            } else {
+                setShowClosedIncidentLoadMore(true);
+            }
+            setClosedIncidents(tempclosedIncidents.concat(closedIncidents));
         })();
     }, [ctx]);
     const items = [
@@ -36,6 +51,28 @@ export const TeamTab = () => {
             content: t("allClosedIncidentsHeader"),
         },
     ];
+
+    const onLoadMore = async () => {
+        const newPageIndex = pageIndex + 1;
+        if (activeIndex === 0) {
+            const tempincidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "", newPageIndex);
+            if (tempincidents.length === 0) {
+                setShowIncidentLoadMore(false);
+            } else {
+                setShowIncidentLoadMore(true);
+            }
+            setIncidents(incidents.concat(tempincidents));
+        } else if (activeIndex === 1) {
+            const tempclosedIncidents = await getClosedTeamIncidents(ctx.teamsContext.groupId || "", newPageIndex);
+            if (tempclosedIncidents.length === 0) {
+                setShowClosedIncidentLoadMore(false);
+            } else {
+                setShowClosedIncidentLoadMore(true);
+            }
+            setClosedIncidents(closedIncidents.concat(tempclosedIncidents));
+        }
+        setPageIndex(newPageIndex);
+    }
 
     const onMenuChange = (event: React.SyntheticEvent<HTMLElement>, data?: any) => {
         setActiveIndex(data.activeIndex);
@@ -56,12 +93,13 @@ export const TeamTab = () => {
             </Flex>
 
             <Flex column>
-                {activeIndex === 0 && incidents.map((incident) => (
+                {activeIndex === 0 && incidents.slice(0, (pageIndex - 1) * 10).map((incident) => (
                     <IncidentCard incident={incident} key={incident.id} />
-                ))}
-                {activeIndex === 1 && closedIncidents.map((incident) => (
+                ))}{activeIndex === 0 && showIncidentLoadMore && <Flex><Button primary content={t("loadMoreBtnLabel")} onClick={onLoadMore} /></Flex>}
+                {activeIndex === 1 && closedIncidents.slice(0, (pageIndex - 1) * 10).map((incident) => (
                     <IncidentCard incident={incident} key={incident.id} />
-                ))}
+                ))
+                } {activeIndex === 1 && showClosedIncidentLoadMore && <Flex > <Button primary content={t("loadMoreBtnLabel")} onClick={onLoadMore} /></Flex >}
             </Flex>
         </Flex>
     );

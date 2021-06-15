@@ -102,13 +102,13 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("user/all")]
-        public async Task<List<IncidentModel>> GetAllUserIncidents()
+        [HttpGet("user/all/{pagenumber}")]
+        public async Task<List<IncidentModel>> GetAllUserIncidents(int pagenumber)
         {
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await this.incidentService.GetUserIncidents(userId);
+                return await this.incidentService.GetUserIncidents(userId,pagenumber);
             }
             catch (Exception ex)
             {
@@ -117,13 +117,13 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("user/managed")]
-        public async Task<List<IncidentModel>> GetManagedUserIncidents()
+        [HttpGet("user/managed/{pagenumber}")]
+        public async Task<List<IncidentModel>> GetManagedUserIncidents(int pagenumber)
         {
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await this.incidentService.GetUserManagedIncidents(userId);
+                return await this.incidentService.GetUserManagedIncidents(userId, pagenumber);
             }
             catch (Exception ex)
             {
@@ -132,12 +132,12 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("team/{teamId}/active")]
-        public async Task<List<IncidentModel>> GetActiveTeamIncidents(Guid teamId)
+        [HttpGet("team/{teamId}/active/{pagenumber}")]
+        public async Task<List<IncidentModel>> GetActiveTeamIncidents(Guid teamId, int pagenumber)
         {
             try
             {
-                return await this.incidentService.GetTeamIncidents(teamId);
+                return await this.incidentService.GetTeamIncidents(teamId, pagenumber);
             }
             catch (Exception ex)
             {
@@ -146,12 +146,12 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("team/{teamId}/closed")]
-        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId)
+        [HttpGet("team/{teamId}/closed/{pagenumber}")]
+        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber)
         {
             try
             {
-                return await this.incidentService.GetClosedTeamIncidents(teamId);
+                return await this.incidentService.GetClosedTeamIncidents(teamId, pagenumber);
             }
             catch (Exception ex)
             {
@@ -287,6 +287,20 @@ namespace PoliceIncidents.Controllers
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"An error occurred in GetNewMeetigLink {id}: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost("reassignincident")]
+        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        {
+            try
+            {
+                return await this.incidentService.ReAssignIncident(incidentManagerArray);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occured in ReAssignIncident");
                 throw;
             }
         }
