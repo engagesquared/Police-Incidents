@@ -17,7 +17,7 @@ namespace PoliceIncidents.Tab.Services
         {
         }
 
-        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        public async Task<bool> ReAssignIncident(string accessToken, List<ReAssignInput> incidentManagerArray)
         {
             return true;
         }

@@ -7,9 +7,12 @@ namespace PoliceIncidents.Tab.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Core.DB.Entities;
     using PoliceIncidents.Tab.Helpers.Extensions;
@@ -204,19 +207,21 @@ namespace PoliceIncidents.Tab.Services
         }
 
 
-        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        public async Task<bool> ReAssignIncident(string accessToken, List<ReAssignInput> incidentManagerArray)
         {
             try
             {
+                TemplateParameter templateParameter = new TemplateParameter() { Name = "body", Value = "You have been assigned an Incident", };
                 foreach (ReAssignInput incidentManager in incidentManagerArray)
                 {
-                    var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentManager.IncidentId);
+                    var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentManager.IncidentId).Include(x => x.District);
                     var incident = await incidentQuery.FirstOrDefaultAsync();
                     if (incident != null)
                     {
                         incident.ManagerId = incidentManager.IncidentManagerId;
                         this.dbContext.Update(incident);
                         await this.dbContext.SaveChangesAsync();
+                        await this.SendTeamsNotification(accessToken, incident.District.TeamGroupId.ToString(), incidentManager.IncidentManagerId.ToString(), incident.Title);
                     }
                 }
 
@@ -225,6 +230,43 @@ namespace PoliceIncidents.Tab.Services
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"Failed to Re Assign Incident");
+                throw;
+            }
+        }
+
+        public async Task SendTeamsNotification(string accessToken, string groupId, string newManagerID, string incidentTitle)
+        {
+            try
+            {
+                TemplateParameter templateParameter = new TemplateParameter() { Name = "body", Value = incidentTitle, };
+                var body = new
+                {
+                    topic = new
+                    {
+                        source = "entityUrl",
+                        value = "https://graph.microsoft.com/v1.0/teams/" + groupId,
+                    },
+                    activityType = "freeTextActivity",
+                    previewText = new
+                    {
+                        content = "You have been assigned an Incident",
+                    },
+                    recipient = new Recipient
+                    {
+                        OdataType = "microsoft.graph.aadUserNotificationRecipient",
+                        UserId = newManagerID,
+                    },
+                    templateParameters = new List<TemplateParameter> { templateParameter },
+                };
+                HttpClient client = new HttpClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+                var json = JsonConvert.SerializeObject(body);
+                var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
+                var result = await client.PostAsync("https://graph.microsoft.com/v1.0/teams/" + groupId + "/sendActivityNotification", stringContent);
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
                 throw;
             }
         }

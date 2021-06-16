@@ -8,12 +8,14 @@ namespace PoliceIncidents.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
+    using Newtonsoft.Json;
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
@@ -108,7 +110,7 @@ namespace PoliceIncidents.Controllers
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await this.incidentService.GetUserIncidents(userId,pagenumber);
+                return await this.incidentService.GetUserIncidents(userId, pagenumber);
             }
             catch (Exception ex)
             {
@@ -296,7 +298,8 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                return await this.incidentService.ReAssignIncident(incidentManagerArray);
+                string accessToken = await this.GetAccessTokenAsync();
+                return await this.incidentService.ReAssignIncident(accessToken, incidentManagerArray);
             }
             catch (Exception ex)
             {

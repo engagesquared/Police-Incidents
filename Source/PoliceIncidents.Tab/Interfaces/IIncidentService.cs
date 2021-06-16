@@ -31,6 +31,6 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds);
 
-        Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray);
+        Task<bool> ReAssignIncident(string accessToken, List<ReAssignInput> incidentManagerArray);
     }
 }

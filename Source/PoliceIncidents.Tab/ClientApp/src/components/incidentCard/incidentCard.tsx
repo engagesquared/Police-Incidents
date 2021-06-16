@@ -8,12 +8,15 @@ import { IIncidentModel } from "../../models/IIncidentModel";
 import { Routes } from "../../common";
 import { executeDeepLink } from "@microsoft/teams-js";
 import { IncidentUpdateType } from "../../models";
+import { formatDateTime } from "../../utils";
+import { GlobalContext } from "../../providers/GlobalContextProvider";
 
 export const IncidentCard = (props: { incident: IIncidentModel }) => {
     const { t } = useTranslation();
     const history = useHistory();
     const classes = useStyles();
     const { incident } = props;
+    const ctx = React.useContext(GlobalContext);
 
     const onGoChatClick = async () => {
         try {
@@ -35,7 +38,7 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                         content: iu.body,
                         header: iu.updateType === IncidentUpdateType.Critical ? `Critical Decision: ${iu.title}` :
                             iu.updateType === IncidentUpdateType.Manual ? `Update: ${iu.title}` : iu.title,
-                        headerMedia: iu.createdAt,
+                        headerMedia: formatDateTime(ctx.teamsContext.locale, iu.createdAt),
                         key: iu.id,
                     }))}
                 />

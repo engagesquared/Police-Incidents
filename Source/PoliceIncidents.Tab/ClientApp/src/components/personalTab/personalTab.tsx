@@ -97,7 +97,7 @@ export const PersonalTab = () => {
                     {
                         activeIndex === 1 && managedIncidents.length > 0 &&
                         <Flex>
-                            <Dialog style={{ maxHeight: "500px", overflow: "auto" }} content={managedIncidents ? <ReAssignMyIncident onSuccess={onSuccess} myIncidents={managedIncidents} /> : t('reassignIncidentNoDataMsg')} open={reassignIncidentOpen}
+                            <Dialog style={{ maxHeight: "500px", overflow: "auto", minWidth: "300px" }} content={managedIncidents ? <ReAssignMyIncident onSuccess={onSuccess} myIncidents={managedIncidents} /> : t('reassignIncidentNoDataMsg')} open={reassignIncidentOpen}
                                 header={t("reassignIncidentBtnLabel")}
                                 trigger={<Button content={t("reassignIncidentBtnLabel")} onClick={() => setReassignIncidentOpen(true)} />}
                                 onCancel={() => setReassignIncidentOpen(false)} />

@@ -10,6 +10,31 @@ export const useStyles = createUseStyles((theme: ITheme) => {
         contentGrid: {
             margin: "0 -0.75rem",
         },
+        buttonFlex: {
+            display: "inline-flex"
+        },
+        onlyInMobile: {
+            display: "flex"
+        },
+        dialogMinWidth: {
+            minWidth: "300px"
+        },
+        '@media (max-width: 600px)': {
+            contentGrid: {
+                display: "block !important",
+            },
+            column: {
+                padding: "0 0.75rem",
+                width: "calc(100% / 1) !important",
+            },
+            buttonFlex: {
+                display: "block !important",
+                marginBottom: "1%"
+            },
+            onlyInMobile: {
+                display: "block !important",
+            }
+        },
         column: {
             padding: "0 0.75rem",
             width: "calc(100% / 3)",

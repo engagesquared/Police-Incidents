@@ -180,36 +180,27 @@ export const IncidentPage = () => {
                             <Breadcrumb.Item active>{incident.title}</Breadcrumb.Item>
                         </Breadcrumb>
                     </Flex>
-                    <Flex space="between" vAlign="center" wrap gap="gap.medium">
-                        <Flex.Item grow={1}>
-                            <Text content={incident.description} />
-                        </Flex.Item>
-                        <Flex gap="gap.medium" vAlign="center">
-                            <Flex.Item >
-                                <Dialog
-                                    content={
-                                        <CloseIncidentForm
-                                            incidentId={incident.id}
-                                            onCancel={() => setCloseIncidentFormOpen(false)}
-                                            onAdded={onUpdateAdded}
-                                        ></CloseIncidentForm>
-                                    }
-                                    style={{ padding: 0 }}
-                                    open={closeIncidentFormOpen}
-                                    onOpen={() => setCloseIncidentFormOpen(true)}
-                                    trigger={<Button disabled={incident.status === 3} primary content={t("closeIncidentBtnLabel")} />}
-                                    onCancel={() => setCloseIncidentFormOpen(false)}
-                                />
-                            </Flex.Item>
-                            <Flex.Item align="end">
-                                <Button content={t("openPlannerBtnLabel")} disabled={!incident.plannerLink} onClick={onGoPlannerClick} />
-                            </Flex.Item>
-                            <Flex.Item align="end">
-                                <Button content={t("scheduleMeetingBtnLabel")} disabled={!incident} loading={isLoadingMeetingLink} onClick={onScheduleClick} />
-                            </Flex.Item>
-                            <Flex.Item >
-                                <Button primary content={t("goToChatThreadBtnLabel")} disabled={!incident.chatThreadLink} onClick={onGoChatClick} />
-                            </Flex.Item>
+                    <Flex space="between" vAlign="center" wrap gap="gap.medium" >
+                        <Text content={incident.description} />
+                        <Flex gap="gap.medium" vAlign="center" className={classes.onlyInMobile}>
+                            <Dialog
+                                content={
+                                    <CloseIncidentForm
+                                        incidentId={incident.id}
+                                        onCancel={() => setCloseIncidentFormOpen(false)}
+                                        onAdded={onUpdateAdded}
+                                    ></CloseIncidentForm>
+                                }
+                                style={{ padding: 0 }}
+                                open={closeIncidentFormOpen}
+                                onOpen={() => setCloseIncidentFormOpen(true)}
+                                trigger={<Button className={classes.buttonFlex} disabled={incident.status === 3} primary content={t("closeIncidentBtnLabel")} />}
+                                onCancel={() => setCloseIncidentFormOpen(false)}
+                                className={classes.dialogMinWidth}
+                            />
+                            <Button content={t("openPlannerBtnLabel")} disabled={!incident.plannerLink} onClick={onGoPlannerClick} />
+                            <Button content={t("scheduleMeetingBtnLabel")} disabled={!incident} loading={isLoadingMeetingLink} onClick={onScheduleClick} />
+                            <Button primary content={t("goToChatThreadBtnLabel")} disabled={!incident.chatThreadLink} onClick={onGoChatClick} />
                         </Flex>
                     </Flex>
                     <Flex className={classes.contentGrid}>
@@ -234,10 +225,11 @@ export const IncidentPage = () => {
                                             trigger={<Button primary icon={<EditIcon size="small" />}
                                                 size="small" text content={t("editBtnLabel")} />}
                                             onCancel={() => setEditIncidentTeamFormOpen(false)}
+                                            className={classes.dialogMinWidth}
                                         />
                                         : <></>}
                                 >
-{!!incident?.managerId && (
+                                    {!!incident?.managerId && (
                                         <div className={classes.userItem}>
                                             <Person
                                                 userId={incident.managerId}
