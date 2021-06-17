@@ -4,4 +4,5 @@ export interface IGlobalContext {
     teamsContext: microsoftTeams.Context;
     isPersonalTab: boolean;
     isMobileDevice: boolean;
+    subEntityID: string;
 }

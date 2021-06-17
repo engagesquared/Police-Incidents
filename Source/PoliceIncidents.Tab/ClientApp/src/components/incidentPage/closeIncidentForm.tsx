@@ -58,12 +58,13 @@ export const CloseIncidentForm = (props: React.PropsWithChildren<ICloseIncidentF
             <Divider size={3} color="brand" />
             <Flex column padding="padding.medium" style={{ margin: 10 }}>
                 <Flex column padding="padding.medium" style={{ margin: 10 }}>
-                    <Text content="Information" />
+                    <Text content={t("closeIncidentTextAreaLabel")} />
                     <TextArea variables={{ height: "100px" }} value={closingBody}
-                        fluid placeholder="Closing Information..."
+                        fluid placeholder=""
                         onChange={(ev: any, p) => {
                             setClosingBody(p ? p.value as string : "");
                         }} />
+                    <Text size={"small"} content={t("closeIncidentTextAreaHelperText")} />
                 </Flex>
             </Flex>
             <Divider size={0} />

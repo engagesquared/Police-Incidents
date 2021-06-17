@@ -54,5 +54,7 @@
   "loadMoreBtnLabel": "Load More",
   "reassignIncidentBtnLabel": "Reassign My Incidents",
   "reassignIncidentNoDataMsg": "There are not incidents to assign",
-  "reassignBtnLabel": "Reassign"
+  "reassignBtnLabel": "Reassign",
+  "closeIncidentTextAreaLabel": "Please provide relevant incident closure comments",
+  "closeIncidentTextAreaHelperText": "Your comments will be added as a final update to this incident."
 }

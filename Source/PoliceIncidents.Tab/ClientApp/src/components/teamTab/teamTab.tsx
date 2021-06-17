@@ -22,6 +22,12 @@ export const TeamTab = () => {
     const [showClosedIncidentLoadMore, setShowClosedIncidentLoadMore] = React.useState<Boolean>(false);
 
     React.useEffect(() => {
+        if (ctx.subEntityID) {
+            history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(ctx.subEntityID)));
+        }
+    }, [ctx.subEntityID, history]);
+
+    React.useEffect(() => {
         (async () => {
             const tempincidents = await getActiveTeamIncidents(ctx.teamsContext.groupId || "", 1);
             const tempclosedIncidents = await getClosedTeamIncidents(ctx.teamsContext.groupId || "", 1);

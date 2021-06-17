@@ -18,6 +18,7 @@ function GlobalContextProvider(props: any) {
             teamsContext: ctx,
             isPersonalTab: !ctx.groupId,
             isMobileDevice: ctx.hostClientType === HostClientType.android || ctx.hostClientType === HostClientType.ios,
+            subEntityID: ctx.subEntityId ? ctx.subEntityId : ""
         };
 
         return <GlobalContext.Provider value={globalCtx}>{props.children}</GlobalContext.Provider>;

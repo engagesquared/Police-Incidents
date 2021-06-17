@@ -5,5 +5,6 @@ import { TeamTab } from "../teamTab/teamTab";
 
 export const Home = () => {
     const { isPersonalTab } = React.useContext(GlobalContext);
+    
     return <>{isPersonalTab ? <PersonalTab /> : <TeamTab />}</>;
 };
