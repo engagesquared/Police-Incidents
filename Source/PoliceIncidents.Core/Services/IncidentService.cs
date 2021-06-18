@@ -41,7 +41,8 @@ namespace PoliceIncidents.Core.Services
                     };
                     this.dbContext.Districts.Add(newDistrict);
                     await this.dbContext.SaveChangesAsync();
-                } else if (district.ConversationId != conversationId)
+                }
+                else if (district.ConversationId != conversationId)
                 {
                     district.ConversationId = conversationId;
                     await this.dbContext.SaveChangesAsync();
@@ -212,6 +213,10 @@ namespace PoliceIncidents.Core.Services
                 Title = incident.Title,
                 Description = incident.Description,
                 Location = incident.Location,
+                PlannerLink = incident.PlannerLink,
+                ChannelID = incident.District.ConversationId,
+                GroupID = incident.District.TeamGroupId.ToString(),
+                IncidentID = incident.Id.ToString(),
             };
         }
 

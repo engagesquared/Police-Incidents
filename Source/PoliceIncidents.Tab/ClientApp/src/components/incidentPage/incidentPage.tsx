@@ -159,7 +159,7 @@ export const IncidentPage = () => {
     };
     const membersToShow: string[] = [];
     [{ item1: incident?.managerId || "" }, ...incident?.members || []].forEach(user => {
-        if (user.item1 && (membersToShow.findIndex((id: string) => id === user.item1) == -1)) {
+        if (user.item1 && (membersToShow.findIndex((id: string) => id === user.item1) === -1)) {
             membersToShow.push(user.item1);
         }
     });

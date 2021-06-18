@@ -90,7 +90,11 @@ namespace PoliceIncidents.Bot.Bots
                 var text = Strings.IncidentCreatedTemplate
                     .Replace("{title}", incident.Title)
                     .Replace("{location}", incident.Location)
-                    .Replace("{description}", incident.Description);
+                    .Replace("{description}", incident.Description)
+                    .Replace("{plannerLink}", incident.PlannerLink)
+                    .Replace("{incidentID}", incident.IncidentID)
+                    .Replace("{channelID}", incident.ChannelID)
+                    .Replace("{groupID}", incident.GroupID);
                 var message = MessageFactory.Text(text);
                 message.TextFormat = "markdown";
                 return message;
