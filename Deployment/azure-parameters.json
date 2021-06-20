@@ -20,6 +20,12 @@
         "tabAppSecret": {
             "value": ""
         },
+        "tabManifestAppId": {
+            "value": "a1082658-48e9-4c7e-b0a9-d1fdcaeb3426"
+        },
+        "planId": {
+            "value": ""
+        },
         "dbAdministratorLogin": {
             "value": ""
         },

@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoliceIncidents.Tab", "Poli
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoliceIncidents.Core", "PoliceIncidents.Core\PoliceIncidents.Core.csproj", "{684FCF16-5193-43DB-A86E-3745B0ED4E95}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoliceIncidents.Functions", "PoliceIncidents.Functions\PoliceIncidents.Functions.csproj", "{B337BBC7-9F18-4A69-9CC4-EFD65AEAC183}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoliceIncidents.Bot", "PoliceIncidents.Bot\PoliceIncidents.Bot.csproj", "{F24D6C44-1F8B-439D-B927-8E8B5FF33EE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoliceIncidents.Bot", "PoliceIncidents.Bot\PoliceIncidents.Bot.csproj", "{F24D6C44-1F8B-439D-B927-8E8B5FF33EE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +23,6 @@ Global
 		{684FCF16-5193-43DB-A86E-3745B0ED4E95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{684FCF16-5193-43DB-A86E-3745B0ED4E95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{684FCF16-5193-43DB-A86E-3745B0ED4E95}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B337BBC7-9F18-4A69-9CC4-EFD65AEAC183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B337BBC7-9F18-4A69-9CC4-EFD65AEAC183}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B337BBC7-9F18-4A69-9CC4-EFD65AEAC183}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B337BBC7-9F18-4A69-9CC4-EFD65AEAC183}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F24D6C44-1F8B-439D-B927-8E8B5FF33EE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F24D6C44-1F8B-439D-B927-8E8B5FF33EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F24D6C44-1F8B-439D-B927-8E8B5FF33EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -40,10 +40,6 @@ Write-Host "Publishing Bot Web App..."
 $pathToZip = "$currentPath\PoliceIncidents.Bot.zip"
 $quiet = Publish-AzWebApp -ResourceGroupName $resourceGroupName -Name $deploymentResults.Outputs.botAppName.Value -ArchivePath $pathToZip -Force
 
-Write-Host "Publishing Function App..."
-$pathToZip = "$currentPath\PoliceIncidents.Functions.zip"
-$quiet = Publish-AzWebApp -ResourceGroupName $resourceGroupName -Name $deploymentResults.Outputs.funcAppName.Value -ArchivePath $pathToZip -Force
-
 Write-Host "Publishing Tab App..."
 $pathToZip = "$currentPath\PoliceIncidents.Tab.zip"
 $quiet = Publish-AzWebApp -ResourceGroupName $resourceGroupName -Name $deploymentResults.Outputs.tabWebAppName.Value -ArchivePath $pathToZip -Force

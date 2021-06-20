@@ -21,6 +21,12 @@
         "tabAppSecret": {
             "type": "string"
         },
+        "tabManifestAppId": {
+            "type": "string"
+        },
+        "planId": {
+            "type": "string"
+        },
         "dbAdministratorLogin": {
             "type": "String"
         },
@@ -45,16 +51,15 @@
         "botWebAppName": "[concat(parameters('baseResourceName'),'BotWebApp', variables('rgUniqueStr'))]",
         "botWebUrl": "[concat('https://',variables('botWebAppName'), '.azurewebsites.net')]",
         "tabWebAppName": "[concat(parameters('baseResourceName'),'TabWebApp', variables('rgUniqueStr'))]",
+        "tabBaseUrl": "[concat('https://', variables('tabWebAppName'), '.azurewebsites.net')]",
         "tabWebAppDomain": "[toLower(concat(variables('tabWebAppName'), '.azurewebsites.net'))]",
         "tabAppIdUri": "[concat('api://',variables('tabWebAppName'), '.azurewebsites.net/', parameters('tabAppId'))]",
         "hostingPlanName": "[concat(parameters('baseResourceName'),'ASP', variables('rgUniqueStr'))]",
-        "functionName": "[concat(parameters('baseResourceName'),'Func', variables('rgUniqueStr'))]",
         "storageAccountName": "[toLower(concat(substring(parameters('baseResourceName'),0 , 13),'Storage', variables('rgUniqueStr')))]",
         "insightsNameBot": "[concat(parameters('baseResourceName'),'BotAppInsights', variables('rgUniqueStr'))]",
         "insightsNameBotWebApp": "[concat(parameters('baseResourceName'),'BotWebAppAppInsights', variables('rgUniqueStr'))]",
         "insightsNameTabWebApp": "[concat(parameters('baseResourceName'),'TabWebAppAppInsights', variables('rgUniqueStr'))]",
-        "insightsNameFunc": "[concat(parameters('baseResourceName'),'FuncAppInsights', variables('rgUniqueStr'))]",
-        "dbConnectionString": "[concat('Server=tcp:',variables('sqlServerName'),'.database.windows.net,1433;Initial Catalog=policeincidents;Persist Security Info=False;User ID=',parameters('dbAdministratorLogin'),';Password=',parameters('dbAdministratorPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+        "dbConnectionString": "[concat('Server=tcp:',variables('sqlServerName'),'.database.windows.net,1433;Initial Catalog=policeincidents;Persist Security Info=False;User ID=',parameters('dbAdministratorLogin'),'@',variables('sqlServerName')';Password=',parameters('dbAdministratorPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
     },
     "resources": [
         {
@@ -177,6 +182,14 @@
                         {
                             "name": "TenantId",
                             "value": "[parameters('tenantId')]"
+                        },
+                        {
+                            "name": "TabBaseUrl",
+                            "value": "[variables('tabBaseUrl')]"
+                        },
+                        {
+                            "name": "TabAppId",
+                            "value": "[parameters('tabManifestAppId')]"
                         }
                     ],
                     "connectionStrings": [
@@ -267,11 +280,15 @@
                         },
                         {
                             "name": "AzureAd:GraphScope",
-                            "value": "https://graph.microsoft.com/User.Read openid profile https://graph.microsoft.com/User.Read.All https://graph.microsoft.com/People.Read"
+                            "value": "https://graph.microsoft.com/User.Read openid profile https://graph.microsoft.com/User.Read.All https://graph.microsoft.com/People.Read  https://graph.microsoft.com/Tasks.ReadWrite https://graph.microsoft.com/TeamsActivity.Send https://graph.microsoft.com/ChannelMessage.Read.All https://graph.microsoft.com/Files.ReadWrite.All"
                         },
                         {
                             "name": "BotBaseUrl",
                             "value": "[variables('botWebUrl')]"
+                        },
+                        {
+                            "name": "PlannerId",
+                            "value": "[parameters('planId')]"
                         }
                     ],
                     "connectionStrings": [
@@ -356,81 +373,12 @@
                 "supportsHttpsTrafficOnly": true,
                 "minimumTlsVersion": "TLS1_2"
             }
-        },
-        {
-            "apiVersion": "2020-02-02-preview",
-            "name": "[variables('insightsNameFunc')]",
-            "type": "microsoft.insights/components",
-            "location": "[parameters('location')]",
-            "tags": {},
-            "dependsOn": [],
-            "properties": {
-                "ApplicationId": "[variables('functionName')]",
-                "Request_Source": "IbizaWebAppExtensionCreate",
-                "Flow_Type": "Redfield",
-                "Application_Type": "web"
-            }
-        },
-        {
-            "apiVersion": "2018-11-01",
-            "name": "[variables('functionName')]",
-            "type": "Microsoft.Web/sites",
-            "kind": "functionapp",
-            "location": "[parameters('location')]",
-            "tags": {},
-            "dependsOn": [
-                "[concat('microsoft.insights/components/', variables('insightsNameFunc'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-                "[concat('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]"
-            ],
-            "properties": {
-                "name": "[variables('functionName')]",
-                "siteConfig": {
-                    "appSettings": [
-                        {
-                            "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~3"
-                        },
-                        {
-                            "name": "FUNCTIONS_WORKER_RUNTIME",
-                            "value": "dotnet"
-                        },
-                        {
-                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(concat('microsoft.insights/components/', variables('insightsNameFunc')), '2015-05-01').InstrumentationKey]"
-                        },
-                        {
-                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                            "value": "[reference(concat('microsoft.insights/components/', variables('insightsNameFunc')), '2015-05-01').ConnectionString]"
-                        },
-                        {
-                            "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
-                        },
-                        {
-                            "name": "PoliceIncidentsConnectionString",
-                            "value": "[variables('dbConnectionString')]"
-                        },
-                        {
-                            "name": "BotBaseUrl",
-                            "value": "[variables('botWebUrl')]"
-                        }
-                    ],
-                    "alwaysOn": true
-                },
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
-                "clientAffinityEnabled": false
-            }
         }
     ],
     "outputs": {
         "botAppName": {
             "type": "string",
             "value": "[variables('botWebAppName')]"
-        },
-        "funcAppName": {
-            "type": "string",
-            "value": "[variables('functionName')]"
         },
         "tabWebAppName": {
             "type": "string",
