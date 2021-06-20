@@ -42,6 +42,11 @@ namespace PoliceIncidents.Tab.Services
             return true;
         }
 
+        public async Task ChangeIncidentFileReportUrl(long incidentId, string fileReportUrl)
+        {
+            return;
+        }
+
         public Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds)
         {
             throw new NotImplementedException();
@@ -75,6 +80,11 @@ namespace PoliceIncidents.Tab.Services
                 ExternalLink = "https://google.com",
             };
             return incident;
+        }
+
+        public DistrictEntity GetDistricForIncident(long incidentId)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber)

@@ -45,6 +45,8 @@ namespace PoliceIncidents.Core.DB.Entities
 
         public string ChatConverstaionId { get; set; }
 
+        public string FileReportUrl { get; set; }
+
         public List<IncidentTeamMemberEntity> Participants { get; set; }
 
         public List<IncidentUpdateEntity> Updates { get; set; }

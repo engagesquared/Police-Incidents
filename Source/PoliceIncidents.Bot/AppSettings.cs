@@ -20,10 +20,16 @@ namespace PoliceIncidents.Bot
 
         public string TenantId { get; private set; }
 
+        public string TabAppId { get; private set; }
+
+        public string TabBaseUrl { get; private set; }
+
         private void Setup()
         {
             this.BotAppId = this.configuration["MicrosoftAppId"];
             this.TenantId = this.configuration["TenantId"];
+            this.TabAppId = this.configuration["TabAppId"];
+            this.TabBaseUrl = this.configuration["TabBaseUrl"];
         }
     }
 }

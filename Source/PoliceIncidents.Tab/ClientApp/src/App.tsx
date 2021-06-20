@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./localization/localization";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch, useHistory } from "react-router-dom";
 import ErrorPage from "./components/error-page/error-page";
 import SignInPage from "./components/sign-in-page/sign-in-page";
 import SignInSimpleStart from "./components/sign-in-page/sign-in-simple-start";
@@ -28,7 +28,13 @@ Providers.globalProvider = new MgtTokenProvider();
 
 const App = () => {
     const classes = useStyles();
-    const { isMobileDevice } = React.useContext(GlobalContext);
+    const history = useHistory();
+    const { isMobileDevice, teamsContext } = React.useContext(GlobalContext);
+    
+    const path = teamsContext.subEntityId;
+    if (path?.includes(Routes.incidentPage.slice(1, Routes.incidentIdPart.length - 1))) {
+        history.push(path);
+    }
 
     return (
         <Flex className={classes.root} column>

@@ -5,8 +5,10 @@
 namespace PoliceIncidents.Core.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Core.DB.Entities;
@@ -140,6 +142,22 @@ namespace PoliceIncidents.Core.Services
             }
         }
 
+        public List<UserEntity> GetIncidentTeamMembers(long incidentId)
+        {
+            try
+            {
+                var members = this.dbContext.IncidentTeamMembers.Where(v => v.IncidentId == incidentId).Include(x => x.TeamMember).Select(v => v.TeamMember).ToList();
+                var manager = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId).Select(v => v.Manager).FirstOrDefault();
+                members.Add(manager);
+                return members;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to get team members for incident {incidentId} from database");
+                throw;
+            }
+        }
+
         /// <summary>
         /// Create if not exist district.
         /// </summary>
@@ -213,6 +231,11 @@ namespace PoliceIncidents.Core.Services
                 Title = incident.Title,
                 Description = incident.Description,
                 Location = incident.Location,
+                ExternalId = incident.ExternalId,
+                Status = incident.Status,
+                CreatedUtc = incident.CreatedUtc,
+                ExternalLink = incident.ExternalLink,
+                ChatConverstaionId = incident.ChatConverstaionId,
                 PlannerLink = incident.PlannerLink,
                 ChannelID = incident.District.ConversationId,
                 GroupID = incident.District.TeamGroupId.ToString(),

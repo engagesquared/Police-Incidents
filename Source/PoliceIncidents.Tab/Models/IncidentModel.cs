@@ -22,6 +22,8 @@ namespace PoliceIncidents.Tab.Models
 
         public string ChatThreadLink { get; set; }
 
+        public string ChatConverstaionId { get; set; }
+
         public Guid? ManagerId { get; set; }
 
         public List<Tuple<Guid, int>> Members { get; set; }

@@ -8,12 +8,17 @@
     <RootNamespace>PoliceIncidents.Bot</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>5</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" />
     <AdditionalFiles Include="..\.editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AdaptiveCards.Templating" Version="1.2.1" />
     <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.13.0" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.ApplicationInsights.Core" Version="4.12.2" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.12.2" />

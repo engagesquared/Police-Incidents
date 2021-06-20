@@ -6,6 +6,7 @@ namespace PoliceIncidents.Helpers
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
@@ -129,6 +130,31 @@ namespace PoliceIncidents.Helpers
             result.AddRange(owners.Select(x => new Guid(x.Id)).ToList());
 
             return result.ToArray();
+        }
+
+        public async Task<ChatMessage> GetChatMessage(string teamId, string channelId, string chatMessageId)
+        {
+            var chatMessage = await this.graphClient.Teams[teamId].Channels[channelId].Messages[chatMessageId].Request().GetAsync();
+            return chatMessage;
+        }
+
+        public async Task<IChatMessageRepliesCollectionPage> GetChatMessageReplies(string teamId, string channelId, string chatMessageId)
+        {
+            var chatMessageReplies = await this.graphClient.Teams[teamId].Channels[channelId].Messages[chatMessageId].Replies.Request().GetAsync();
+            return chatMessageReplies;
+        }
+
+        public async Task<string> UploadFileToTeams(string groupId, string fileName, Stream stream)
+        {
+            var result = await this.graphClient
+                                            .Groups[groupId]
+                                            .Drive
+                                            .Root
+                                            .ItemWithPath(fileName)
+                                            .Content
+                                            .Request()
+                                            .PutAsync<DriveItem>(stream);
+            return result.WebUrl;
         }
 
         private string IncidentModelTempating(string input, IncidentInputModel incidentInput)

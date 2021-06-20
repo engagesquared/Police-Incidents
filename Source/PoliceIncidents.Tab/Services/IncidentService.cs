@@ -51,6 +51,20 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
+        public DistrictEntity GetDistricForIncident(long incidentId)
+        {
+            try
+            {
+                var disctrict = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId).Select(v => v.District).FirstOrDefault();
+                return disctrict;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to get district for incident {incidentId} from database");
+                throw;
+            }
+        }
+
         public async Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber)
         {
             try
@@ -152,6 +166,30 @@ namespace PoliceIncidents.Tab.Services
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"Failed to change incident manager. Incident id: {incidentId} ManagerId: {managerId}");
+                throw;
+            }
+        }
+
+        public async Task ChangeIncidentFileReportUrl(long incidentId, string fileReportUrl)
+        {
+            try
+            {
+                var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId);
+                var incident = await incidentQuery.FirstOrDefaultAsync();
+                if (incident != null)
+                {
+                    incident.FileReportUrl = fileReportUrl;
+                    this.dbContext.Update(incident);
+                    await this.dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    this.logger.LogError($"Failed to find incident by id: {incidentId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Failed to change incident file report url. Incident id: {incidentId} FileReportUrl: {fileReportUrl}");
                 throw;
             }
         }

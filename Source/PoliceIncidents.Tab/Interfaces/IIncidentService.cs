@@ -7,6 +7,7 @@ namespace PoliceIncidents.Tab.Interfaces
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using PoliceIncidents.Core.DB.Entities;
     using PoliceIncidents.Tab.Models;
 
     public interface IIncidentService
@@ -20,6 +21,10 @@ namespace PoliceIncidents.Tab.Interfaces
         Task<bool> UpdateTeamMember(long id, IncidentTeamMemberInput teamMemberInput);
 
         Task<IncidentModel> GetIncidentById(long id);
+
+        DistrictEntity GetDistricForIncident(long incidentId);
+
+        Task ChangeIncidentFileReportUrl(long incidentId, string fileReportUrl);
 
         Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber);
 

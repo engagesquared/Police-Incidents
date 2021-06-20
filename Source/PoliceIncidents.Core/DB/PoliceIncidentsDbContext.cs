@@ -63,6 +63,7 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.Location);
                 e.Property(e => e.Status);
                 e.Property(e => e.ChatConverstaionId);
+                e.Property(e => e.FileReportUrl);
                 e.Property(e => e.Title);
                 e.Property(e => e.ExternalLink);
                 e.Property(e => e.DistrictId).IsRequired();

@@ -6,6 +6,7 @@ namespace PoliceIncidents.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Text;
@@ -19,6 +20,7 @@ namespace PoliceIncidents.Controllers
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
+    using PoliceIncidents.Tab.Helpers;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
 
@@ -223,6 +225,19 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
+                var token = await this.GetAccessTokenAsync();
+                var graphHelper = new GraphUtilityHelper(token);
+                var pdfGenerator = new PdfGenerator();
+
+                var incident = await this.incidentService.GetIncidentById(id);
+                var district = this.incidentService.GetDistricForIncident(id);
+
+                var chatMessage = await graphHelper.GetChatMessage(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
+                var chatMessageReplies = await graphHelper.GetChatMessageReplies(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
+                var pdfBytes = pdfGenerator.PrepareDocument(chatMessage, chatMessageReplies);
+                MemoryStream stream = new MemoryStream(pdfBytes);
+                var pdfDocUrl = await graphHelper.UploadFileToTeams(district.TeamGroupId.ToString(), $"Incident-Report-{incident.Title}-{DateTime.Now.ToString("yyyyMMdd_HHmm")}.pdf", stream);
+                await this.incidentService.ChangeIncidentFileReportUrl(id, pdfDocUrl);
                 return await this.incidentService.CloseIncident(id);
             }
             catch (Exception ex)

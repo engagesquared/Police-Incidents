@@ -2,6 +2,9 @@
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
+using PoliceIncidents.Core.DB.Entities;
+using System;
+
 namespace PoliceIncidents.Core.Models
 {
     public class NewIncidentInfoModel
@@ -19,5 +22,15 @@ namespace PoliceIncidents.Core.Models
         public string ChannelID { get; set; }
 
         public string GroupID { get; set; }
+
+        public string ExternalId { get; set; }
+
+        public IncidentStatus Status { get; set; }
+
+        public DateTime CreatedUtc { get; set; }
+
+        public string ExternalLink { get; set; }
+
+        public string ChatConverstaionId { get; set; }
     }
 }
