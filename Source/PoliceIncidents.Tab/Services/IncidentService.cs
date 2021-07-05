@@ -256,7 +256,8 @@ namespace PoliceIncidents.Tab.Services
                     var incident = await incidentQuery.FirstOrDefaultAsync();
                     if (incident != null)
                     {
-                        incident.ManagerId = incidentManager.IncidentManagerId;
+                        var manager = await this.EnsureUserAsync(incidentManager.IncidentManagerId);
+                        incident.Manager = manager;
                         this.dbContext.Update(incident);
                         await this.dbContext.SaveChangesAsync();
                         await this.SendTeamsNotification(accessToken, incident.District.TeamGroupId.ToString(), incidentManager.IncidentManagerId.ToString(), incident.Title);

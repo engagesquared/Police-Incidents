@@ -10,6 +10,6 @@ namespace PoliceIncidents.Tab.Models
     {
         public int IncidentId { get; set; }
 
-        public Guid? IncidentManagerId { get; set; }
+        public Guid IncidentManagerId { get; set; }
     }
 }
