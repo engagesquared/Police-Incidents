@@ -41,15 +41,10 @@ export const IncidentUpdates = (props: IIncidentUpdatesProps) => {
                 itemsToShow.map((i) => (
                     <Flex column gap="gap.smaller" className={classes.item}>
                         <Text weight="semibold">{i.title}</Text>
-                        <Text>{i.body}</Text>
+                        <Text className={classes.text}>{i.body}</Text>
                         <Flex className={classes.itemBottom} vAlign="center">
                             <Text>{formatDateTime(ctx.teamsContext.locale, i.createdAt)}</Text>
-                            <Person
-                                userId={ctx.teamsContext.userObjectId}
-                                showPresence={false}
-                                view={PersonViewType.oneline}
-                                personCardInteraction={PersonCardInteraction.hover}
-                            />
+                            <Person userId={i.createdById} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
                         </Flex>
                     </Flex>
                 ))}

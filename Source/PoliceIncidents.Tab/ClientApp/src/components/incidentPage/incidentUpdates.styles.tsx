@@ -26,5 +26,8 @@ export const useStyles = createUseStyles((theme: ITheme) => {
         showLessIcon: {
             transform: "rotate(180deg)",
         },
+        text: {
+            whiteSpace: "pre-line",
+        },
     };
 });
