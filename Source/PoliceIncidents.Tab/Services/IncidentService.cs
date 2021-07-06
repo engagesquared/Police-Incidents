@@ -112,7 +112,9 @@ namespace PoliceIncidents.Tab.Services
             {
                 var incidentsQuery = this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
-                    .Where(v => v.District.TeamGroupId == teamId).Skip((pagenumber - 1) * 10).Take(10)
+                    .Where(v => v.District.TeamGroupId == teamId)
+                    //.OrderByDescending(v => v.CreatedUtc)
+                    .Skip((pagenumber - 1) * 10).Take(10)
                     .Include(v => v.Updates).Include(x => x.District);
                 var incidents = await incidentsQuery
                     .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
@@ -331,6 +333,7 @@ namespace PoliceIncidents.Tab.Services
                             incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 1 });
                         }
                     }
+
                     if (teamMembers.ExternalAgency != null)
                     {
                         foreach (Guid temp in teamMembers.ExternalAgency)
@@ -339,6 +342,7 @@ namespace PoliceIncidents.Tab.Services
                             incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 2 });
                         }
                     }
+
                     if (teamMembers.SocLead != null)
                     {
                         foreach (Guid temp in teamMembers.SocLead)
@@ -377,7 +381,7 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds)
+        public async Task<long> CreateIncident(IncidentInputModel incident, Guid authorId)
         {
             try
             {
@@ -390,15 +394,13 @@ namespace PoliceIncidents.Tab.Services
                 var author = await this.EnsureUserAsync(authorId);
                 newIncident.CreatedById = authorId;
 
-                if (participantIds.Length > 0)
+                if (incident.MemberIds?.Count > 0)
                 {
-                    foreach (var userId in participantIds)
+                    incident.MemberIds = incident.MemberIds.Distinct().ToList();
+                    foreach (var userId in incident.MemberIds)
                     {
-                        if (newIncident.Participants.Find(p => p.TeamMember.AadUserId.ToString() == userId.ToString()) == null)
-                        {
-                            var user = await this.EnsureUserAsync(userId);
-                            newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRoleId = 1 });
-                        }
+                        var user = await this.EnsureUserAsync(userId);
+                        newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRoleId = 1 });
                     }
                 }
 

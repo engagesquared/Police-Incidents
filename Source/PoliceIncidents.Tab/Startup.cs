@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.DLLookup
 {
+    using System.Net.Http;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -19,7 +20,6 @@ namespace Microsoft.Teams.Apps.DLLookup
     using PoliceIncidents.Tab;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Services;
-    using System.Net.Http;
 
     /// <summary>
     /// Default Startup class.
@@ -90,17 +90,9 @@ namespace Microsoft.Teams.Apps.DLLookup
         {
             string connectionString = this.Configuration.GetConnectionString("PoliceIncidents");
 
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                services.AddScoped<IIncidentService, FakeIncidentService>();
-                services.AddScoped<IIncidentUpdateService, FakeIncidentUpdateService>();
-            }
-            else
-            {
-                services.AddDbContext<PoliceIncidentsDbContext>(p => { p.UseSqlServer(connectionString); });
-                services.AddScoped<IIncidentService, IncidentService>();
-                services.AddScoped<IIncidentUpdateService, IncidentUpdateService>();
-            }
+            services.AddDbContext<PoliceIncidentsDbContext>(p => { p.UseSqlServer(connectionString); });
+            services.AddScoped<IIncidentService, IncidentService>();
+            services.AddScoped<IIncidentUpdateService, IncidentUpdateService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

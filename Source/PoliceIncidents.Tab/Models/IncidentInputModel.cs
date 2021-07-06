@@ -23,6 +23,6 @@ namespace PoliceIncidents.Tab.Models
 
         public Guid[] GroupIds { get; set; }
 
-        public Guid[] MemberIds { get; set; }
+        public List<Guid> MemberIds { get; set; }
     }
 }

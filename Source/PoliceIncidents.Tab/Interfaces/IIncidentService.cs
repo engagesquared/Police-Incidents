@@ -34,7 +34,7 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber);
 
-        Task<long> CreateIncident(IncidentInputModel incident, Guid authorId, Guid[] participantIds);
+        Task<long> CreateIncident(IncidentInputModel incident, Guid authorId);
 
         Task<bool> ReAssignIncident(string accessToken, List<ReAssignInput> incidentManagerArray);
     }

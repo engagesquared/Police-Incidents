@@ -9,14 +9,12 @@ namespace PoliceIncidents.Controllers
     using System.IO;
     using System.Linq;
     using System.Net.Http;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
-    using Newtonsoft.Json;
     using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
@@ -59,6 +57,25 @@ namespace PoliceIncidents.Controllers
             {
                 var token = await this.GetAccessTokenAsync();
                 var graphHelper = new GraphUtilityHelper(token);
+                incident.MemberIds = incident.MemberIds ?? new List<Guid>();
+
+                if (incident.GroupIds?.Length > 0)
+                {
+                    foreach (var groupId in incident.GroupIds)
+                    {
+                        try
+                        {
+                            var memberIds = await graphHelper.GetUsersByGroupId(groupId.ToString());
+                            incident.MemberIds.AddRange(memberIds);
+                        }
+                        catch (Exception ex)
+                        {
+                            this.logger.LogError(ex, $"Can't retrieve owners and members from group '{groupId}'");
+                        }
+                    }
+
+                    incident.MemberIds = incident.MemberIds.Distinct().ToList();
+                }
 
                 try
                 {
@@ -69,24 +86,7 @@ namespace PoliceIncidents.Controllers
                     this.logger.LogError(ex, "Planner creating error");
                 }
 
-                var participantIds = incident.MemberIds != null ? incident.MemberIds.ToList() : new List<Guid>();
-                if (incident.GroupIds.Length > 0)
-                {
-                    foreach (var groupId in incident.GroupIds)
-                    {
-                        try
-                        {
-                            var memberIds = await graphHelper.GetUsersByGroupId(groupId.ToString());
-                            participantIds.AddRange(memberIds);
-                        }
-                        catch (Exception ex)
-                        {
-                            this.logger.LogError(ex, $"Can't retrieve owners and members from group '{groupId}'");
-                        }
-                    }
-                }
-
-                var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId), participantIds.ToArray());
+                var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
                 try
                 {
                     var botNotifyPath = Core.Common.Constants.IncidentCreatedBotRoute.Replace("{id}", newIncidentId.ToString());
