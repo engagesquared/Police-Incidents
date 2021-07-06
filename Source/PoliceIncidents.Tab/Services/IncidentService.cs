@@ -397,7 +397,7 @@ namespace PoliceIncidents.Tab.Services
                         if (newIncident.Participants.Find(p => p.TeamMember.AadUserId.ToString() == userId.ToString()) == null)
                         {
                             var user = await this.EnsureUserAsync(userId);
-                            newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRoleId = 2 });
+                            newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRoleId = 1 });
                         }
                     }
                 }
