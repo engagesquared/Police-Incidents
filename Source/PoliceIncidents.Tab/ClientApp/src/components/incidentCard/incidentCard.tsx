@@ -1,5 +1,5 @@
 ﻿import * as React from "react";
-import { Button, Flex, Text, Segment, Divider, List } from "@fluentui/react-northstar";
+import { Button, Flex, Text, Segment, Divider, List, FlexItem } from "@fluentui/react-northstar";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./incidentCard.styles";
@@ -21,23 +21,29 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
     const onGoChatClick = async () => {
         try {
             executeDeepLink(incident?.chatThreadLink || "");
-        } catch (error) { }
+        } catch (error) {}
     };
 
     return (
         <div className={classes.container}>
             <Segment color="brand" style={{ borderTopWidth: "5px" }}>
-                <Flex gap="gap.smaller" vAlign="center">
+                <Flex gap="gap.smaller" className={classes.header}>
                     <Text content={incident.title} as="h3" />
                     <Text content={incident.description} />
-                    <Person userId={incident.managerId} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
+                    <div>
+                        <Person userId={incident.managerId} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
+                    </div>
                 </Flex>
                 <Divider size={1} />
                 <List
                     items={incident.incidentUpdates.map((iu) => ({
                         content: iu.body,
-                        header: iu.updateType === IncidentUpdateType.Critical ? `Critical Decision: ${iu.title}` :
-                            iu.updateType === IncidentUpdateType.Manual ? `Update: ${iu.title}` : iu.title,
+                        header:
+                            iu.updateType === IncidentUpdateType.Critical
+                                ? `Critical Decision: ${iu.title}`
+                                : iu.updateType === IncidentUpdateType.Manual
+                                ? `Update: ${iu.title}`
+                                : iu.title,
                         headerMedia: formatDateTime(ctx.teamsContext.locale, iu.createdAt),
                         key: iu.id,
                     }))}

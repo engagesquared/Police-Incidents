@@ -9,5 +9,14 @@ export const useStyles = createUseStyles((theme: ITheme) => {
                 marginBottom: "1rem",
             },
         },
+        header: {
+            alignItems: "center",
+        },
+        "@media screen and (max-width: 800px)": {
+            header: {
+                alignItems: "normal",
+                flexDirection: "column",
+            },
+        },
     };
 });
