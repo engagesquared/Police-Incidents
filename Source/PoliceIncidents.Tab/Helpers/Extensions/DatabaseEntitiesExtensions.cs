@@ -7,7 +7,6 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
     using System;
     using System.Linq;
     using PoliceIncidents.Core.DB.Entities;
-    using PoliceIncidents.Core.Models;
     using PoliceIncidents.Tab.Models;
 
     public static class DatabaseEntitiesExtensions
@@ -18,7 +17,7 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.Id = incidentUpdateEntity.Id;
             result.Title = incidentUpdateEntity.Title;
             result.Body = incidentUpdateEntity.Body;
-            result.CreatedAt = incidentUpdateEntity.CreatedAt;
+            result.CreatedAt = DateTime.SpecifyKind(incidentUpdateEntity.CreatedAt, DateTimeKind.Utc);
             result.CreatedById = incidentUpdateEntity.CreatedById;
             result.UpdateType = incidentUpdateEntity.UpdateType;
 
@@ -33,7 +32,7 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.Id = incidentEntity.Id;
             result.ManagerId = incidentEntity.ManagerId;
             result.Description = incidentEntity.Description;
-            result.Created = incidentEntity.CreatedUtc;
+            result.Created = DateTime.SpecifyKind(incidentEntity.CreatedUtc, DateTimeKind.Utc);
             result.Location = incidentEntity.Location;
             result.Status = incidentEntity.Status;
             result.ExternalLink = incidentEntity.ExternalLink;
