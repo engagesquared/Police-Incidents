@@ -280,7 +280,7 @@
                         },
                         {
                             "name": "AzureAd:GraphScope",
-                            "value": "https://graph.microsoft.com/User.Read openid profile https://graph.microsoft.com/User.Read.All https://graph.microsoft.com/People.Read  https://graph.microsoft.com/Tasks.ReadWrite https://graph.microsoft.com/TeamsActivity.Send https://graph.microsoft.com/ChannelMessage.Read.All https://graph.microsoft.com/Files.ReadWrite.All"
+                            "value": "https://graph.microsoft.com/.default"
                         },
                         {
                             "name": "BotBaseUrl",
