@@ -10,23 +10,19 @@ namespace PoliceIncidents.Tab.Helpers
     using Microsoft.Graph;
     using WkHtmlToPdfDotNet;
 
-    public class PdfGenerator
+    public static class PdfGenerator
     {
-        private readonly BasicConverter converter;
-        private readonly string chatMessageTemplate = "<div style=\"border: 1px solid #edebe9; border-radius: .3rem .3rem 0 0; padding: 15px; text-align: left;\"><div style=\" color: black; display: flex; align-items: center; \"><span style=\" margin-right: 5px; font-size: 12px; font-weight: 600;\">Police Incidents Bot</span><span style=\" font-size: 12px;\">{{CreateDate}}</span></div><div style=\" color: black; margin-top: 10px;\">{{Content}}</div></div>";
-        private readonly string chatMessageReplyTemplate = "<div style=\" border: 1px solid #edebe9; border-bottom: 0; border-top: 0; padding: 15px; text-align: left;\"><div style=\" color: black; display: flex; align-items: center; \"><span style=\" margin-right: 5px; font-size: 12px; font-weight: 600;\">{{AuthorDisplayName}}</span><span style=\" font-size: 12px;\">{{CreateDate}}</span></div><div style=\" color: black; margin-top: 10px;\">{{Content}}</div></div>";
-        private readonly string attachmentTemplate = "<div style=\"height: 18px; width: min-content; max-width: min-content; background: #f1f0ef; padding: 15px; margin: 5px 0; border: 1px solid rgba(0,0,0,.05); border-radius: 3px; box-shadow: 0 1px 2px -1px rgb(0 0 0 / 10%);\"><a href=\"{{AttachmentUrl}}\" style=\" text-decoration: none; color: black;\">{{AttachmentName}}</a></div>";
+        private static readonly BasicConverter converter = new BasicConverter(new PdfTools());
+        private static readonly string chatMessageTemplate = "<div style=\"border: 1px solid #edebe9; border-radius: .3rem .3rem 0 0; padding: 15px; text-align: left;\"><div style=\" color: black; display: flex; align-items: center; \"><span style=\" margin-right: 5px; font-size: 12px; font-weight: 600;\">Police Incidents Bot</span><span style=\" font-size: 12px;\">{{CreateDate}}</span></div><div style=\" color: black; margin-top: 10px;\">{{Content}}</div></div>";
+        private static readonly string chatMessageReplyTemplate = "<div style=\" border: 1px solid #edebe9; border-bottom: 0; border-top: 0; padding: 15px; text-align: left;\"><div style=\" color: black; display: flex; align-items: center; \"><span style=\" margin-right: 5px; font-size: 12px; font-weight: 600;\">{{AuthorDisplayName}}</span><span style=\" font-size: 12px;\">{{CreateDate}}</span></div><div style=\" color: black; margin-top: 10px;\">{{Content}}</div></div>";
+        private static readonly string attachmentTemplate = "<div style=\"height: 18px; width: min-content; max-width: min-content; background: #f1f0ef; padding: 15px; margin: 5px 0; border: 1px solid rgba(0,0,0,.05); border-radius: 3px; box-shadow: 0 1px 2px -1px rgb(0 0 0 / 10%);\"><a href=\"{{AttachmentUrl}}\" style=\" text-decoration: none; color: black;\">{{AttachmentName}}</a></div>";
 
-        public PdfGenerator()
-        {
-            this.converter = new BasicConverter(new PdfTools());
-        }
 
-        public new byte[] PrepareDocument(ChatMessage chatMessage, IChatMessageRepliesCollectionPage chatMessageReplies)
+        public static byte[] PrepareDocument(ChatMessage chatMessage, IChatMessageRepliesCollectionPage chatMessageReplies)
         {
-            var messageContent = this.chatMessageTemplate;
+            var messageContent = chatMessageTemplate;
             messageContent = messageContent.Replace("{{CreateDate}}", chatMessage.LastModifiedDateTime.ToString());
-            var messageBodyContent = this.ProcessMessageContent(chatMessage.Body.Content, chatMessage.Attachments);
+            var messageBodyContent = ProcessMessageContent(chatMessage.Body.Content, chatMessage.Attachments);
             messageContent = messageContent.Replace("{{Content}}", messageBodyContent);
 
             var messageRepliesContent = string.Empty;
@@ -34,10 +30,10 @@ namespace PoliceIncidents.Tab.Helpers
             var sortedReplies = replies.OrderBy(x => x.CreatedDateTime);
             foreach (var reply in sortedReplies)
             {
-                var replyContent = this.chatMessageReplyTemplate;
+                var replyContent = chatMessageReplyTemplate;
                 replyContent = replyContent.Replace("{{CreateDate}}", reply.LastModifiedDateTime.ToString());
                 replyContent = replyContent.Replace("{{AuthorDisplayName}}", reply.From.User.DisplayName);
-                var replyBodyContent = this.ProcessMessageContent(reply.Body.Content, reply.Attachments);
+                var replyBodyContent = ProcessMessageContent(reply.Body.Content, reply.Attachments);
                 replyContent = replyContent.Replace("{{Content}}", replyBodyContent);
                 messageRepliesContent += replyContent;
             }
@@ -62,11 +58,11 @@ namespace PoliceIncidents.Tab.Helpers
                 },
             };
 
-            byte[] pdf = this.converter.Convert(doc);
+            byte[] pdf = converter.Convert(doc);
             return pdf;
         }
 
-        private string ProcessMessageContent(string messageContent, IEnumerable<ChatMessageAttachment> attachments)
+        private static string ProcessMessageContent(string messageContent, IEnumerable<ChatMessageAttachment> attachments)
         {
             var content = Regex.Replace(messageContent, "<attachment (id=\".+?\")></attachment>",  match =>
             {
@@ -79,7 +75,7 @@ namespace PoliceIncidents.Tab.Helpers
                     return string.Empty;
                 }
 
-                var attachmentNode = this.attachmentTemplate;
+                var attachmentNode = attachmentTemplate;
                 attachmentNode = attachmentNode.Replace("{{AttachmentUrl}}", attachment.ContentUrl);
                 attachmentNode = attachmentNode.Replace("{{AttachmentName}}", attachment.Name);
                 return attachmentNode;

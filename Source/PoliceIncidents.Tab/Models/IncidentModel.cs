@@ -24,6 +24,10 @@ namespace PoliceIncidents.Tab.Models
 
         public string ChatConverstaionId { get; set; }
 
+        public string ReportsFolderName { get; set; }
+
+        public string ReportsFolderPath { get; set; }
+
         public Guid? ManagerId { get; set; }
 
         public List<Tuple<Guid, int>> Members { get; set; }

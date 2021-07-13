@@ -4,20 +4,24 @@
 
 namespace Microsoft.Teams.Apps.DLLookup
 {
+    using System.Net;
     using System.Net.Http;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Identity.Client;
-    using PoliceIncidents.Authentication;
+    using Newtonsoft.Json;
     using PoliceIncidents.Core.DB;
-    using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
+    using PoliceIncidents.Tab.Authentication;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Services;
 
@@ -47,18 +51,20 @@ namespace Microsoft.Teams.Apps.DLLookup
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMemoryCache();
             var scopes = this.Configuration["AzureAd:GraphScope"].Split(new char[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
             IConfidentialClientApplication confidentialClientApp = ConfidentialClientApplicationBuilder.Create(this.Configuration["AzureAd:ClientId"])
                 .WithClientSecret(this.Configuration["AzureAd:ClientSecret"]).WithTenantId(this.Configuration["AzureAd:TenantId"])
                 .Build();
 
-            services.AddMemoryCache();
+            services.AddHttpContextAccessor();
             services.AddSingleton(new HttpClient());
             services.AddSingleton<AppSettings>();
             services.AddDistributedMemoryCache();
             services.AddSingleton<IConfidentialClientApplication>(confidentialClientApp);
             services.AddDLLookupAuthentication(this.Configuration);
-            services.AddSingleton<TokenAcquisitionHelper>();
+            services.AddScoped<TokenAcquisitionService>();
+            services.AddScoped<GraphApiService>();
             services.AddSession();
 
             this.ConfigureDataServices(services);
@@ -99,13 +105,23 @@ namespace Microsoft.Teams.Apps.DLLookup
         {
             app.UseSession();
 
-            if (env.IsDevelopment())
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+            //else
             {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler(errorApp =>
+                {
+                    errorApp.Run(async context =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                        await context.Response.WriteAsync(JsonConvert.SerializeObject(exceptionHandlerPathFeature?.Error.Message));
+
+                    });
+                });
                 app.UseHsts();
             }
 

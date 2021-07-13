@@ -5,10 +5,10 @@ import { IIncidentTeamMemberInputModel } from "../models/IIncidentTeamMemberInpu
 
 let baseAxiosUrl = "/api";
 
-export const getAccessToken = async (): Promise<string> => {
+export const getAccessToken = async (): Promise<{ token: string; expiresOn: string }> => {
     let url = baseAxiosUrl + "/user/getToken";
     const response = await axios.get(url);
-    return response.data as string;
+    return response.data as { token: string; expiresOn: string };
 };
 
 export const getAuthenticationMetadata = async (windowLocationOriginDomain: string, loginHint: string): Promise<AxiosResponse<string>> => {
@@ -98,8 +98,14 @@ export const updateTeamMember = async (incidentId: number, teamMember: IIncident
     return response.data as Boolean;
 };
 
-export const reAssignIncident = async (updatedIncidentManagers: { incidentId: number, incidentManagerId: number }[]): Promise<Boolean> => {
+export const reAssignIncident = async (updatedIncidentManagers: { incidentId: number; incidentManagerId: number }[]): Promise<Boolean> => {
     let url = baseAxiosUrl + `/Incidents/reassignincident`;
     const response = await axios.post(url, updatedIncidentManagers);
     return response.data as Boolean;
+};
+
+export const generatePdf = async (incidentId: number): Promise<string> => {
+    let url = baseAxiosUrl + `/incidents/${incidentId}/generatePdf`;
+    const response = await axios.post(url);
+    return response.data as string;
 };

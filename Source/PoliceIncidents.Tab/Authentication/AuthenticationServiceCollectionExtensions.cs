@@ -2,7 +2,7 @@
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
-namespace PoliceIncidents.Authentication
+namespace PoliceIncidents.Tab.Authentication
 {
     using System;
     using System.Collections.Generic;
@@ -60,7 +60,7 @@ namespace PoliceIncidents.Authentication
                 {
                     OnTokenValidated = async context =>
                     {
-                        var tokenAcquisition = context.HttpContext.RequestServices.GetRequiredService<TokenAcquisitionHelper>();
+                        var tokenAcquisition = context.HttpContext.RequestServices.GetRequiredService<TokenAcquisitionService>();
                         context.Success();
 
                         // Adds the token to the cache, and also handles the incremental consent and claim challenges

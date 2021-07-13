@@ -2,8 +2,8 @@ import { SimpleProvider, ProviderState } from "@microsoft/mgt-react";
 import { getAccessToken as getAccessTokenAsync } from "../apis/api-list";
 
 let tokenCached: string = "";
-let cachedTime: Date | undefined;
-let getTokenFunc: Promise<string> | undefined;
+let expired: Date | undefined;
+let getTokenFunc: Promise<{ token: string; expiresOn: string }> | undefined;
 
 export class MgtTokenProvider extends SimpleProvider {
     constructor() {
@@ -12,7 +12,7 @@ export class MgtTokenProvider extends SimpleProvider {
     }
 
     public async getAccessToken(options?: { scopes?: string[] }): Promise<string> {
-        if (!cachedTime || +new Date() - +cachedTime > 1 * 60 * 1000) {
+        if (!expired || +expired - +new Date() < 1 * 60 * 1000) {
             if (!getTokenFunc) {
                 getTokenFunc = (async () => {
                     var data = await getAccessTokenAsync();
@@ -20,7 +20,9 @@ export class MgtTokenProvider extends SimpleProvider {
                     return data;
                 })();
             }
-            tokenCached = await getTokenFunc;
+            const token = await getTokenFunc;
+            tokenCached = token.token;
+            expired = new Date(token.expiresOn);
         }
         return tokenCached;
     }

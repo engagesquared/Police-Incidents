@@ -63,7 +63,7 @@ namespace PoliceIncidents.Core.DB
                 e.Property(e => e.Location);
                 e.Property(e => e.Status);
                 e.Property(e => e.ChatConverstaionId);
-                e.Property(e => e.FileReportUrl);
+                e.Property(e => e.FileReportFolderName);
                 e.Property(e => e.Title);
                 e.Property(e => e.ExternalLink);
                 e.Property(e => e.DistrictId).IsRequired();
@@ -88,6 +88,7 @@ namespace PoliceIncidents.Core.DB
                 e.Property(x => x.ConversationId).HasMaxLength(500);
                 e.Property(x => x.IsDefault);
                 e.Property(x => x.RegionName);
+                e.Property(x => x.RootFolderPath);
                 e.Property(x => x.TeamGroupId);
                 e.HasKey(x => x.Id);
             });

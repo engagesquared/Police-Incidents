@@ -1,22 +1,19 @@
 ﻿import * as React from "react";
-import {
-    Flex, AddIcon, Loader, EditIcon, Text, Button, Breadcrumb, ShareLocationIcon,
-    ChevronEndIcon, Dialog
-} from "@fluentui/react-northstar";
+import { Flex, AddIcon, Loader, EditIcon, Text, Button, Breadcrumb, ShareLocationIcon, ChevronEndIcon, Dialog, MenuButton, ExpandIcon } from "@fluentui/react-northstar";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./incidentPage.styles";
 import { useParams } from "react-router-dom";
 import { IIncidentModel } from "../../models/IIncidentModel";
 import { IncidentDetailsCard } from "./incidentDetailsCard";
 import { IncidentUpdates } from "./incidentUpdates";
-import { getIncident, getScheduleMeetingLink } from "../../apis/api-list";
+import { getIncident, getScheduleMeetingLink, generatePdf } from "../../apis/api-list";
 import { Person, MgtTemplateProps, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
-import { IncidentUpdateType, IIncidentUpdateModel } from "../../models";
+import { IncidentUpdateType, IIncidentUpdateModel, IncidentStatus } from "../../models";
 import { executeDeepLink } from "@microsoft/teams-js";
 import { Routes } from "../../common";
 import { UpdateCreationForm } from "./updateCreationForm";
 import { UpdateLocationForm } from "./updateLocationForm";
-import { CloseIncidentForm } from './closeIncidentForm';
+import { CloseIncidentForm } from "./closeIncidentForm";
 import { EditIncidentTeamForm } from "./editIncidentTeamFrom";
 import { IIncidentTeamMemberInputModel } from "../../models/IIncidentTeamMemberInputModel";
 
@@ -25,7 +22,7 @@ export const IncidentPage = () => {
     const { incidentId }: { incidentId?: string } = useParams();
     const classes = useStyles();
     const [incident, setIncident] = React.useState<IIncidentModel>();
-    const [isLoadingMeetingLink, setIsLoadingMeetingLink] = React.useState(false);
+    const [isLoadingAction, setIsLoadingAction] = React.useState(false);
     const [isNewUpdateFormActive, setIsNewUpdateFormActive] = React.useState(false);
     const [isNewCriticalUpdateFormActive, setIsNewCriticalUpdateFormActive] = React.useState(false);
     const [manualUpdates, setManualUpdates] = React.useState<IIncidentUpdateModel[]>([]);
@@ -74,7 +71,7 @@ export const IncidentPage = () => {
             if (incident) {
                 let tempIncident = incident;
                 tempIncident.managerId = update.incidentManager;
-                let temp: { item1: string, item2: number }[] = [];
+                let temp: { item1: string; item2: number }[] = [];
                 if (update.fieldOfficer) {
                     update.fieldOfficer.map((val) => {
                         let tempitem = { item1: val, item2: 1 };
@@ -110,33 +107,52 @@ export const IncidentPage = () => {
     };
 
     const onScheduleClick = async () => {
-        setIsLoadingMeetingLink(true);
+        setIsLoadingAction(true);
         try {
             const link = await getScheduleMeetingLink(incident!.id);
             executeDeepLink(link);
         } catch (error) {
         } finally {
-            setIsLoadingMeetingLink(false);
+            setIsLoadingAction(false);
         }
     };
 
     const onGoChatClick = async () => {
         try {
             executeDeepLink(incident?.chatThreadLink || "");
-        } catch (error) { }
+        } catch (error) {}
+    };
+
+    const onGeneratePdfClick = async () => {
+        setIsLoadingAction(true);
+        try {
+            const link = await generatePdf(incident!.id);
+            executeDeepLink(link);
+        } catch (error) {
+        } finally {
+            setIsLoadingAction(false);
+        }
+        try {
+        } catch (error) {}
+    };
+
+    const onGoPdfFolderClick = async () => {
+        try {
+            executeDeepLink(incident?.reportsFolderPath || "");
+        } catch (error) {}
     };
 
     const onGoPlannerClick = async () => {
         try {
             executeDeepLink(incident?.plannerLink || "");
-        } catch (error) { }
+        } catch (error) {}
     };
     const CustomIncidentManager = (props: MgtTemplateProps) => {
         return <div>{t("incidentManager")}</div>;
     };
     type MgtTemplatePropsTemp = {
         roleNumber: number;
-    }
+    };
     type Itemp = MgtTemplateProps & MgtTemplatePropsTemp;
 
     const CustomIncidentMembers = (props: Itemp) => {
@@ -158,8 +174,8 @@ export const IncidentPage = () => {
         return <div>{props.roleNumber}</div>;
     };
     const membersToShow: string[] = [];
-    [{ item1: incident?.managerId || "" }, ...incident?.members || []].forEach(user => {
-        if (user.item1 && (membersToShow.findIndex((id: string) => id === user.item1) === -1)) {
+    [{ item1: incident?.managerId || "" }, ...(incident?.members || [])].forEach((user) => {
+        if (user.item1 && membersToShow.findIndex((id: string) => id === user.item1) === -1) {
             membersToShow.push(user.item1);
         }
     });
@@ -180,7 +196,7 @@ export const IncidentPage = () => {
                             <Breadcrumb.Item active>{incident.title}</Breadcrumb.Item>
                         </Breadcrumb>
                     </Flex>
-                    <Flex space="between" vAlign="center" wrap gap="gap.medium" >
+                    <Flex space="between" vAlign="center" wrap gap="gap.medium">
                         <Text content={incident.description} />
                         <Flex gap="gap.medium" vAlign="center" className={classes.onlyInMobile}>
                             <Dialog
@@ -194,13 +210,45 @@ export const IncidentPage = () => {
                                 style={{ padding: 0 }}
                                 open={closeIncidentFormOpen}
                                 onOpen={() => setCloseIncidentFormOpen(true)}
-                                trigger={<Button className={classes.buttonFlex} disabled={incident.status === 3} primary content={t("closeIncidentBtnLabel")} />}
                                 onCancel={() => setCloseIncidentFormOpen(false)}
                                 className={classes.dialogMinWidth}
                             />
-                            <Button content={t("openPlannerBtnLabel")} disabled={!incident.plannerLink} onClick={onGoPlannerClick} />
-                            <Button content={t("scheduleMeetingBtnLabel")} disabled={!incident} loading={isLoadingMeetingLink} onClick={onScheduleClick} />
-                            <Button primary content={t("goToChatThreadBtnLabel")} disabled={!incident.chatThreadLink} onClick={onGoChatClick} />
+                            <MenuButton
+                                trigger={<Button icon={<ExpandIcon />} loading={isLoadingAction} content={t("actionsBtnLabel")} />}
+                                menu={[
+                                    {
+                                        disabled: incident.status === IncidentStatus.Closed,
+                                        content: t("closeIncidentBtnLabel"),
+                                        onClick: () => setCloseIncidentFormOpen(true),
+                                    },
+                                    {
+                                        disabled: incident.plannerLink,
+                                        content: t("openPlannerBtnLabel"),
+                                        onClick: onGoPlannerClick,
+                                    },
+                                    {
+                                        disabled: !incident,
+                                        content: t("scheduleMeetingBtnLabel"),
+                                        onClick: onScheduleClick,
+                                    },
+                                    {
+                                        disabled: !incident.chatThreadLink,
+                                        content: t("goToChatThreadBtnLabel"),
+                                        onClick: onGoChatClick,
+                                    },
+                                    {
+                                        disabled: !incident,
+                                        content: t("generatePdfBtnLabel"),
+                                        onClick: onGeneratePdfClick,
+                                    },
+                                    {
+                                        disabled: !incident.reportsFolderPath,
+                                        content: t("goToGeneratePdfFolderBtnLabel"),
+                                        onClick: onGoPdfFolderClick,
+                                    },
+                                ]}
+                                on="click"
+                            />
                         </Flex>
                     </Flex>
                     <Flex className={classes.contentGrid}>
@@ -208,26 +256,33 @@ export const IncidentPage = () => {
                             <Flex column gap="gap.medium">
                                 <IncidentDetailsCard
                                     header={t("incidentTeamLabel")}
-                                    addButton={incident.status !== 3 ?
-                                        <Dialog
-                                            content={
-                                                incident ? <EditIncidentTeamForm
-                                                    incidentId={incident.id}
-                                                    incidentManager={incident.managerId}
-                                                    incidentMembers={incident.members}
-                                                    onCancel={() => setEditIncidentTeamFormOpen(false)}
-                                                    onAdded={onUpdateTeamMember}
-                                                ></EditIncidentTeamForm> : <></>
-                                            }
-                                            style={{ padding: 0 }}
-                                            open={editIncidentTeamFormOpen}
-                                            onOpen={() => setEditIncidentTeamFormOpen(true)}
-                                            trigger={<Button primary icon={<EditIcon size="small" />}
-                                                size="small" text content={t("editBtnLabel")} />}
-                                            onCancel={() => setEditIncidentTeamFormOpen(false)}
-                                            className={classes.dialogMinWidth}
-                                        />
-                                        : <></>}
+                                    addButton={
+                                        incident.status !== 3 ? (
+                                            <Dialog
+                                                content={
+                                                    incident ? (
+                                                        <EditIncidentTeamForm
+                                                            incidentId={incident.id}
+                                                            incidentManager={incident.managerId}
+                                                            incidentMembers={incident.members}
+                                                            onCancel={() => setEditIncidentTeamFormOpen(false)}
+                                                            onAdded={onUpdateTeamMember}
+                                                        ></EditIncidentTeamForm>
+                                                    ) : (
+                                                        <></>
+                                                    )
+                                                }
+                                                style={{ padding: 0 }}
+                                                open={editIncidentTeamFormOpen}
+                                                onOpen={() => setEditIncidentTeamFormOpen(true)}
+                                                trigger={<Button primary icon={<EditIcon size="small" />} size="small" text content={t("editBtnLabel")} />}
+                                                onCancel={() => setEditIncidentTeamFormOpen(false)}
+                                                className={classes.dialogMinWidth}
+                                            />
+                                        ) : (
+                                            <></>
+                                        )
+                                    }
                                 >
                                     {!!incident?.managerId && (
                                         <div className={classes.userItem}>
@@ -237,7 +292,9 @@ export const IncidentPage = () => {
                                                 showPresence={false}
                                                 view={PersonViewType.twolines}
                                                 personCardInteraction={PersonCardInteraction.hover}
-                                            ><CustomIncidentManager template="line2" /></Person>
+                                            >
+                                                <CustomIncidentManager template="line2" />
+                                            </Person>
                                         </div>
                                     )}
                                     {!!incident?.members?.length &&
@@ -250,7 +307,9 @@ export const IncidentPage = () => {
                                                         showPresence={false}
                                                         view={PersonViewType.twolines}
                                                         personCardInteraction={PersonCardInteraction.hover}
-                                                    ><CustomIncidentMembers template="line2" roleNumber={u.item2} /></Person>
+                                                    >
+                                                        <CustomIncidentMembers template="line2" roleNumber={u.item2} />
+                                                    </Person>
                                                 </div>
                                             );
                                         })}
@@ -258,28 +317,46 @@ export const IncidentPage = () => {
                                 <IncidentDetailsCard
                                     header={t("incidentLocationLabel")}
                                     addButton={
-                                        incident.status !== 3 ?
-                                            <Flex gap="gap.small"><Button
-                                                primary
-                                                icon={<ShareLocationIcon size="small" />}
-                                                size="small"
-                                                text
-                                                content={t("seeMapBtnLabel")}
-                                                onClick={onLocationClick}
-                                            />
-                                                <Button primary icon={<EditIcon size="small" />}
+                                        incident.status !== 3 ? (
+                                            <Flex gap="gap.small">
+                                                <Button
+                                                    primary
+                                                    icon={<ShareLocationIcon size="small" />}
+                                                    size="small"
+                                                    text
+                                                    content={t("seeMapBtnLabel")}
+                                                    onClick={onLocationClick}
+                                                />
+                                                <Button
+                                                    primary
+                                                    icon={<EditIcon size="small" />}
                                                     onClick={() => setIsLocaltionEditActive(true)}
-                                                    size="small" text content={t("editBtnLabel")} /></Flex> : <></>
+                                                    size="small"
+                                                    text
+                                                    content={t("editBtnLabel")}
+                                                />
+                                            </Flex>
+                                        ) : (
+                                            <></>
+                                        )
                                     }
                                 >
-                                    {!isLocaltionEditActive ? <div className={classes.locationItem}>
-                                        <Text weight="semibold">{incident.location}</Text>
-                                    </div> : <UpdateLocationForm incidentId={incident.id}
-                                        locationValue={incident.location}
-                                        onCancel={() => {
-                                            setIsLocaltionEditActive(false);
-                                        }}
-                                        onAdded={(updatedLocation) => { incident.location = updatedLocation; }}></UpdateLocationForm>}
+                                    {!isLocaltionEditActive ? (
+                                        <div className={classes.locationItem}>
+                                            <Text weight="semibold">{incident.location}</Text>
+                                        </div>
+                                    ) : (
+                                        <UpdateLocationForm
+                                            incidentId={incident.id}
+                                            locationValue={incident.location}
+                                            onCancel={() => {
+                                                setIsLocaltionEditActive(false);
+                                            }}
+                                            onAdded={(updatedLocation) => {
+                                                incident.location = updatedLocation;
+                                            }}
+                                        ></UpdateLocationForm>
+                                    )}
                                 </IncidentDetailsCard>
                             </Flex>
                         </div>
@@ -287,7 +364,7 @@ export const IncidentPage = () => {
                             <IncidentDetailsCard
                                 header={t("latestUpdatesLabel")}
                                 addButton={
-                                    incident.status !== 3 ?
+                                    incident.status !== 3 ? (
                                         <Button
                                             primary
                                             icon={<AddIcon size="small" />}
@@ -295,7 +372,10 @@ export const IncidentPage = () => {
                                             text
                                             content={t("addBtnLabel")}
                                             onClick={() => setIsNewUpdateFormActive(true)}
-                                        /> : <></>
+                                        />
+                                    ) : (
+                                        <></>
+                                    )
                                 }
                             >
                                 {isNewUpdateFormActive && (
@@ -315,7 +395,7 @@ export const IncidentPage = () => {
                             <IncidentDetailsCard
                                 header={t("criticalDecisionsLabel")}
                                 addButton={
-                                    incident.status !== 3 ?
+                                    incident.status !== 3 ? (
                                         <Button
                                             primary
                                             icon={<AddIcon size="small" />}
@@ -323,7 +403,10 @@ export const IncidentPage = () => {
                                             text
                                             content={t("addBtnLabel")}
                                             onClick={() => setIsNewCriticalUpdateFormActive(true)}
-                                        /> : <></>
+                                        />
+                                    ) : (
+                                        <></>
+                                    )
                                 }
                             >
                                 {isNewCriticalUpdateFormActive && (

@@ -1,5 +1,5 @@
 ﻿import * as React from "react";
-import { Button, Flex, Text, Segment, Divider, List, FlexItem } from "@fluentui/react-northstar";
+import { Button, Flex, Text, Segment, Divider, List } from "@fluentui/react-northstar";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./incidentCard.styles";

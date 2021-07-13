@@ -5,8 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useStyles } from "./reAssignMyIncident.styles";
 import { IIncidentModel } from "../../models";
 import { reAssignIncident } from "../../apis/api-list";
-import { GlobalContext } from "../../providers/GlobalContextProvider";
-
 
 export interface IReAssignMyIncidentProps {
     myIncidents: IIncidentModel[];
@@ -18,15 +16,14 @@ export const ReAssignMyIncident = (props: React.PropsWithChildren<IReAssignMyInc
     const classes = useStyles();
     const [isLoading, setIsLoading] = React.useState(false);
     const [isSuccessMessage, setIsSuccessMessage] = React.useState(false);
-    const [updatedIncidentManagers, setupdatedIncidentManagers] = React.useState<{ incidentId: number, incidentManagerId: number }[]>([]);
-    const context = React.useContext(GlobalContext);
+    const [updatedIncidentManagers, setupdatedIncidentManagers] = React.useState<{ incidentId: number; incidentManagerId: number }[]>([]);
 
     const onUserChange = (e: any, incidentId: number) => {
-        const result = e ? e.detail && e.detail.length ? e.detail[0] ? e.detail[0].id : undefined : undefined : undefined;
+        const result = e ? (e.detail && e.detail.length ? (e.detail[0] ? e.detail[0].id : undefined) : undefined) : undefined;
         if (result) {
             let incidentManagers = updatedIncidentManagers;
-            if (incidentManagers.filter(t => t.incidentId === incidentId).length > 0) {
-                let indexNumber: number = incidentManagers.map(t => t.incidentId).indexOf(incidentId);
+            if (incidentManagers.filter((t) => t.incidentId === incidentId).length > 0) {
+                let indexNumber: number = incidentManagers.map((t) => t.incidentId).indexOf(incidentId);
                 incidentManagers[indexNumber].incidentManagerId = result;
             } else {
                 incidentManagers.push({ incidentId: incidentId, incidentManagerId: result });
@@ -35,10 +32,10 @@ export const ReAssignMyIncident = (props: React.PropsWithChildren<IReAssignMyInc
         }
     };
 
-    const onConfirm = (async () => {
+    const onConfirm = async () => {
         try {
             setIsLoading(true);
-            const checkUpdate = await reAssignIncident(updatedIncidentManagers);
+            await reAssignIncident(updatedIncidentManagers);
             props.onSuccess(updatedIncidentManagers);
             setIsSuccessMessage(true);
         } catch (ex) {
@@ -46,41 +43,57 @@ export const ReAssignMyIncident = (props: React.PropsWithChildren<IReAssignMyInc
         } finally {
             setIsLoading(false);
         }
-    });
+    };
 
     const CustomPerson = (props: MgtTemplateProps) => {
         const { person } = props.dataContext;
-        return <div style={{ fontSize: "1.75rem" }} >{`Thanks ${person.displayName.split(" ")[0]}, you have reassigned ${updatedIncidentManagers.length} incidents`}</div>;
+        return <div style={{ fontSize: "1.75rem" }}>{`Thanks ${person.displayName.split(" ")[0]}, you have reassigned ${updatedIncidentManagers.length} incidents`}</div>;
     };
 
     return (
         <div className={classes.container}>
-            {!isSuccessMessage &&
+            {!isSuccessMessage && (
                 <Flex gap="gap.medium" column padding="padding.medium">
                     {props.myIncidents.map((incident, index) => {
                         return (
                             <Flex column>
                                 <Text content={incident.title} />
-                                <PeoplePicker selectionMode="single" placeholder={`Search for users to reassign your incidents.`}
-                                    selectionChanged={(e) => { onUserChange(e, incident.id); }}
-                                    showMax={25} />
+                                <PeoplePicker
+                                    selectionMode="single"
+                                    placeholder={`Search for users to reassign your incidents.`}
+                                    selectionChanged={(e) => {
+                                        onUserChange(e, incident.id);
+                                    }}
+                                    showMax={25}
+                                />
                             </Flex>
                         );
                     })}
-                    <Flex hAlign='end' vAlign='end' padding="padding.medium" gap="gap.medium" >
-                        <Button primary content={t('reassignBtnLabel')} loading={isLoading} onClick={onConfirm} />
+                    <Flex hAlign="end" vAlign="end" padding="padding.medium" gap="gap.medium">
+                        <Button primary content={t("reassignBtnLabel")} loading={isLoading} onClick={onConfirm} />
                     </Flex>
                 </Flex>
-            }
-            {isSuccessMessage &&
+            )}
+            {isSuccessMessage && (
                 <Flex gap="gap.medium" column padding="padding.medium">
-                    <Flex hAlign='center' vAlign='center' padding="padding.medium" gap="gap.medium"
+                    <Flex
+                        hAlign="center"
+                        vAlign="center"
+                        padding="padding.medium"
+                        gap="gap.medium"
                         styles={({ theme: { siteVariables } }) => ({
                             color: "#13A10E",
-                        })} ><CheckmarkCircleIcon size="largest" /></Flex>
-                    <Flex><Person personQuery="me" ><CustomPerson /></Person></Flex>
+                        })}
+                    >
+                        <CheckmarkCircleIcon size="largest" />
+                    </Flex>
+                    <Flex>
+                        <Person personQuery="me">
+                            <CustomPerson />
+                        </Person>
+                    </Flex>
                 </Flex>
-            }
+            )}
         </div>
     );
 };

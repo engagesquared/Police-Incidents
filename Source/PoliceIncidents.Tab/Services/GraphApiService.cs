@@ -1,8 +1,8 @@
-﻿// <copyright file="GraphUtilityHelper.cs" company="Engage Squared">
+﻿// <copyright file="GraphApiService.cs" company="Engage Squared">
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
-namespace PoliceIncidents.Helpers
+namespace PoliceIncidents.Tab.Services
 {
     using System;
     using System.Collections.Generic;
@@ -11,29 +11,27 @@ namespace PoliceIncidents.Helpers
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
     using Microsoft.Graph;
+    using PoliceIncidents.Tab.Authentication;
     using PoliceIncidents.Tab.Models;
+    using KeyValuePair = Microsoft.Graph.KeyValuePair;
 
-    public class GraphUtilityHelper
+    public class GraphApiService
     {
         private readonly GraphServiceClient graphClient;
+        private readonly TokenAcquisitionService tokenAcquisitionService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GraphUtilityHelper"/> class.
-        /// </summary>
-        /// <param name="accessToken">Token to access MS graph.</param>
-        public GraphUtilityHelper(string accessToken)
+        public GraphApiService(TokenAcquisitionService tokenAcquisitionService)
         {
-            this.graphClient = new GraphServiceClient(
-                new DelegateAuthenticationProvider(
-                    async (requestMessage) =>
+            this.tokenAcquisitionService = tokenAcquisitionService;
+            this.graphClient = new GraphServiceClient(new DelegateAuthenticationProvider(
+                async (requestMessage) =>
+                {
+                    var token = await tokenAcquisitionService.GetAccessTokenAsync();
+                    await Task.Run(() =>
                     {
-                        await Task.Run(() =>
-                        {
-                            requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                                "Bearer",
-                                accessToken);
-                        });
-                    }));
+                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+                    });
+                }));
         }
 
         public async Task<List<string>> GetUserUpns(List<Guid> ids)
@@ -146,8 +144,7 @@ namespace PoliceIncidents.Helpers
 
         public async Task<string> UploadFileToTeams(string groupId, string fileName, Stream stream)
         {
-            var result = await this.graphClient
-                                            .Groups[groupId]
+            var result = await this.graphClient.Groups[groupId]
                                             .Drive
                                             .Root
                                             .ItemWithPath(fileName)
@@ -155,6 +152,53 @@ namespace PoliceIncidents.Helpers
                                             .Request()
                                             .PutAsync<DriveItem>(stream);
             return result.WebUrl;
+        }
+
+        public async Task<string> GetRootDriveUrl(string groupId)
+        {
+            var result = await this.graphClient.Groups[groupId]
+                                            .Drive
+                                            .Root
+                                            .Request()
+                                            .GetAsync();
+            return result.WebUrl;
+        }
+
+        public async Task SendTeamsNotification(string groupId, string newManagerID, string incidentTitle)
+        {
+            try
+            {
+                TeamworkActivityTopic topic = new TeamworkActivityTopic()
+                {
+                    WebUrl = "",
+                    Source = TeamworkActivityTopicSource.Text,
+                    Value = "subTitle",
+                };
+                ItemBody itemBody = new ItemBody
+                {
+                    Content = "You have been assigned an Incident",
+                };
+                List<KeyValuePair> templateParameters = new List<KeyValuePair>()
+                {
+                    new KeyValuePair
+                    {
+                        Name = "body",
+                        Value = incidentTitle,
+                    },
+                };
+                var recipient = new AadUserNotificationRecipient
+                {
+                    UserId = newManagerID,
+                };
+
+                await this.graphClient.Teams[groupId].SendActivityNotification(topic, "freeTextActivity", null, itemBody, templateParameters, recipient)
+                    .Request().PostAsync();
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                throw;
+            }
         }
 
         private string IncidentModelTempating(string input, IncidentInputModel incidentInput)

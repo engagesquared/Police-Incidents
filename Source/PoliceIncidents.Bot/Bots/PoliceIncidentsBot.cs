@@ -44,6 +44,7 @@ namespace PoliceIncidents.Bot.Bots
             {
                 string conversationId = conversationReference.Conversation.Id;
                 var team = turnContext.Activity.TeamsGetTeamInfo();
+                string channelId = turnContext.Activity.ChannelId;
                 await this.incidentService.CreateDistrict(new Guid(team.AadGroupId), team.Name, conversationId);
             }
 

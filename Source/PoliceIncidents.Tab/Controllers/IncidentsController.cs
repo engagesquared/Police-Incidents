@@ -9,6 +9,7 @@ namespace PoliceIncidents.Controllers
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ namespace PoliceIncidents.Controllers
     using PoliceIncidents.Tab.Helpers;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
+    using PoliceIncidents.Tab.Services;
 
     [Authorize]
     [Route("api/[controller]")]
@@ -32,6 +34,7 @@ namespace PoliceIncidents.Controllers
         private readonly HttpClient httpClient;
         private readonly IIncidentUpdateService incidentUpdateService;
         private readonly AppSettings appSettings;
+        private readonly GraphApiService graphApiService;
 
         public IncidentsController(
             IOptions<AzureAdOptions> azureAdOptions,
@@ -40,14 +43,15 @@ namespace PoliceIncidents.Controllers
             IIncidentUpdateService incidentUpdateService,
             IConfidentialClientApplication confidentialClientApp,
             HttpClient httpClient,
-            AppSettings appSettings)
-            : base(confidentialClientApp, azureAdOptions, logger)
+            AppSettings appSettings,
+            GraphApiService graphApiService)
         {
             this.logger = logger;
             this.incidentService = incidentService;
             this.incidentUpdateService = incidentUpdateService;
             this.httpClient = httpClient;
             this.appSettings = appSettings;
+            this.graphApiService = graphApiService;
         }
 
         [HttpPost("")]
@@ -55,8 +59,6 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                var token = await this.GetAccessTokenAsync();
-                var graphHelper = new GraphUtilityHelper(token);
                 incident.MemberIds = incident.MemberIds ?? new List<Guid>();
 
                 if (incident.GroupIds?.Length > 0)
@@ -65,7 +67,7 @@ namespace PoliceIncidents.Controllers
                     {
                         try
                         {
-                            var memberIds = await graphHelper.GetUsersByGroupId(groupId.ToString());
+                            var memberIds = await this.graphApiService.GetUsersByGroupId(groupId.ToString());
                             incident.MemberIds.AddRange(memberIds);
                         }
                         catch (Exception ex)
@@ -79,7 +81,7 @@ namespace PoliceIncidents.Controllers
 
                 try
                 {
-                    incident.PlannerLink = await graphHelper.CreateCopyOfPlanner(this.appSettings.PlannerId, incident);
+                    incident.PlannerLink = await this.graphApiService.CreateCopyOfPlanner(this.appSettings.PlannerId, incident);
                 }
                 catch (Exception ex)
                 {
@@ -225,24 +227,49 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                var token = await this.GetAccessTokenAsync();
-                var graphHelper = new GraphUtilityHelper(token);
-                var pdfGenerator = new PdfGenerator();
-
-                var incident = await this.incidentService.GetIncidentById(id);
-                var district = this.incidentService.GetDistricForIncident(id);
-
-                var chatMessage = await graphHelper.GetChatMessage(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
-                var chatMessageReplies = await graphHelper.GetChatMessageReplies(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
-                var pdfBytes = pdfGenerator.PrepareDocument(chatMessage, chatMessageReplies);
-                MemoryStream stream = new MemoryStream(pdfBytes);
-                var pdfDocUrl = await graphHelper.UploadFileToTeams(district.TeamGroupId.ToString(), $"Incident-Report-{incident.Title}-{DateTime.Now.ToString("yyyyMMdd_HHmm")}.pdf", stream);
-                await this.incidentService.ChangeIncidentFileReportUrl(id, pdfDocUrl);
                 return await this.incidentService.CloseIncident(id);
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"An error occurred in CloseIncident: {ex.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost("{id}/generatePdf")]
+        public async Task<string> GeneratePdf(long id)
+        {
+            try
+            {
+                var incident = await this.incidentService.GetIncidentById(id);
+                var district = this.incidentService.GetDistricForIncident(id);
+                if (string.IsNullOrEmpty(district.RootFolderPath))
+                {
+                    var rfolder = await this.graphApiService.GetRootDriveUrl(district.TeamGroupId?.ToString());
+                    await this.incidentService.UpdateDistrictFolder(district.Id, rfolder);
+                }
+
+                var chatMessage = await this.graphApiService.GetChatMessage(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
+                var chatMessageReplies = await this.graphApiService.GetChatMessageReplies(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
+                var pdfBytes = PdfGenerator.PrepareDocument(chatMessage, chatMessageReplies);
+                MemoryStream stream = new MemoryStream(pdfBytes);
+                var folder = incident.ReportsFolderName ?? $"/IncidentReports/{incident.Id}-{new Regex("[\"*:<>?\\/\\|]").Replace(incident.Title, string.Empty)}";
+                if (folder.Length > 80)
+                {
+                    folder = folder.Substring(0, 80);
+                }
+
+                if (!folder.Equals(incident.ReportsFolderName))
+                {
+                    await this.incidentService.ChangeIncidentFileReportUrl(id, folder);
+                }
+
+                var pdfDocUrl = await this.graphApiService.UploadFileToTeams(district.TeamGroupId.ToString(), $"{folder}/Report-{DateTime.Now.ToString("yyyyMMdd_HHmm")}.pdf", stream);
+                return pdfDocUrl;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"An error occurred in GeneratePdf: {ex.Message}");
                 throw;
             }
         }
@@ -294,9 +321,7 @@ namespace PoliceIncidents.Controllers
                 var upns = new List<string>();
                 if (userIds.Any())
                 {
-                    var token = await this.GetAccessTokenAsync();
-                    var graphHelper = new GraphUtilityHelper(token);
-                    upns = await graphHelper.GetUserUpns(userIds);
+                    upns = await this.graphApiService.GetUserUpns(userIds);
                 }
 
                 return $"https://teams.microsoft.com/l/meeting/new?subject={Uri.EscapeDataString(incident.Title)}&attendees={string.Join(',', upns)}";
@@ -313,8 +338,7 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                string accessToken = await this.GetAccessTokenAsync();
-                return await this.incidentService.ReAssignIncident(accessToken, incidentManagerArray);
+                return await this.incidentService.ReAssignIncident(incidentManagerArray);
             }
             catch (Exception ex)
             {

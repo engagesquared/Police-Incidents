@@ -36,6 +36,8 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.Location = incidentEntity.Location;
             result.Status = incidentEntity.Status;
             result.ExternalLink = incidentEntity.ExternalLink;
+            result.ReportsFolderPath = incidentEntity.District?.RootFolderPath + incidentEntity.FileReportFolderName;
+            result.ReportsFolderName = incidentEntity.FileReportFolderName;
             result.ChatConverstaionId = incidentEntity.ChatConverstaionId;
             result.ChatThreadLink = incidentEntity.District == null
                 ? string.Empty : $"https://teams.microsoft.com/l/message/{incidentEntity.District.ConversationId}/{incidentEntity.ChatConverstaionId}";

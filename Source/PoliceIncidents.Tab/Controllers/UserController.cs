@@ -9,9 +9,9 @@ namespace PoliceIncidents.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
-    using PoliceIncidents.Models;
+    using PoliceIncidents.Tab.Authentication;
+    using PoliceIncidents.Tab.Models;
 
     [Authorize]
     [Route("api/[controller]")]
@@ -19,23 +19,27 @@ namespace PoliceIncidents.Controllers
     public class UserController : BaseController
     {
         private readonly ILogger<UserController> logger;
+        private readonly TokenAcquisitionService tokenAcquisitionService;
 
         public UserController(
-            IOptions<AzureAdOptions> azureAdOptions,
             ILogger<UserController> logger,
-            IConfidentialClientApplication confidentialClientApp)
-            : base(confidentialClientApp, azureAdOptions, logger)
+            TokenAcquisitionService tokenAcquisitionService)
         {
             this.logger = logger;
+            this.tokenAcquisitionService = tokenAcquisitionService;
         }
 
         [HttpGet("GetToken")]
-        public async Task<IActionResult> GetToken()
+        public async Task<GraphTokenModel> GetToken()
         {
             try
             {
-                string accessToken = await this.GetAccessTokenAsync();
-                return this.Ok(accessToken);
+                var accessToken = await this.tokenAcquisitionService.GetAccessTokenAsync();
+                return new GraphTokenModel
+                {
+                    Token = accessToken.AccessToken,
+                    ExpiresOn = accessToken.ExpiresOn,
+                };
             }
             catch (Exception ex)
             {
