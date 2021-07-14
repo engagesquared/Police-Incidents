@@ -5,7 +5,6 @@
 namespace PoliceIncidents.Core.Services
 {
     using System;
-    using System.Web;
 
     public class DeepLinksService
     {

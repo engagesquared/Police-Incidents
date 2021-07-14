@@ -1,6 +1,8 @@
 ﻿namespace PoliceIncidents.Bot.Services
 {
+    using System;
     using System.IO;
+    using System.Text.RegularExpressions;
     using AdaptiveCards.Templating;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
@@ -54,15 +56,24 @@
         public IMessageActivity GeIncidentCreatedMessage(IncidentDetailsEntity incident)
         {
             var incidentDeepLink = this.deepLinksService.GetTeamIncidentLink(incident.District.TeamGroupId, this.appSettings.TabAppId, incident.Title, incident.District.ConversationId, incident.Id);
+            var location = Escape(incident.Location);
+            var locationUrlescaped = Uri.EscapeDataString(incident.Location);
             var text = Strings.IncidentCreatedTemplate
                 .Replace("{title}", incident.Title)
-                .Replace("{location}", incident.Location)
+                .Replace("{locationEscaped}", location)
+                .Replace("{locationUrlEscaped}", locationUrlescaped)
                 .Replace("{description}", incident.Description)
                 .Replace("{plannerLink}", incident.PlannerLink)
                 .Replace("{incidentLink}", incidentDeepLink);
             var message = MessageFactory.Text(text);
             message.TextFormat = "markdown";
             return message;
+        }
+
+        private string Escape(string link)
+        {
+            var regex = new Regex("(?<!\\\\)([\\(\\)\\[\\]\\*\\{\\}\\!\\+\\-])");
+            return regex.Replace(link ?? string.Empty, "\\$1");
         }
     }
 }

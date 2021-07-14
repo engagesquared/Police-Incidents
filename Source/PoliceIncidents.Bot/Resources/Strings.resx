@@ -122,7 +122,7 @@
 
 **Title:** {title}
 
-**Location: [{location}](https://bing.com/maps/default.aspx?ss={location}){:target="_blank"}** 
+**Location: [{locationEscaped}](https://bing.com/maps/default.aspx?ss={locationUrlEscaped}){:target="_blank"}** 
 
 **[Open Planner]({plannerLink}){:target="_blank"}** 
 

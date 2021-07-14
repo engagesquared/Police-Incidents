@@ -65,7 +65,7 @@ namespace PoliceIncidents.Bot.Resources {
         ///
         ///**Title:** {title}
         ///
-        ///**Location: [{location}](https://bing.com/maps/default.aspx?ss={location}){:target=&quot;_blank&quot;}** 
+        ///**Location: [{locationEscaped}](https://bing.com/maps/default.aspx?ss={locationUrlEscaped}){:target=&quot;_blank&quot;}** 
         ///
         ///**[Open Planner]({plannerLink}){:target=&quot;_blank&quot;}** 
         ///
