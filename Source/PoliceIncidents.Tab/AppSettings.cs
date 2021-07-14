@@ -22,7 +22,7 @@ namespace PoliceIncidents.Tab
 
         private void Setup()
         {
-            this.BotBaseUrl = this.configuration["BotBaseUrl"];
+            this.BotBaseUrl = (this.configuration["BotBaseUrl"] ?? string.Empty).TrimEnd('/');
             this.PlannerId = this.configuration["PlannerId"];
         }
     }

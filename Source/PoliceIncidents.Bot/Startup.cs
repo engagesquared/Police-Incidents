@@ -17,8 +17,9 @@ namespace PoliceIncidents.Bot
     using PoliceIncidents.Bot.Adapters;
     using PoliceIncidents.Bot.Bots;
     using PoliceIncidents.Bot.Controllers;
+    using PoliceIncidents.Bot.Interfaces;
+    using PoliceIncidents.Bot.Services;
     using PoliceIncidents.Core.DB;
-    using PoliceIncidents.Core.Interfaces;
     using PoliceIncidents.Core.Services;
 
     public class Startup
@@ -53,6 +54,8 @@ namespace PoliceIncidents.Bot
             });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IIncidentService, IncidentService>();
+            services.AddSingleton<DeepLinksService>();
+            services.AddSingleton<AdaptiveCardService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -17,5 +17,8 @@ namespace PoliceIncidents.Core.DB.Entities
         public bool IsDefault { get; set; }
 
         public string ConversationId { get; set; }
+
+        public string RootFolderPath { get; set; }
+
     }
 }

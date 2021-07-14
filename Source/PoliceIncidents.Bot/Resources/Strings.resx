@@ -122,11 +122,15 @@
 
 **Title:** {title}
 
-**Location: [{location}](https://bing.com/maps/default.aspx?ss={location}){:target="_blank"}**
+**Location: [{location}](https://bing.com/maps/default.aspx?ss={location}){:target="_blank"}** 
 
-**[Planner link]({plannerLink}){:target="_blank"}** 
+**[Open Planner]({plannerLink}){:target="_blank"}** 
 
 {description}
-**[Open Incident Log](https://teams.microsoft.com/l/entity/71811d9b-82a7-4b2d-a1b9-81f372e4063d/Home?context={"subEntityId":{incidentID},"channelId":"{channelID}"}&amp;groupId={groupID})**</value>
+
+**[Open Incident Log]({incidentLink})**</value>
+  </data>
+  <data name="ManagerRoleName" xml:space="preserve">
+    <value>Manager</value>
   </data>
 </root>

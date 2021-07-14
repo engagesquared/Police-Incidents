@@ -8,15 +8,11 @@ namespace PoliceIncidents.Controllers
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Net.Http;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-    using Microsoft.Identity.Client;
-    using PoliceIncidents.Helpers;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
     using PoliceIncidents.Tab.Helpers;
@@ -31,27 +27,25 @@ namespace PoliceIncidents.Controllers
     {
         private readonly ILogger<UserController> logger;
         private readonly IIncidentService incidentService;
-        private readonly HttpClient httpClient;
         private readonly IIncidentUpdateService incidentUpdateService;
         private readonly AppSettings appSettings;
         private readonly GraphApiService graphApiService;
+        private readonly BotNotificationsService botNotificationsService;
 
         public IncidentsController(
-            IOptions<AzureAdOptions> azureAdOptions,
             ILogger<UserController> logger,
             IIncidentService incidentService,
             IIncidentUpdateService incidentUpdateService,
-            IConfidentialClientApplication confidentialClientApp,
-            HttpClient httpClient,
             AppSettings appSettings,
-            GraphApiService graphApiService)
+            GraphApiService graphApiService,
+            BotNotificationsService botNotificationsService)
         {
             this.logger = logger;
             this.incidentService = incidentService;
             this.incidentUpdateService = incidentUpdateService;
-            this.httpClient = httpClient;
             this.appSettings = appSettings;
             this.graphApiService = graphApiService;
+            this.botNotificationsService = botNotificationsService;
         }
 
         [HttpPost("")]
@@ -89,15 +83,10 @@ namespace PoliceIncidents.Controllers
                 }
 
                 var newIncidentId = await this.incidentService.CreateIncident(incident, new Guid(this.UserObjectId));
-                try
-                {
-                    var botNotifyPath = Core.Common.Constants.IncidentCreatedBotRoute.Replace("{id}", newIncidentId.ToString());
-                    await this.httpClient.GetAsync(this.appSettings.BotBaseUrl.Trim(new[] { '/' }) + botNotifyPath);
-                }
-                catch (Exception ex)
-                {
-                    this.logger.LogError(ex, "Notifying bot error.");
-                }
+
+                // Send async to increase system's response time
+                _ = this.botNotificationsService.SendNewIncidentChannelNotification(newIncidentId);
+                _ = this.botNotificationsService.SendIncidentRolesPrivateNotification(newIncidentId, null);
 
                 return newIncidentId;
             }
@@ -181,11 +170,11 @@ namespace PoliceIncidents.Controllers
         }
 
         [HttpPost("{id}/manager")]
-        public async Task SetIncidentManager(long id, string managerId)
+        public async Task SetIncidentManager(long id, Guid managerId)
         {
             try
             {
-                await this.incidentService.ChangeIncidentManager(id, Guid.Parse(managerId));
+                await this.incidentService.ChangeIncidentManager(id, managerId);
             }
             catch (Exception ex)
             {
@@ -333,8 +322,8 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpPost("reassignincident")]
-        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        [HttpPost("reassignincidents")]
+        public async Task<bool> ReAssignIncident(List<ReAssignIncidentInput> incidentManagerArray)
         {
             try
             {

@@ -65,6 +65,7 @@ namespace Microsoft.Teams.Apps.DLLookup
             services.AddDLLookupAuthentication(this.Configuration);
             services.AddScoped<TokenAcquisitionService>();
             services.AddScoped<GraphApiService>();
+            services.AddScoped<BotNotificationsService>();
             services.AddSession();
 
             this.ConfigureDataServices(services);

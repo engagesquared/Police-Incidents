@@ -7,8 +7,8 @@
       "type": "TextBlock",
       "text": "You've been assigned to an incident",
       "wrap": true,
-      "size": "medium",
-      "weight": "bolder"
+      "size": "Large",
+      "weight": "Bolder"
     },
     {
       "type": "TextBlock",
@@ -20,13 +20,15 @@
       "type": "TextBlock",
       "text": "Assigned Role: ${RoleType}",
       "wrap": true
-    },
-    {
-      "type": "TextBlock",
-      "text": "[Open Incident Log](${IncidentLogUrl})"
     }
   ],
   "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Open Incident Log",
+      "url": "${IncidentLogUrl}",
+      "style": "positive"
+    },
     {
       "type": "Action.OpenUrl",
       "title": "Open chat thread",

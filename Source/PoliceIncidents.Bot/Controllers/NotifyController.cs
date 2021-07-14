@@ -4,6 +4,8 @@
 
 namespace PoliceIncidents.Bot.Controllers
 {
+    using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using PoliceIncidents.Bot.Bots;
@@ -18,11 +20,21 @@ namespace PoliceIncidents.Bot.Controllers
             this.bot = bot;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route(Core.Common.Constants.IncidentCreatedBotRoute)]
-        public async Task<StatusCodeResult> NewIncidentCreated(int id)
+        public async Task<StatusCodeResult> NewIncidentCreated(int incidentId)
         {
-            await this.bot.NotifyAboutIncidentCreated(id);
+            await this.bot.NotifyAboutIncidentCreated(incidentId);
+
+            // Let the caller know proactive messages have been sent
+            return new OkResult();
+        }
+
+        [HttpPost]
+        [Route(Core.Common.Constants.IncidentRolesBotRoute)]
+        public async Task<StatusCodeResult> NotifyNewRoles(int incidentId, List<Guid> usersToNotifyIds)
+        {
+            await this.bot.NotifyAboutIncidentCreated(incidentId);
 
             // Let the caller know proactive messages have been sent
             return new OkResult();

@@ -1,9 +1,10 @@
 import { SimpleProvider, ProviderState } from "@microsoft/mgt-react";
 import { getAccessToken as getAccessTokenAsync } from "../apis/api-list";
+import { IAccessToken } from "../models";
 
 let tokenCached: string = "";
 let expired: Date | undefined;
-let getTokenFunc: Promise<{ token: string; expiresOn: string }> | undefined;
+let getTokenFunc: Promise<IAccessToken> | undefined;
 
 export class MgtTokenProvider extends SimpleProvider {
     constructor() {

@@ -2,15 +2,15 @@
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
-namespace PoliceIncidents.Core.Services
+namespace PoliceIncidents.Bot.Services
 {
     using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
+    using PoliceIncidents.Bot.Interfaces;
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Core.DB.Entities;
-    using PoliceIncidents.Core.Interfaces;
 
     public class UserService : IUserService
     {
@@ -25,7 +25,7 @@ namespace PoliceIncidents.Core.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<UserEntity> EnsureUserAsync(string aadObjectId, string conversationId = null, string botUserId = null)
+        public async Task<UserEntity> EnsureUserAsync(string aadObjectId, string conversationId, string botUserId)
         {
             try
             {
@@ -58,11 +58,6 @@ namespace PoliceIncidents.Core.Services
                 this.logger.LogError(ex, "Failed to ensure user");
                 throw;
             }
-        }
-
-        public async Task<UserEntity> EnsureUserAsync(string aadObjectId)
-        {
-            return await this.EnsureUserAsync(aadObjectId);
         }
     }
 }

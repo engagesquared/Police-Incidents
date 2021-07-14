@@ -36,7 +36,7 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<long> CreateIncident(IncidentInputModel incident, Guid authorId);
 
-        Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray);
+        Task<bool> ReAssignIncident(List<ReAssignIncidentInput> incidentManagerArray);
 
         Task UpdateDistrictFolder(long districtId, string folderPath);
     }

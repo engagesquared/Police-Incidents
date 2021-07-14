@@ -5,22 +5,18 @@
 namespace PoliceIncidents.Bot.Bots
 {
     using System;
-    using System.IO;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AdaptiveCards.Templating;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using PoliceIncidents.Bot.Interfaces;
     using PoliceIncidents.Bot.Resources;
-    using PoliceIncidents.Bot.Models;
+    using PoliceIncidents.Bot.Services;
     using PoliceIncidents.Core.DB;
-    using PoliceIncidents.Core.Interfaces;
-    using System.Web;
 
     public class ProactiveBot
     {
@@ -29,56 +25,134 @@ namespace PoliceIncidents.Bot.Bots
         private readonly IBotFrameworkHttpAdapter adapter;
         private readonly IIncidentService incidentService;
         private readonly PoliceIncidentsDbContext dbContext;
-        private readonly string UserNotificationCardPath = "Resources/AdaptiveCards/IncidentAssignmentUserNotification.json";
+        private readonly AdaptiveCardService adaptiveCardService;
 
         public ProactiveBot(
             AppSettings appSettings,
             ILogger<ProactiveBot> logger,
             IBotFrameworkHttpAdapter adapter,
             IIncidentService incidentService,
-            PoliceIncidentsDbContext dbContext)
+            PoliceIncidentsDbContext dbContext,
+            AdaptiveCardService adaptiveCardService)
         {
             this.appSettings = appSettings;
             this.logger = logger;
             this.adapter = adapter;
             this.incidentService = incidentService;
             this.dbContext = dbContext;
+            this.adaptiveCardService = adaptiveCardService;
         }
 
         public async Task NotifyAboutIncidentCreated(long incidentId)
         {
             try
             {
-                var district = this.incidentService.GetDistricForIncident(incidentId);
-                var members = this.incidentService.GetIncidentTeamMembers(incidentId);
-                if (district == null)
+                this.logger.LogInformation($"NotifyAboutIncidentCreated: incident with {incidentId} id.");
+                var incident = this.incidentService.GetIncident(incidentId);
+                if (incident == null)
                 {
-                    this.logger.LogError($"No distric found for IncidentId: {incidentId}");
-                }
-                else if (district.ConversationId != null)
-                {
-                    var message = this.GeIncidentCreatedMessage(incidentId);
-                    await this.SendChannelMessageAsync(message, district.ConversationId);
-                    await this.incidentService.UpdateIncidentConversationId(incidentId, message.Id);
+                    this.logger.LogError($"NotifyAboutIncidentCreated: Can't find incident with {incidentId} id");
+                    return;
                 }
 
+                if (string.IsNullOrEmpty(incident.District?.ConversationId))
+                {
+                    this.logger.LogError($"NotifyAboutIncidentCreated: District (Team) {incident.District?.TeamGroupId} is not resolved. Bot was not added to the target team correctly");
+                }
+                else
+                {
+                    var message = this.adaptiveCardService.GeIncidentCreatedMessage(incident);
+                    await this.SendProactiveMessageAsync(message, incident.District.ConversationId);
+                    await this.incidentService.UpdateIncidentChatMessageId(incidentId, message.Id);
+                }
+
+                if (string.IsNullOrEmpty(incident.Manager.ConversationId))
+                {
+                    this.logger.LogWarning($"Can't send notification to user {incident.Manager.AadUserId}. Bot is not installed for them.");
+                }
+                else
+                {
+                    var notification = this.adaptiveCardService.GeIncidentMemberNotificationMessage(incident, Strings.ManagerRoleName);
+                    await this.SendProactiveMessageAsync(notification, incident.Manager.ConversationId);
+                }
+
+                var members = this.incidentService.GetIncidentTeamMembers(incidentId);
                 foreach (var member in members)
                 {
-                    if (member.ConversationId != null)
+                    if (string.IsNullOrEmpty(member.TeamMember.ConversationId))
                     {
-                        var roleEntity = this.dbContext.IncidentTeamMembers.Where(v => v.IncidentId == incidentId && v.TeamMemberId == member.AadUserId).Select(x => x.UserRole).FirstOrDefault();
-                        var notification = this.GeIncidentMemberNotificationMessage(incidentId, roleEntity?.Title ?? "Manager");
-                        await this.SendChannelMessageAsync(notification, member.ConversationId);
+                        this.logger.LogWarning($"Can't send notification to user {member.TeamMember.AadUserId}. Bot is not installed for them");
+                    }
+                    else
+                    {
+                        var notification = this.adaptiveCardService.GeIncidentMemberNotificationMessage(incident, member.UserRole.Title);
+                        await this.SendProactiveMessageAsync(notification, member.TeamMember.ConversationId);
                     }
                 }
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Can't sent NotifyAboutIncidentCreated notification.");
+                throw;
             }
         }
 
-        private async Task SendChannelMessageAsync(IMessageActivity message, string conversationId)
+        public async Task NotifyAboutIncidentRoles(long incidentId, List<Guid> usersToNotify)
+        {
+            try
+            {
+                var notifyAll = usersToNotify == null || usersToNotify.Count == 0;
+                this.logger.LogInformation($"NotifyAboutIncidentRoles: incident with {incidentId} id.");
+                var incident = this.incidentService.GetIncident(incidentId);
+                if (incident == null)
+                {
+                    this.logger.LogError($"NotifyAboutIncidentRoles: Can't find incident with {incidentId} id");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(incident.District?.ConversationId))
+                {
+                    this.logger.LogError($"NotifyAboutIncidentCreated: District (Team) {incident.District?.TeamGroupId} is not resolved. Bot was not added to the target team correctly");
+                }
+
+                if (notifyAll || usersToNotify.Any(x => x == incident.Manager.AadUserId))
+                {
+                    if (string.IsNullOrEmpty(incident.Manager.ConversationId))
+                    {
+                        this.logger.LogWarning($"Can't send notification to user {incident.Manager.AadUserId}. Bot is not installed for them.");
+                    }
+                    else
+                    {
+                        var notification = this.adaptiveCardService.GeIncidentMemberNotificationMessage(incident, Strings.ManagerRoleName);
+                        await this.SendProactiveMessageAsync(notification, incident.Manager.ConversationId);
+                    }
+                }
+
+                var members = this.incidentService.GetIncidentTeamMembers(incidentId);
+                foreach (var member in members)
+                {
+                    if (notifyAll || usersToNotify.Any(x => x == member.TeamMember.AadUserId))
+                    {
+                        if (string.IsNullOrEmpty(member.TeamMember.ConversationId))
+                        {
+                            this.logger.LogWarning($"Can't send notification to user {member.TeamMember.AadUserId}. Bot is not installed for them");
+                        }
+                        else
+                        {
+                            var notification = this.adaptiveCardService.GeIncidentMemberNotificationMessage(incident, member.UserRole.Title);
+                            await this.SendProactiveMessageAsync(notification, member.TeamMember.ConversationId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Can't sent NotifyAboutIncidentRoles notification.");
+                throw;
+            }
+        }
+
+        private async Task SendProactiveMessageAsync(IMessageActivity message, string conversationId)
         {
             var conversation = this.CreateConversationReference(conversationId);
             async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)
@@ -87,66 +161,6 @@ namespace PoliceIncidents.Bot.Bots
             }
 
             await ((BotAdapter)this.adapter).ContinueConversationAsync(this.appSettings.BotAppId, conversation, Conversationcallback, default);
-        }
-
-        private async Task SendPrivateMessageAsync(IActivity message, string conversationReference)
-        {
-            var conversation = this.CreateConversationReference(conversationReference);
-            async Task Conversationcallback(ITurnContext turnContext, CancellationToken cancellationToken)
-            {
-                await turnContext.SendActivityAsync(message, cancellationToken);
-            }
-
-            await ((BotAdapter)this.adapter).ContinueConversationAsync(this.appSettings.BotAppId, conversation, Conversationcallback, default);
-        }
-
-        private IMessageActivity GeIncidentCreatedMessage(long incidentId)
-        {
-            var incident = this.incidentService.GetIncident(incidentId);
-            if (incident != null)
-            {
-                var text = Strings.IncidentCreatedTemplate
-                    .Replace("{title}", incident.Title)
-                    .Replace("{location}", incident.Location)
-                    .Replace("{description}", incident.Description)
-                    .Replace("{plannerLink}", incident.PlannerLink)
-                    .Replace("{incidentID}", incident.IncidentID)
-                    .Replace("{channelID}", incident.ChannelID)
-                    .Replace("{groupID}", incident.GroupID);
-                var message = MessageFactory.Text(text);
-                message.TextFormat = "markdown";
-                return message;
-            }
-
-            return null;
-        }
-
-        private IMessageActivity GeIncidentMemberNotificationMessage(long incidentId, string role)
-        {
-            var incident = this.incidentService.GetIncident(incidentId);
-            var district = this.incidentService.GetDistricForIncident(incidentId);
-
-            var chatThreadUrl = $"https://teams.microsoft.com/l/message/{district.ConversationId}/{incident.ChatConverstaionId}?tenantId={this.appSettings.TenantId}&groupId={district.TeamGroupId}&parentMessageId={incident.ChatConverstaionId}";
-            var incidentLogUrl = $"https://teams.microsoft.com/l/entity/{this.appSettings.TabAppId}/Home?webUrl={HttpUtility.UrlEncode($"{this.appSettings.TabBaseUrl}/incident/{incidentId}")}&label={HttpUtility.UrlEncode(incident.Title)}&context={HttpUtility.UrlEncode($"{{ \"subEntityId\": \"incident/{incidentId}\", \"channelId\": \"{district.ConversationId}\" }}")}";
-            var data = new IncidentMemberNotificationCardData
-            {
-                IncidentName = incident.Title,
-                IncidentLocation = incident.Location,
-                IncidentLogUrl = incidentLogUrl,
-                ChatThreadUrl = chatThreadUrl,
-                RoleType = role,
-            };
-            var adaptiveCardText = File.ReadAllText(this.UserNotificationCardPath);
-            AdaptiveCardTemplate template = new AdaptiveCardTemplate(adaptiveCardText);
-            string processedCardText = template.Expand(data);
-            var cardJson = JsonConvert.DeserializeObject<JObject>(processedCardText);
-            var message = MessageFactory.Attachment(new Attachment()
-            {
-                ContentType = "application/vnd.microsoft.card.adaptive",
-                Content = cardJson,
-            });
-
-            return message;
         }
 
         private ConversationReference CreateConversationReference(string conversationId)

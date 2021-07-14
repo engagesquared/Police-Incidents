@@ -8,14 +8,13 @@ import { IncidentDetailsCard } from "./incidentDetailsCard";
 import { IncidentUpdates } from "./incidentUpdates";
 import { getIncident, getScheduleMeetingLink, generatePdf } from "../../apis/api-list";
 import { Person, MgtTemplateProps, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
-import { IncidentUpdateType, IIncidentUpdateModel, IncidentStatus } from "../../models";
+import { IncidentUpdateType, IIncidentUpdateModel, IncidentStatus, IIncidentTeamMemberInputModel } from "../../models";
 import { executeDeepLink } from "@microsoft/teams-js";
 import { Routes } from "../../common";
 import { UpdateCreationForm } from "./updateCreationForm";
 import { UpdateLocationForm } from "./updateLocationForm";
 import { CloseIncidentForm } from "./closeIncidentForm";
 import { EditIncidentTeamForm } from "./editIncidentTeamFrom";
-import { IIncidentTeamMemberInputModel } from "../../models/IIncidentTeamMemberInputModel";
 
 export const IncidentPage = () => {
     const { t } = useTranslation();

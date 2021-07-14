@@ -2,7 +2,7 @@
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
-namespace PoliceIncidents.Core.Interfaces
+namespace PoliceIncidents.Bot.Interfaces
 {
     using System.Threading.Tasks;
     using PoliceIncidents.Core.DB.Entities;
@@ -10,7 +10,5 @@ namespace PoliceIncidents.Core.Interfaces
     public interface IUserService
     {
         Task<UserEntity> EnsureUserAsync(string aadObjectId, string conversationId, string botUserId);
-
-        Task<UserEntity> EnsureUserAsync(string aadObjectId);
     }
 }

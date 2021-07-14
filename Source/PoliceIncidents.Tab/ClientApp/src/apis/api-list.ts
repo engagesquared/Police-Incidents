@@ -1,14 +1,13 @@
 import axios from "./axios-jwt-decorator";
 import { AxiosResponse } from "axios";
-import { IIncidentInputModel, IIncidentModel, IIncidentUpdateModel, IIncidentUpdateInputModel } from "../models";
-import { IIncidentTeamMemberInputModel } from "../models/IIncidentTeamMemberInputModel";
+import { IIncidentInputModel, IIncidentModel, IIncidentUpdateModel, IIncidentUpdateInputModel, IIncidentTeamMemberInputModel, IAccessToken } from "../models";
 
 let baseAxiosUrl = "/api";
 
-export const getAccessToken = async (): Promise<{ token: string; expiresOn: string }> => {
+export const getAccessToken = async (): Promise<IAccessToken> => {
     let url = baseAxiosUrl + "/user/getToken";
     const response = await axios.get(url);
-    return response.data as { token: string; expiresOn: string };
+    return response.data as IAccessToken;
 };
 
 export const getAuthenticationMetadata = async (windowLocationOriginDomain: string, loginHint: string): Promise<AxiosResponse<string>> => {

@@ -1,19 +1,17 @@
 ﻿import * as React from "react";
-import {
-    Flex, Text, Button, Image, Layout, Divider
-} from "@fluentui/react-northstar";
+import { Flex, Text, Button, Image, Layout, Divider } from "@fluentui/react-northstar";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./editIncidentTeamFrom.styles";
 import { ErrorMessage } from "../form/errorMessage";
 import { PeoplePicker } from "@microsoft/mgt-react";
 import { useForm } from "react-hook-form";
 import { updateTeamMember } from "../../apis/api-list";
-import { IIncidentTeamMemberInputModel } from "../../models/IIncidentTeamMemberInputModel";
+import { IIncidentTeamMemberInputModel } from "../../models";
 
 export interface IEditIncidentTeamFormProps {
     incidentId: number;
     incidentManager: string | undefined;
-    incidentMembers: { item1: string, item2: number }[];
+    incidentMembers: { item1: string; item2: number }[];
     onCancel(): void;
     onAdded(update: IIncidentTeamMemberInputModel, isClosed?: boolean): void;
 }
@@ -25,14 +23,10 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
     const getDefaultValues = () => {
         const result = {
             incidentManager: props.incidentManager,
-            socLead: props.incidentMembers.filter(t => t.item2 === 3).length > 0 ?
-                props.incidentMembers.filter(t => t.item2 === 3).map(t=>t.item1) : [],
-            fieldOfficer: props.incidentMembers.filter(t => t.item2 === 1).length > 0 ?
-                props.incidentMembers.filter(t => t.item2 === 1).map(t => t.item1) : [],
-            familyLiason: props.incidentMembers.filter(t => t.item2 === 4).length > 0 ?
-                props.incidentMembers.filter(t => t.item2 === 4).map(t => t.item1) : [],
-            externalAgency: props.incidentMembers.filter(t => t.item2 === 2).length > 0 ?
-                props.incidentMembers.filter(t => t.item2 === 2).map(t => t.item1) : []
+            socLead: props.incidentMembers.filter((t) => t.item2 === 3).length > 0 ? props.incidentMembers.filter((t) => t.item2 === 3).map((t) => t.item1) : [],
+            fieldOfficer: props.incidentMembers.filter((t) => t.item2 === 1).length > 0 ? props.incidentMembers.filter((t) => t.item2 === 1).map((t) => t.item1) : [],
+            familyLiason: props.incidentMembers.filter((t) => t.item2 === 4).length > 0 ? props.incidentMembers.filter((t) => t.item2 === 4).map((t) => t.item1) : [],
+            externalAgency: props.incidentMembers.filter((t) => t.item2 === 2).length > 0 ? props.incidentMembers.filter((t) => t.item2 === 2).map((t) => t.item1) : [],
         };
         return result;
     };
@@ -44,12 +38,12 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
     React.useEffect(() => {
         const validationRules = {
             incidentManager: {
-                required: t("requiredValidationMessage")
+                required: t("requiredValidationMessage"),
             },
             socLead: undefined,
             fieldOfficer: undefined,
             familyLiason: undefined,
-            externalAgency: undefined
+            externalAgency: undefined,
         };
 
         register({ name: "incidentManager" }, validationRules.incidentManager);
@@ -65,19 +59,19 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
         try {
             setIsLoading(true);
             const update: IIncidentTeamMemberInputModel = {
-                incidentManager: incidentManager ? incidentManager : ""
+                incidentManager: incidentManager ? incidentManager : "",
             };
             if (socLead) {
-                update['socLead'] = socLead;
+                update["socLead"] = socLead;
             }
             if (fieldOfficer) {
-                update['fieldOfficer'] = fieldOfficer;
+                update["fieldOfficer"] = fieldOfficer;
             }
             if (familyLiason) {
-                update['familyLiason'] = familyLiason;
+                update["familyLiason"] = familyLiason;
             }
             if (externalAgency) {
-                update['externalAgency'] = externalAgency;
+                update["externalAgency"] = externalAgency;
             }
             const checkUpdate = await updateTeamMember(props.incidentId, update);
             if (checkUpdate) {
@@ -94,20 +88,20 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
     const onUserChange = (e: any, type: "incidentManager" | "socLead" | "fieldOfficer" | "familyLiason" | "externalAgency") => {
         //alert(JSON.stringify(e.detail));
         if (type !== "incidentManager") {
-            const result = e ? e.detail && e.detail.length ? e.detail[0] ? e.detail.map((t: any) => t.id) : undefined : undefined : undefined;
+            const result = e ? (e.detail && e.detail.length ? (e.detail[0] ? e.detail.map((t: any) => t.id) : undefined) : undefined) : undefined;
             setValue(type, result, { shouldValidate: true });
         } else {
-            const result = e ? e.detail && e.detail.length ? e.detail[0] ? e.detail[0].id : undefined : undefined : undefined;
+            const result = e ? (e.detail && e.detail.length ? (e.detail[0] ? e.detail[0].id : undefined) : undefined) : undefined;
             setValue(type, result, { shouldValidate: true });
         }
     };
 
     return (
-        <Flex className={classes.container} column >
+        <Flex className={classes.container} column>
             <Flex gap="gap.medium" padding="padding.medium" style={{ margin: 15 }}>
                 <Layout
                     styles={{
-                        maxWidth: '50px',
+                        maxWidth: "50px",
                     }}
                     renderMainArea={() => (
                         <Image
@@ -118,7 +112,8 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
                 />
                 <Flex column>
                     <Text content="Incident App" weight="bold" size="larger" />
-                    <Text content={t("editTeamMemberTitle")} /></Flex>
+                    <Text content={t("editTeamMemberTitle")} />
+                </Flex>
             </Flex>
             <Divider size={3} color="brand" />
             <form onSubmit={onConfirm}>
@@ -126,32 +121,62 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
                     <Flex column gap="gap.medium" padding="padding.medium" style={{ margin: 10 }}>
                         <Flex column>
                             <Text content={t("incidentManager")} />
-                            <PeoplePicker selectionMode="single" placeholder=" " showMax={25} defaultSelectedUserIds={[`${incidentManager}`]}
-                                selectionChanged={(e) => { onUserChange(e, "incidentManager"); }} />
+                            <PeoplePicker
+                                selectionMode="single"
+                                placeholder=" "
+                                showMax={25}
+                                defaultSelectedUserIds={[`${incidentManager}`]}
+                                selectionChanged={(e) => {
+                                    onUserChange(e, "incidentManager");
+                                }}
+                            />
                             {!!errors.incidentManager && <ErrorMessage errorMessage={errors.incidentManager.message} />}
                         </Flex>
                         <Flex column>
                             <Text content={t("socLead")} />
-                            <PeoplePicker placeholder=" " showMax={25} defaultSelectedUserIds={socLead ? socLead : []}
-                                selectionChanged={(e) => { onUserChange(e, "socLead"); }} />
+                            <PeoplePicker
+                                placeholder=" "
+                                showMax={25}
+                                defaultSelectedUserIds={socLead ? socLead : []}
+                                selectionChanged={(e) => {
+                                    onUserChange(e, "socLead");
+                                }}
+                            />
                         </Flex>
                         <Flex column>
                             <Text content={t("familyLiason")} />
-                            <PeoplePicker placeholder=" " showMax={25} defaultSelectedUserIds={familyLiason ? familyLiason : []}
-                                selectionChanged={(e) => { onUserChange(e, "familyLiason"); }} />
+                            <PeoplePicker
+                                placeholder=" "
+                                showMax={25}
+                                defaultSelectedUserIds={familyLiason ? familyLiason : []}
+                                selectionChanged={(e) => {
+                                    onUserChange(e, "familyLiason");
+                                }}
+                            />
                         </Flex>
                         <Flex column>
                             <Text content={t("fieldOfficer")} />
-                            <PeoplePicker placeholder=" " showMax={25} defaultSelectedUserIds={fieldOfficer ? fieldOfficer : []}
-                                selectionChanged={(e) => { onUserChange(e, "fieldOfficer"); }} />
+                            <PeoplePicker
+                                placeholder=" "
+                                showMax={25}
+                                defaultSelectedUserIds={fieldOfficer ? fieldOfficer : []}
+                                selectionChanged={(e) => {
+                                    onUserChange(e, "fieldOfficer");
+                                }}
+                            />
                         </Flex>
                         <Flex column>
                             <Text content={t("externalAgency")} />
-                            <PeoplePicker placeholder=" " showMax={25} defaultSelectedUserIds={externalAgency ? externalAgency : []}
-                                selectionChanged={(e) => { onUserChange(e, "externalAgency"); }} />
+                            <PeoplePicker
+                                placeholder=" "
+                                showMax={25}
+                                defaultSelectedUserIds={externalAgency ? externalAgency : []}
+                                selectionChanged={(e) => {
+                                    onUserChange(e, "externalAgency");
+                                }}
+                            />
                         </Flex>
                     </Flex>
-
                 </Flex>
                 <Divider size={0} />
                 <Flex gap="gap.medium" padding="padding.medium" style={{ margin: 10 }}>

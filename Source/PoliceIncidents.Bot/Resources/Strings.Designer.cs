@@ -65,16 +65,26 @@ namespace PoliceIncidents.Bot.Resources {
         ///
         ///**Title:** {title}
         ///
-        ///**Location: [{location}](https://bing.com/maps/default.aspx?ss={location}){:target=&quot;_blank&quot;}**
+        ///**Location: [{location}](https://bing.com/maps/default.aspx?ss={location}){:target=&quot;_blank&quot;}** 
         ///
-        ///**[Planner link]({plannerLink}){:target=&quot;_blank&quot;}** 
+        ///**[Open Planner]({plannerLink}){:target=&quot;_blank&quot;}** 
         ///
         ///{description}
-        ///**[Open Incident Log](https://teams.microsoft.com/l/entity/71811d9b-82a7-4b2d-a1b9-81f372e4063d/Home?context={&quot;subEntityId&quot;:{incidentID},&quot;channelId&quot;:&quot;{channelID}&quot;}&amp;groupId={groupID})**.
+        ///
+        ///**[Open Incident Log]({incidentLink})**.
         /// </summary>
         internal static string IncidentCreatedTemplate {
             get {
                 return ResourceManager.GetString("IncidentCreatedTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manager.
+        /// </summary>
+        internal static string ManagerRoleName {
+            get {
+                return ResourceManager.GetString("ManagerRoleName", resourceCulture);
             }
         }
     }

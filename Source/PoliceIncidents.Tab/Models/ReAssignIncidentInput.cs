@@ -6,7 +6,7 @@ namespace PoliceIncidents.Tab.Models
 {
     using System;
 
-    public class ReAssignInput
+    public class ReAssignIncidentInput
     {
         public int IncidentId { get; set; }
 

@@ -264,11 +264,11 @@ namespace PoliceIncidents.Tab.Services
         }
 
 
-        public async Task<bool> ReAssignIncident(List<ReAssignInput> incidentManagerArray)
+        public async Task<bool> ReAssignIncident(List<ReAssignIncidentInput> incidentManagerArray)
         {
             try
             {
-                foreach (ReAssignInput incidentManager in incidentManagerArray)
+                foreach (ReAssignIncidentInput incidentManager in incidentManagerArray)
                 {
                     var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentManager.IncidentId).Include(x => x.District);
                     var incident = await incidentQuery.FirstOrDefaultAsync();
