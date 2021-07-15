@@ -1,4 +1,4 @@
-﻿// <copyright file="ReAssignInput.cs" company="Engage Squared">
+﻿// <copyright file="ReAssignIncidentInput.cs" company="Engage Squared">
 // Copyright (c) Engage Squared. All rights reserved.
 // </copyright>
 
@@ -8,7 +8,7 @@ namespace PoliceIncidents.Tab.Models
 
     public class ReAssignIncidentInput
     {
-        public int IncidentId { get; set; }
+        public long IncidentId { get; set; }
 
         public Guid IncidentManagerId { get; set; }
     }

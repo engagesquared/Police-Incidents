@@ -119,13 +119,14 @@ namespace PoliceIncidents.Core.DB
             modelBuilder.Entity<UserRoleEntity>(e =>
             {
                 e.Property(e => e.Id).ValueGeneratedOnAdd();
-                e.Property(x => x.Title).HasMaxLength(100);
+                e.Property(x => x.Title).IsRequired().HasMaxLength(100);
+                e.Property(x => x.IsDefault);
                 e.HasKey(x => x.Id);
             });
 
             // Seed data
             modelBuilder.Entity<UserRoleEntity>().HasData(
-                new UserRoleEntity { Id = 1, Title = "Field Officer" },
+                new UserRoleEntity { Id = 1, Title = "Field Officer", IsDefault = true },
                 new UserRoleEntity { Id = 2, Title = "External User" },
                 new UserRoleEntity { Id = 3, Title = "SOC Lead" },
                 new UserRoleEntity { Id = 4, Title = "Family Liason Officer" });

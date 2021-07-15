@@ -1,6 +1,15 @@
 import axios from "./axios-jwt-decorator";
 import { AxiosResponse } from "axios";
-import { IIncidentInputModel, IIncidentModel, IIncidentUpdateModel, IIncidentUpdateInputModel, IIncidentTeamMemberInputModel, IAccessToken } from "../models";
+import {
+    IIncidentInputModel,
+    IIncidentModel,
+    IIncidentUpdateModel,
+    IIncidentUpdateInputModel,
+    IIncidentMemberInputModel,
+    IReassignIncidentInputModel,
+    IAccessToken,
+    IUserRoleModel,
+} from "../models";
 
 let baseAxiosUrl = "/api";
 
@@ -51,13 +60,13 @@ export const getIncident = async (id: number): Promise<IIncidentModel> => {
 };
 
 export const setIncidentManager = async (id: number, managerId: string): Promise<void> => {
-    let url = baseAxiosUrl + `/Incidents/${id}/SetManager`;
+    let url = baseAxiosUrl + `/incidents/${id}/manager`;
     await axios.post(url, { managerId });
     return;
 };
 
 export const setIncidentLocation = async (id: number, location: string): Promise<void> => {
-    let url = baseAxiosUrl + `/Incidents/${id}/location`;
+    let url = baseAxiosUrl + `/incidents/${id}/location`;
     await axios.post(url, { location });
     return;
 };
@@ -91,20 +100,26 @@ export const getScheduleMeetingLink = async (incidentId: number): Promise<string
     return response.data as string;
 };
 
-export const updateTeamMember = async (incidentId: number, teamMember: IIncidentTeamMemberInputModel): Promise<Boolean> => {
-    let url = baseAxiosUrl + `/Incidents/${incidentId}/updatemember`;
-    const response = await axios.post(url, teamMember);
-    return response.data as Boolean;
+export const updateTeamMember = async (incidentId: number, members: IIncidentMemberInputModel[]): Promise<void> => {
+    let url = baseAxiosUrl + `/incidents/${incidentId}/members`;
+    const response = await axios.post(url, members);
+    return response.data as void;
 };
 
-export const reAssignIncident = async (updatedIncidentManagers: { incidentId: number; incidentManagerId: number }[]): Promise<Boolean> => {
-    let url = baseAxiosUrl + `/Incidents/reassignincident`;
+export const reAssignIncident = async (updatedIncidentManagers: IReassignIncidentInputModel[]): Promise<void> => {
+    let url = baseAxiosUrl + `/incidents/reassign`;
     const response = await axios.post(url, updatedIncidentManagers);
-    return response.data as Boolean;
+    return response.data as void;
 };
 
 export const generatePdf = async (incidentId: number): Promise<string> => {
     let url = baseAxiosUrl + `/incidents/${incidentId}/generatePdf`;
     const response = await axios.post(url);
     return response.data as string;
+};
+
+export const getAllUserRoles = async (): Promise<IUserRoleModel[]> => {
+    let url = baseAxiosUrl + `/roles`;
+    const response = await axios.get(url);
+    return response.data as IUserRoleModel[];
 };

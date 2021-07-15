@@ -2,11 +2,11 @@ import * as React from "react";
 import { Provider, teamsDarkV2Theme, teamsHighContrastTheme, teamsV2Theme, ThemePrepared } from "@fluentui/react-northstar";
 import { ThemeProvider } from "react-jss";
 import * as microsoftTeams from "@microsoft/teams-js";
-import { GlobalContext } from "./GlobalContextProvider";
+import { useGlobalState } from "../hooks/useGlobalState";
 
 function FluentThemeProvider(props: any) {
-    const ctx = React.useContext(GlobalContext);
-    const [themeName, setThemeName] = React.useState(ctx.teamsContext.theme);
+    const { state } = useGlobalState();
+    const [themeName, setThemeName] = React.useState(state.teamsContext.theme);
 
     React.useEffect(() => {
         microsoftTeams.registerOnThemeChangeHandler((theme) => {

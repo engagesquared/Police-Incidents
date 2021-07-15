@@ -15,8 +15,9 @@ import { Routes } from "./common";
 
 import { Flex } from "@fluentui/react-northstar";
 import { useStyles } from "./App.styles";
-import { GlobalContext } from "./providers/GlobalContextProvider";
+import { useGlobalState } from "./hooks/useGlobalState";
 import * as microsoftTeams from "@microsoft/teams-js";
+import { getAllUserRoles } from "./apis/api-list";
 
 TeamsHelper.microsoftTeamsLib = microsoftTeams;
 
@@ -29,8 +30,16 @@ Providers.globalProvider = new MgtTokenProvider();
 const App = () => {
     const classes = useStyles();
     const history = useHistory();
-    const { isMobileDevice, teamsContext } = React.useContext(GlobalContext);
-    
+    const { state, dispatch } = useGlobalState();
+    const { isMobileDevice, teamsContext } = state;
+
+    React.useEffect(() => {
+        (async () => {
+            const roles = await getAllUserRoles();
+            dispatch("updateRoles", roles);
+        })();
+    }, [dispatch]);
+
     const path = teamsContext.subEntityId;
     if (path?.includes(Routes.incidentPage.slice(1, Routes.incidentIdPart.length - 1))) {
         history.push(path);

@@ -3,7 +3,7 @@ import { Flex, Text, Button, CheckmarkCircleIcon } from "@fluentui/react-northst
 import { PeoplePicker, Person, MgtTemplateProps } from "@microsoft/mgt-react";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./reAssignMyIncident.styles";
-import { IIncidentModel } from "../../models";
+import { IIncidentModel, IReassignIncidentInputModel } from "../../models";
 import { reAssignIncident } from "../../apis/api-list";
 
 export interface IReAssignMyIncidentProps {
@@ -16,7 +16,7 @@ export const ReAssignMyIncident = (props: React.PropsWithChildren<IReAssignMyInc
     const classes = useStyles();
     const [isLoading, setIsLoading] = React.useState(false);
     const [isSuccessMessage, setIsSuccessMessage] = React.useState(false);
-    const [updatedIncidentManagers, setupdatedIncidentManagers] = React.useState<{ incidentId: number; incidentManagerId: number }[]>([]);
+    const [updatedIncidentManagers, setupdatedIncidentManagers] = React.useState<IReassignIncidentInputModel[]>([]);
 
     const onUserChange = (e: any, incidentId: number) => {
         const result = e ? (e.detail && e.detail.length ? (e.detail[0] ? e.detail[0].id : undefined) : undefined) : undefined;

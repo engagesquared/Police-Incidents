@@ -66,29 +66,8 @@ namespace PoliceIncidents.Bot.Bots
                     await this.incidentService.UpdateIncidentChatMessageId(incidentId, message.Id);
                 }
 
-                if (string.IsNullOrEmpty(incident.Manager.ConversationId))
-                {
-                    this.logger.LogWarning($"Can't send notification to user {incident.Manager.AadUserId}. Bot is not installed for them.");
-                }
-                else
-                {
-                    var notification = this.adaptiveCardService.GeIncidentMemberNotificationMessage(incident, Strings.ManagerRoleName);
-                    await this.SendProactiveMessageAsync(notification, incident.Manager.ConversationId);
-                }
+                await this.NotifyAboutIncidentRoles(incidentId, null);
 
-                var members = this.incidentService.GetIncidentTeamMembers(incidentId);
-                foreach (var member in members)
-                {
-                    if (string.IsNullOrEmpty(member.TeamMember.ConversationId))
-                    {
-                        this.logger.LogWarning($"Can't send notification to user {member.TeamMember.AadUserId}. Bot is not installed for them");
-                    }
-                    else
-                    {
-                        var notification = this.adaptiveCardService.GeIncidentMemberNotificationMessage(incident, member.UserRole.Title);
-                        await this.SendProactiveMessageAsync(notification, member.TeamMember.ConversationId);
-                    }
-                }
             }
             catch (Exception ex)
             {

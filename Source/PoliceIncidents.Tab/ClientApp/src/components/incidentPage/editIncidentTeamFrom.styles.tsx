@@ -8,6 +8,24 @@ export const useStyles = createUseStyles((theme: ITheme) => {
                 "--input-border": "none",
                 "--input-background-color": "#f5f5f5",
             },
-        }
+        },
+        row: {
+            alignItems: "center",
+            justifyContent: "space-between",
+        },
+        pickerColumn: {
+            width: "40%",
+        },
+        ddContainer: {
+            width: "16rem",
+            "& .ui-dropdown__container, & .ui-list": {
+                width: "16rem",
+            },
+        },
+        removeBtnContainer: {
+            ".ui-button": {
+                maxWidth: "2rem",
+            },
+        },
     };
 });

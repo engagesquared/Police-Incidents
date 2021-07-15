@@ -168,51 +168,6 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task ChangeIncidentFileReportUrl(long incidentId, string fileReportUrl)
-        {
-            try
-            {
-                var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId);
-                var incident = await incidentQuery.FirstOrDefaultAsync();
-                if (incident != null)
-                {
-                    incident.FileReportFolderName = fileReportUrl;
-                    this.dbContext.Update(incident);
-                    await this.dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    this.logger.LogError($"Failed to find incident by id: {incidentId}");
-                }
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, $"Failed to change incident file report url. Incident id: {incidentId} FileReportUrl: {fileReportUrl}");
-                throw;
-            }
-        }
-
-        public async Task UpdateDistrictFolder(long districtId, string folderPath)
-        {
-            try
-            {
-                var district = this.dbContext.Districts.FirstOrDefault(x => x.Id == districtId);
-                if (district == null)
-                {
-                    this.logger.LogWarning($"No district was found with '{districtId}' Id.");
-                    return;
-                }
-
-                district.RootFolderPath = folderPath;
-                await this.dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, $"Failed to update incident {districtId}");
-                throw;
-            }
-        }
-
         public async Task ChangeLocation(long incidentId, string location)
         {
             try
@@ -263,27 +218,28 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-
-        public async Task<bool> ReAssignIncident(List<ReAssignIncidentInput> incidentManagerArray)
+        public async Task<List<ReAssignIncidentInput>> ReAssignIncidents(List<ReAssignIncidentInput> incidents)
         {
             try
             {
-                foreach (ReAssignIncidentInput incidentManager in incidentManagerArray)
+                var managersToNotify = new List<ReAssignIncidentInput>();
+                var incidentsToUpdateIds = incidents.Select(x => x.IncidentId).Distinct().ToArray();
+                var incidentsToUpdate = this.dbContext.IncidentDetails.Where(v => incidentsToUpdateIds.Contains(v.Id)).Include(x => x.Manager).ToList();
+                var users = await this.EnsureUsersAsync(incidents.Select(x => x.IncidentManagerId).ToArray());
+                foreach (var incidentToUpdate in incidentsToUpdate)
                 {
-                    var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentManager.IncidentId).Include(x => x.District);
-                    var incident = await incidentQuery.FirstOrDefaultAsync();
-                    if (incident != null)
+                    var request = incidents.First(x => x.IncidentId == incidentToUpdate.Id);
+                    var newManager = users.First(x => x.AadUserId == request.IncidentManagerId);
+                    if (incidentToUpdate.Manager?.AadUserId != newManager.AadUserId)
                     {
-                        var manager = await this.EnsureUserAsync(incidentManager.IncidentManagerId);
-                        incident.Manager = manager;
-                        this.dbContext.Update(incident);
-                        await this.dbContext.SaveChangesAsync();
-                        //TODO: 
-                        //await this.SendTeamsNotification(accessToken, incident.District.TeamGroupId.ToString(), incidentManager.IncidentManagerId.ToString(), incident.Title);
+                        incidentToUpdate.Manager = newManager;
+                        this.dbContext.Update(incidentToUpdate);
+                        managersToNotify.Add(request);
                     }
                 }
 
-                return true;
+                await this.dbContext.SaveChangesAsync();
+                return managersToNotify;
             }
             catch (Exception ex)
             {
@@ -292,67 +248,45 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<bool> UpdateTeamMember(long incidentId, IncidentTeamMemberInput teamMembers)
+        public async Task<List<UserEntity>> UpdateTeamMembers(long incidentId, List<IncidentMemberInput> teamMembersInput)
         {
+            var usersToNotify = new List<UserEntity>();
             try
             {
-                var incidentQuery = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId);
-                var incident = await incidentQuery.FirstOrDefaultAsync();
+                var incident = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId).Include(x => x.Participants).FirstOrDefault();
                 if (incident != null)
                 {
-                    incident.ManagerId = teamMembers.IncidentManager;
+                    var users = await this.EnsureUsersAsync(teamMembersInput.Select(x => x.UserId).Distinct().ToArray());
 
-                    var incidentTeams = this.dbContext.IncidentTeamMembers.Where(t => t.IncidentId == incidentId);
-                    var incidentTeamMembers = await incidentTeams.ToListAsync();
-                    this.dbContext.IncidentTeamMembers.RemoveRange(incidentTeamMembers);
-                    if (teamMembers.FieldOfficer != null)
+                    var assignmentsToDelete = incident.Participants.Where(x => !users.Any(u => u.AadUserId == x.TeamMemberId)).ToList();
+                    this.dbContext.IncidentTeamMembers.RemoveRange(assignmentsToDelete);
+
+                    foreach (var user in users)
                     {
-                        foreach (Guid temp in teamMembers.FieldOfficer)
+                        var teamMemberInput = teamMembersInput.First(x => x.UserId == user.AadUserId);
+                        var participant = incident.Participants.FirstOrDefault(x => x.TeamMemberId == user.AadUserId);
+                        if (participant == null)
                         {
-                            var fieldOfficer = await this.EnsureUserAsync(temp);
-                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 1 });
+                            participant = new IncidentTeamMemberEntity { TeamMember = user };
+                            incident.Participants.Add(participant);
                         }
-                    }
 
-                    if (teamMembers.ExternalAgency != null)
-                    {
-                        foreach (Guid temp in teamMembers.ExternalAgency)
+                        if (participant.UserRoleId != teamMemberInput.RoleId)
                         {
-                            var fieldOfficer = await this.EnsureUserAsync(temp);
-                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 2 });
-                        }
-                    }
-
-                    if (teamMembers.SocLead != null)
-                    {
-                        foreach (Guid temp in teamMembers.SocLead)
-                        {
-                            var fieldOfficer = await this.EnsureUserAsync(temp);
-                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 3 });
-                        }
-                    }
-
-                    if (teamMembers.FamilyLiason != null)
-                    {
-                        foreach (Guid temp in teamMembers.FamilyLiason)
-                        {
-
-                            var fieldOfficer = await this.EnsureUserAsync(temp);
-                            incident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = fieldOfficer, UserRoleId = 4 });
+                            participant.UserRoleId = teamMemberInput.RoleId;
+                            usersToNotify.Add(user);
                         }
                     }
 
                     this.dbContext.Update(incident);
-
-                    // this.dbContext.Update(incidentTeamMember);
                     await this.dbContext.SaveChangesAsync();
-                    return true;
                 }
                 else
                 {
                     this.logger.LogError($"Failed to find incident by id: {incidentId}");
-                    return false;
                 }
+
+                return usersToNotify;
             }
             catch (Exception ex)
             {
@@ -374,13 +308,19 @@ namespace PoliceIncidents.Tab.Services
                 var author = await this.EnsureUserAsync(authorId);
                 newIncident.CreatedById = authorId;
 
+                var defaultRole = this.dbContext.UserRoles.FirstOrDefault(x => x.IsDefault == true);
+                if (defaultRole == null)
+                {
+                    defaultRole = this.dbContext.UserRoles.FirstOrDefault();
+                }
+
                 if (incident.MemberIds?.Count > 0)
                 {
-                    incident.MemberIds = incident.MemberIds.Distinct().ToList();
+                    incident.MemberIds = incident.MemberIds.Where(x => manager.AadUserId != x).Distinct().ToList();
                     foreach (var userId in incident.MemberIds)
                     {
                         var user = await this.EnsureUserAsync(userId);
-                        newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRoleId = 1 });
+                        newIncident.Participants.Add(new IncidentTeamMemberEntity { TeamMember = user, UserRole = defaultRole });
                     }
                 }
 
@@ -415,20 +355,31 @@ namespace PoliceIncidents.Tab.Services
 
         private async Task<UserEntity> EnsureUserAsync(Guid userId)
         {
-            var userQuery = this.dbContext.UserEntities.Where(x => x.AadUserId == userId);
-            var user = userQuery.FirstOrDefault();
-            if (user == null)
-            {
-                user = new UserEntity
-                {
-                    AadUserId = userId,
-                };
+            return (await this.EnsureUsersAsync(new[] { userId })).FirstOrDefault();
+        }
 
-                this.dbContext.Add(user);
+        private async Task<List<UserEntity>> EnsureUsersAsync(Guid[] userIds)
+        {
+            var users = this.dbContext.UserEntities.Where(x => userIds.Contains(x.AadUserId)).ToList();
+            var usersToEnsure = userIds.Where(x => users.All(u => u.AadUserId != x));
+
+            if (usersToEnsure.Any())
+            {
+                foreach (var userId in usersToEnsure)
+                {
+                    var newUser = new UserEntity
+                    {
+                        AadUserId = userId,
+                    };
+
+                    this.dbContext.Add(newUser);
+                    users.Add(newUser);
+                }
+
                 await this.dbContext.SaveChangesAsync();
             }
 
-            return user;
+            return users;
         }
 
         private IncidentDetailsEntity MapFromInputModel(IncidentInputModel model)

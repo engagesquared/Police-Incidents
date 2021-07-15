@@ -22,5 +22,10 @@ namespace PoliceIncidents.Core.Services
             var result = $"{TeamsDeepLink}/entity/{tabAppId}/Home?label={Uri.EscapeDataString(label)}{(teamId.HasValue ? $"&groupId={teamId}" : string.Empty)}&context={Uri.EscapeDataString(ctx)}";
             return result;
         }
+
+        public string GetNewMeetingLink(string incidentTitle, string[] upns)
+        {
+            return $"{TeamsDeepLink}/meeting/new?subject={Uri.EscapeDataString(incidentTitle)}&attendees={string.Join(',', upns)}";
+        }
     }
 }

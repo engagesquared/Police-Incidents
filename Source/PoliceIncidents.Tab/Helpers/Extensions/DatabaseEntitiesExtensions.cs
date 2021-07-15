@@ -42,7 +42,11 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
             result.ChatThreadLink = incidentEntity.District == null
                 ? string.Empty : $"https://teams.microsoft.com/l/message/{incidentEntity.District.ConversationId}/{incidentEntity.ChatConverstaionId}";
             result.PlannerLink = incidentEntity.PlannerLink;
-            result.Members = incidentEntity.Participants?.Select(v => new Tuple<Guid, int>(v.TeamMemberId, v.UserRoleId)).ToList();
+            result.Members = incidentEntity.Participants?.Select(v => new IncidentMemberModel
+            {
+                UserId = v.TeamMemberId,
+                RoleId = v.UserRoleId,
+            }).ToList();
             result.IncidentUpdates = incidentEntity.Updates
                 .OrderByDescending(u => u.CreatedAt)
                 .Take(limitOfUpdates)

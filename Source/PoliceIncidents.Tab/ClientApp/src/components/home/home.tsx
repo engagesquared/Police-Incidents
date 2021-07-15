@@ -1,10 +1,10 @@
 ﻿import * as React from "react";
-import { GlobalContext } from "../../providers/GlobalContextProvider";
 import { PersonalTab } from "../personalTab/personalTab";
 import { TeamTab } from "../teamTab/teamTab";
+import { useGlobalState } from "../../hooks/useGlobalState";
 
 export const Home = () => {
-    const { isPersonalTab } = React.useContext(GlobalContext);
-    
-    return <>{isPersonalTab ? <PersonalTab /> : <TeamTab />}</>;
+    const { state } = useGlobalState();
+
+    return <>{state.isPersonalTab ? <PersonalTab /> : <TeamTab />}</>;
 };

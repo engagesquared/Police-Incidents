@@ -34,7 +34,7 @@ namespace PoliceIncidents.Bot.Controllers
         [Route(Core.Common.Constants.IncidentRolesBotRoute)]
         public async Task<StatusCodeResult> NotifyNewRoles(int incidentId, List<Guid> usersToNotifyIds)
         {
-            await this.bot.NotifyAboutIncidentCreated(incidentId);
+            await this.bot.NotifyAboutIncidentRoles(incidentId, usersToNotifyIds);
 
             // Let the caller know proactive messages have been sent
             return new OkResult();

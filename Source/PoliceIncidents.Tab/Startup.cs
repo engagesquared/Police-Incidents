@@ -19,6 +19,7 @@ namespace Microsoft.Teams.Apps.DLLookup
     using Microsoft.Identity.Client;
     using Newtonsoft.Json;
     using PoliceIncidents.Core.DB;
+    using PoliceIncidents.Core.Services;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
     using PoliceIncidents.Tab.Authentication;
@@ -60,12 +61,14 @@ namespace Microsoft.Teams.Apps.DLLookup
             services.AddHttpContextAccessor();
             services.AddSingleton(new HttpClient());
             services.AddSingleton<AppSettings>();
+            services.AddSingleton<DeepLinksService>();
             services.AddDistributedMemoryCache();
             services.AddSingleton<IConfidentialClientApplication>(confidentialClientApp);
             services.AddDLLookupAuthentication(this.Configuration);
             services.AddScoped<TokenAcquisitionService>();
             services.AddScoped<GraphApiService>();
             services.AddScoped<BotNotificationsService>();
+            services.AddScoped<PdfService>();
             services.AddSession();
 
             this.ConfigureDataServices(services);

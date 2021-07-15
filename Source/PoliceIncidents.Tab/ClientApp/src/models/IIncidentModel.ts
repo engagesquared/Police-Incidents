@@ -1,5 +1,6 @@
 import { IncidentStatus } from "./IncidentStatus";
 import { IIncidentUpdateModel } from "./IIncidentUpdateModel";
+import { IIncidentMemberModel } from "./IIncidentMemberModel";
 
 export interface IIncidentModel {
     id: number;
@@ -10,7 +11,7 @@ export interface IIncidentModel {
     reportsFolderPath?: string;
     plannerLink?: string;
     managerId?: string;
-    members: { item1: string; item2: number }[];
+    members: IIncidentMemberModel[];
     status: IncidentStatus;
     location: string;
     incidentUpdates: IIncidentUpdateModel[];

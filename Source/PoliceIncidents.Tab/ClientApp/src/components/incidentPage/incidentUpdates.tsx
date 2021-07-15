@@ -3,8 +3,8 @@ import { Flex, Text, Button, ChevronDownIcon } from "@fluentui/react-northstar";
 import { useStyles } from "./incidentUpdates.styles";
 import { IIncidentUpdateModel } from "../../models";
 import { Person, PersonViewType, PersonCardInteraction } from "@microsoft/mgt-react";
-import { GlobalContext } from "../../providers/GlobalContextProvider";
 import { formatDateTime } from "../../utils";
+import { useGlobalState } from "../../hooks/useGlobalState";
 
 export interface IIncidentUpdatesProps {
     itemsToShow: number;
@@ -13,7 +13,7 @@ export interface IIncidentUpdatesProps {
 
 export const IncidentUpdates = (props: IIncidentUpdatesProps) => {
     const classes = useStyles();
-    const ctx = React.useContext(GlobalContext);
+    const { state } = useGlobalState();
     const [itemsToShow, setItemsToShow] = React.useState<IIncidentUpdateModel[]>([]);
     React.useEffect(() => {
         setItemsToShow(props.updates.slice(0, props.itemsToShow));
@@ -43,7 +43,7 @@ export const IncidentUpdates = (props: IIncidentUpdatesProps) => {
                         <Text weight="semibold">{i.title}</Text>
                         <Text className={classes.text}>{i.body}</Text>
                         <Flex className={classes.itemBottom} vAlign="center">
-                            <Text>{formatDateTime(ctx.teamsContext.locale, i.createdAt)}</Text>
+                            <Text>{formatDateTime(state.teamsContext.locale, i.createdAt)}</Text>
                             <Person userId={i.createdById} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
                         </Flex>
                     </Flex>

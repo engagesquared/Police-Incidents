@@ -30,7 +30,7 @@ namespace PoliceIncidents.Tab.Models
 
         public Guid? ManagerId { get; set; }
 
-        public List<Tuple<Guid, int>> Members { get; set; }
+        public List<IncidentMemberModel> Members { get; set; }
 
         public IncidentStatus Status { get; set; }
 

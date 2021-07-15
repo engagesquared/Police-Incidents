@@ -13,6 +13,7 @@ namespace PoliceIncidents.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
+    using PoliceIncidents.Core.Services;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
     using PoliceIncidents.Tab.Helpers;
@@ -31,6 +32,8 @@ namespace PoliceIncidents.Controllers
         private readonly AppSettings appSettings;
         private readonly GraphApiService graphApiService;
         private readonly BotNotificationsService botNotificationsService;
+        private readonly DeepLinksService deepLinksService;
+        private readonly PdfService pdfService;
 
         public IncidentsController(
             ILogger<UserController> logger,
@@ -38,7 +41,9 @@ namespace PoliceIncidents.Controllers
             IIncidentUpdateService incidentUpdateService,
             AppSettings appSettings,
             GraphApiService graphApiService,
-            BotNotificationsService botNotificationsService)
+            BotNotificationsService botNotificationsService,
+            DeepLinksService deepLinksService,
+            PdfService pdfService)
         {
             this.logger = logger;
             this.incidentService = incidentService;
@@ -46,6 +51,8 @@ namespace PoliceIncidents.Controllers
             this.appSettings = appSettings;
             this.graphApiService = graphApiService;
             this.botNotificationsService = botNotificationsService;
+            this.deepLinksService = deepLinksService;
+            this.pdfService = pdfService;
         }
 
         [HttpPost("")]
@@ -86,8 +93,6 @@ namespace PoliceIncidents.Controllers
 
                 // Send async to increase system's response time
                 _ = this.botNotificationsService.SendNewIncidentChannelNotification(newIncidentId);
-                _ = this.botNotificationsService.SendIncidentRolesPrivateNotification(newIncidentId, null);
-
                 return newIncidentId;
             }
             catch (Exception ex)
@@ -197,12 +202,17 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpPost("{id}/updatemember")]
-        public async Task<bool> AddUpdateTeamMember(long id, IncidentTeamMemberInput teamMemberInput)
+        [HttpPost("{id}/members")]
+        public async Task AddUpdateTeamMember(long id, List<IncidentMemberInput> members)
         {
             try
             {
-                return await this.incidentService.UpdateTeamMember(id, teamMemberInput);
+                var usersToNotify = await this.incidentService.UpdateTeamMembers(id, members);
+                if (usersToNotify.Any())
+                {
+                    // async for responsibility
+                    _ = this.botNotificationsService.SendIncidentRolesPrivateNotification(id, usersToNotify.Select(x => x.AadUserId).ToList());
+                }
             }
             catch (Exception ex)
             {
@@ -216,7 +226,9 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                return await this.incidentService.CloseIncident(id);
+                await this.incidentService.CloseIncident(id);
+                await this.pdfService.GenerateAndUploadPdf(id, true);
+                return true;
             }
             catch (Exception ex)
             {
@@ -230,30 +242,7 @@ namespace PoliceIncidents.Controllers
         {
             try
             {
-                var incident = await this.incidentService.GetIncidentById(id);
-                var district = this.incidentService.GetDistricForIncident(id);
-                if (string.IsNullOrEmpty(district.RootFolderPath))
-                {
-                    var rfolder = await this.graphApiService.GetRootDriveUrl(district.TeamGroupId?.ToString());
-                    await this.incidentService.UpdateDistrictFolder(district.Id, rfolder);
-                }
-
-                var chatMessage = await this.graphApiService.GetChatMessage(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
-                var chatMessageReplies = await this.graphApiService.GetChatMessageReplies(district.TeamGroupId.ToString(), district.ConversationId, incident.ChatConverstaionId);
-                var pdfBytes = PdfGenerator.PrepareDocument(chatMessage, chatMessageReplies);
-                MemoryStream stream = new MemoryStream(pdfBytes);
-                var folder = incident.ReportsFolderName ?? $"/IncidentReports/{incident.Id}-{new Regex("[\"*:<>?\\/\\|]").Replace(incident.Title, string.Empty)}";
-                if (folder.Length > 80)
-                {
-                    folder = folder.Substring(0, 80);
-                }
-
-                if (!folder.Equals(incident.ReportsFolderName))
-                {
-                    await this.incidentService.ChangeIncidentFileReportUrl(id, folder);
-                }
-
-                var pdfDocUrl = await this.graphApiService.UploadFileToTeams(district.TeamGroupId.ToString(), $"{folder}/Report-{DateTime.Now.ToString("yyyyMMdd_HHmm")}.pdf", stream);
+                var pdfDocUrl = await this.pdfService.GenerateAndUploadPdf(id);
                 return pdfDocUrl;
             }
             catch (Exception ex)
@@ -305,7 +294,7 @@ namespace PoliceIncidents.Controllers
                     userIds.Add(incident.ManagerId.Value);
                 }
 
-                userIds.AddRange(incident.Members.Select(t => t.Item1).ToList());
+                userIds.AddRange(incident.Members.Select(t => t.UserId).ToList());
                 userIds = userIds.Distinct().ToList();
                 var upns = new List<string>();
                 if (userIds.Any())
@@ -313,7 +302,7 @@ namespace PoliceIncidents.Controllers
                     upns = await this.graphApiService.GetUserUpns(userIds);
                 }
 
-                return $"https://teams.microsoft.com/l/meeting/new?subject={Uri.EscapeDataString(incident.Title)}&attendees={string.Join(',', upns)}";
+                return this.deepLinksService.GetNewMeetingLink(incident.Title, upns.ToArray());
             }
             catch (Exception ex)
             {
@@ -322,16 +311,26 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpPost("reassignincidents")]
-        public async Task<bool> ReAssignIncident(List<ReAssignIncidentInput> incidentManagerArray)
+        [HttpPost("reassign")]
+        public async Task<bool> ReAssignIncidents(List<ReAssignIncidentInput> incidentManagerArray)
         {
             try
             {
-                return await this.incidentService.ReAssignIncident(incidentManagerArray);
+                var usersToNotify = await this.incidentService.ReAssignIncidents(incidentManagerArray);
+                if (usersToNotify.Any())
+                {
+                    foreach (var userToNotify in usersToNotify)
+                    {
+                        // async for responsibility
+                        _ = this.botNotificationsService.SendIncidentRolesPrivateNotification(userToNotify.IncidentId, new List<Guid>() { userToNotify.IncidentManagerId });
+                    }
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"An error occured in ReAssignIncident");
+                this.logger.LogError(ex, $"An error occured in ReAssignIncidents");
                 throw;
             }
         }

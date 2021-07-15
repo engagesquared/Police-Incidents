@@ -8,12 +8,12 @@ import { ErrorMessage } from "../form/errorMessage";
 
 import { GroupType, PeoplePicker, PersonType } from "@microsoft/mgt-react";
 import { Routes } from "../../common";
-import { GlobalContext } from "../../providers/GlobalContextProvider";
 import { useHistory } from "react-router-dom";
+import { useGlobalState } from "../../hooks/useGlobalState";
 
 export const NewIncidentPage = () => {
     const { t } = useTranslation();
-    const ctx = React.useContext(GlobalContext);
+    const { state } = useGlobalState();
     const classes = useStyles();
     const history = useHistory();
     const [isLoading, setIsLoading] = React.useState(false);
@@ -24,7 +24,7 @@ export const NewIncidentPage = () => {
             location: "",
             manager: "",
             groups: [],
-            members: []
+            members: [],
         };
         return result;
     };
@@ -50,16 +50,20 @@ export const NewIncidentPage = () => {
             members: {
                 required: t("requiredValidationMessage"),
                 validate: {
-                    hasValue: ((val: any[]) => { return val.length || groups.length || t("requiredValidationMessage"); })
-                }
+                    hasValue: (val: any[]) => {
+                        return val.length || groups.length || t("requiredValidationMessage");
+                    },
+                },
             } as RegisterOptions,
             groups: {
                 required: t("requiredValidationMessage"),
                 validate: {
-                    hasValue: ((val: any[]) => { return val.length || members.length || t("requiredValidationMessage"); })
-                }
+                    hasValue: (val: any[]) => {
+                        return val.length || members.length || t("requiredValidationMessage");
+                    },
+                },
             } as RegisterOptions,
-            description: undefined
+            description: undefined,
         };
 
         register({ name: "title" }, validationRules.title);
@@ -70,8 +74,6 @@ export const NewIncidentPage = () => {
         register({ name: "groups" }, validationRules.groups);
     }, [getValues, register, t, groups, members]);
 
-
-
     const onConfirm = handleSubmit(async (data) => {
         try {
             setIsLoading(true);
@@ -80,9 +82,9 @@ export const NewIncidentPage = () => {
                 description: description,
                 managerId: manager,
                 location: location,
-                regionId: ctx.teamsContext.groupId || "",
+                regionId: state.teamsContext.groupId || "",
                 memberIds: members,
-                groupIds: groups
+                groupIds: groups,
             });
             history.push(Routes.incidentPage.replace(Routes.incidentIdPart, String(incidentId)));
         } catch (ex) {
@@ -105,7 +107,7 @@ export const NewIncidentPage = () => {
     const onGroupsChange = (e: any) => {
         const result = e.detail && e.detail.length ? e.detail.map((g: any) => g.id) : [];
         setValue("groups", result, { shouldValidate: true });
-    }
+    };
 
     const onGoBackClick = () => {
         history.goBack();

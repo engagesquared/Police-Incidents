@@ -18,13 +18,11 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<bool> CloseIncident(long incidentId);
 
-        Task<bool> UpdateTeamMember(long id, IncidentTeamMemberInput teamMemberInput);
+        Task<List<UserEntity>> UpdateTeamMembers(long id, List<IncidentMemberInput> teamMembersInput);
 
         Task<IncidentModel> GetIncidentById(long id);
 
         DistrictEntity GetDistricForIncident(long incidentId);
-
-        Task ChangeIncidentFileReportUrl(long incidentId, string fileReportUrl);
 
         Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber);
 
@@ -36,8 +34,6 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<long> CreateIncident(IncidentInputModel incident, Guid authorId);
 
-        Task<bool> ReAssignIncident(List<ReAssignIncidentInput> incidentManagerArray);
-
-        Task UpdateDistrictFolder(long districtId, string folderPath);
+        Task<List<ReAssignIncidentInput>> ReAssignIncidents(List<ReAssignIncidentInput> incidents);
     }
 }
