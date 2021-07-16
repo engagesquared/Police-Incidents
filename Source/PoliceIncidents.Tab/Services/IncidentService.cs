@@ -442,7 +442,7 @@ namespace PoliceIncidents.Tab.Services
             result.Status = incidentEntity.Status;
             result.ChatConverstaionId = incidentEntity.ChatConverstaionId;
             result.ChatThreadLink =
-                this.deepLinksService.GetChatMessageLink(incidentEntity.District?.TeamGroupId, incidentEntity.ChatConverstaionId, incidentEntity.ChatConverstaionId);
+                this.deepLinksService.GetChatMessageLink(incidentEntity.District?.TeamGroupId, incidentEntity.District?.ConversationId, incidentEntity.ChatConverstaionId);
             result.IncidentUpdates = updates
                 .OrderByDescending(u => u.CreatedAt)
                 .Select(v => v.ToIncidentUpdateModel())
@@ -464,7 +464,7 @@ namespace PoliceIncidents.Tab.Services
             result.ReportsFolderName = incidentEntity.FileReportFolderName;
             result.ChatConverstaionId = incidentEntity.ChatConverstaionId;
             result.ChatThreadLink =
-                this.deepLinksService.GetChatMessageLink(incidentEntity.District?.TeamGroupId, incidentEntity.ChatConverstaionId, incidentEntity.ChatConverstaionId);
+                this.deepLinksService.GetChatMessageLink(incidentEntity.District?.TeamGroupId, incidentEntity.District?.ConversationId, incidentEntity.ChatConverstaionId);
             result.PlannerLink = incidentEntity.PlannerLink;
             result.Members = incidentEntity.Participants?.Select(v => new IncidentMemberModel
             {

@@ -13,7 +13,7 @@ import { Providers, MgtPersonCard, TeamsHelper } from "@microsoft/mgt-react";
 import { MgtTokenProvider } from "./providers/MgtTokenProvider";
 import { Routes } from "./common";
 
-import { Flex } from "@fluentui/react-northstar";
+import { Flex, Loader } from "@fluentui/react-northstar";
 import { useStyles } from "./App.styles";
 import { useGlobalState } from "./hooks/useGlobalState";
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -50,7 +50,7 @@ const App = () => {
     return (
         <Flex className={classes.root} column>
             <div className={[classes.scrollRegion, isMobileDevice ? classes.mobileGap : ""].join(" ")}>
-                <React.Suspense fallback={<></>}>
+                <React.Suspense fallback={<Loader />}>
                     <BrowserRouter>
                         <Switch>
                             {/* Do not remove this pseudo-contatiner. Routes on mobile don't work without it */}
