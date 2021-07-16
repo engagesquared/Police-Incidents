@@ -25,6 +25,8 @@ namespace Microsoft.Teams.Apps.DLLookup
     using PoliceIncidents.Tab.Authentication;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Services;
+    using WkHtmlToPdfDotNet;
+    using WkHtmlToPdfDotNet.Contracts;
 
     /// <summary>
     /// Default Startup class.
@@ -65,6 +67,7 @@ namespace Microsoft.Teams.Apps.DLLookup
             services.AddDistributedMemoryCache();
             services.AddSingleton<IConfidentialClientApplication>(confidentialClientApp);
             services.AddDLLookupAuthentication(this.Configuration);
+            services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
             services.AddScoped<TokenAcquisitionService>();
             services.AddScoped<GraphApiService>();
             services.AddScoped<BotNotificationsService>();

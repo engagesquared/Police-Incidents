@@ -41,6 +41,25 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
     const classes = useStyles();
     const { state } = useGlobalState();
 
+    const getValidateOtherRoleMessage = (value: OtherRoleItem, allUsers: OtherRoleItem[], managerId?: string): string | undefined => {
+        if (!value.userId || !value.role) {
+            return t("requiredValidationMessage");
+        } else if (value.userId === managerId || allUsers.some((x) => x.id !== value.id && x.userId === value.userId)) {
+            return t("multipleRolesValidationMessage");
+        }
+        return undefined;
+    };
+
+    const validateManager = (managerId: string | undefined, allUsers: OtherRoleItem[]) => {
+        if (!managerId) {
+            setManagerValidationError(t("requiredValidationMessage"));
+        } else if (allUsers.some((x) => x.userId === managerId)) {
+            setManagerValidationError(t("multipleRolesValidationMessage"));
+        } else if (!!managerValidationError) {
+            setManagerValidationError("");
+        }
+    };
+
     const getDefaultValues = () => {
         const otherRoles: OtherRoleItem[] = (props.incidentMembers || []).map((x) => ({
             id: uuidv4(),
@@ -159,25 +178,6 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
         newItem.validationMessage = getValidateOtherRoleMessage(newItem, newValue, incidentManager);
         validateManager(incidentManager, newValue);
         setValue("otherRoles", newValue);
-    };
-
-    const getValidateOtherRoleMessage = (value: OtherRoleItem, allUsers: OtherRoleItem[], managerId?: string): string | undefined => {
-        if (!value.userId || !value.role) {
-            return t("requiredValidationMessage");
-        } else if (value.userId === managerId || allUsers.some((x) => x.id !== value.id && x.userId === value.userId)) {
-            return t("multipleRolesValidationMessage");
-        }
-        return undefined;
-    };
-
-    const validateManager = (managerId: string | undefined, allUsers: OtherRoleItem[]) => {
-        if (!managerId) {
-            setManagerValidationError(t("requiredValidationMessage"));
-        } else if (allUsers.some((x) => x.userId === managerId)) {
-            setManagerValidationError(t("multipleRolesValidationMessage"));
-        } else if (!!managerValidationError) {
-            setManagerValidationError("");
-        }
     };
 
     const isFormValid = React.useMemo(() => {

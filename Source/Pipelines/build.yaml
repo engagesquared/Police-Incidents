@@ -20,7 +20,6 @@ steps:
     publishWebProjects: false
     projects: |
       **/PoliceIncidents.Tab.csproj 
-      **/PoliceIncidents.Functions.csproj
       **/PoliceIncidents.Bot.csproj
     arguments: '-c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: true
