@@ -16,8 +16,6 @@ namespace PoliceIncidents.Tab.Models
 
         public string Description { get; set; }
 
-        public string ExternalLink { get; set; }
-
         public string PlannerLink { get; set; }
 
         public string ChatThreadLink { get; set; }

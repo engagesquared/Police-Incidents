@@ -12,6 +12,7 @@ namespace PoliceIncidents.Tab.Services
     using Microsoft.Extensions.Logging;
     using PoliceIncidents.Core.DB;
     using PoliceIncidents.Core.DB.Entities;
+    using PoliceIncidents.Core.Services;
     using PoliceIncidents.Tab.Helpers.Extensions;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
@@ -20,26 +21,30 @@ namespace PoliceIncidents.Tab.Services
     {
         private readonly ILogger<IncidentService> logger;
         private readonly PoliceIncidentsDbContext dbContext;
+        private readonly DeepLinksService deepLinksService;
 
         public IncidentService(
-             ILogger<IncidentService> logger,
-             PoliceIncidentsDbContext dbContext)
+             ILogger<IncidentService> logger, PoliceIncidentsDbContext dbContext, DeepLinksService deepLinksService)
         {
             this.logger = logger;
             this.dbContext = dbContext;
+            this.deepLinksService = deepLinksService;
         }
 
         public async Task<IncidentModel> GetIncidentById(long id)
         {
             try
             {
-                var userIncidentsQuery = this.dbContext.IncidentDetails
+                var incident = await this.dbContext.IncidentDetails
                     .Where(v => v.Id == id)
-                    .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
-                var incidents = await userIncidentsQuery
-                    .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentItem))
+                    .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District)
                     .FirstOrDefaultAsync();
-                return incidents;
+                if (incident != null)
+                {
+                    return this.MapToIncidentModel(incident);
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
@@ -48,32 +53,22 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public DistrictEntity GetDistricForIncident(long incidentId)
+        public async Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber, int pageSize)
         {
+            pagenumber = this.ValidatePageNumber(pagenumber);
+            pageSize = this.ValidatePageSize(pageSize);
             try
             {
-                var disctrict = this.dbContext.IncidentDetails.Where(v => v.Id == incidentId).Select(v => v.District).FirstOrDefault();
-                return disctrict;
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, $"Failed to get district for incident {incidentId} from database");
-                throw;
-            }
-        }
-
-        public async Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber)
-        {
-            try
-            {
-                var userIncidentsQuery = this.dbContext.IncidentDetails
+                var userIncidents = await this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
                     .Where(v => v.Participants.Any(p => p.TeamMemberId == userId) || v.ManagerId == userId)
-                    .Skip((pagenumber - 1) * 10).Take(10)
-                    .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
-                var incidents = await userIncidentsQuery
-                    .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
+                    //.OrderByDescending(x => x.CreatedUtc)
+                    .Include(x => x.District)
+                    .Skip((pagenumber - 1) * pageSize).Take(pageSize)
                     .ToListAsync();
+
+                var updates = await this.GetTopLatestUpdatesForIncidents(userIncidents);
+                var incidents = userIncidents.Select(x => this.MapToIncidentsListModel(x, updates.Where(u => u.ParentIncidentId == x.Id).ToList())).ToList();
                 return incidents;
             }
             catch (Exception ex)
@@ -83,17 +78,21 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId, int pagenumber)
+        public async Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId, int pagenumber, int pageSize)
         {
+            pagenumber = this.ValidatePageNumber(pagenumber);
+            pageSize = this.ValidatePageSize(pageSize);
             try
             {
-                var userIncidentsQuery = this.dbContext.IncidentDetails
+                var userIncidents = await this.dbContext.IncidentDetails
                     .Where(v => v.Status != IncidentStatus.Closed)
-                    .Where(v => v.ManagerId == userId).Skip((pagenumber - 1) * 10).Take(10)
-                    .Include(v => v.Updates).Include(v => v.Participants).Include(x => x.District);
-                var incidents = await userIncidentsQuery
-                    .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
-                    .ToListAsync();
+                    //.OrderByDescending(x => x.CreatedUtc)
+                    .Where(v => v.ManagerId == userId).Skip((pagenumber - 1) * pageSize).Take(pageSize)
+                    .Include(x => x.District).ToListAsync();
+
+                var updates = await this.GetTopLatestUpdatesForIncidents(userIncidents);
+                var incidents = userIncidents.Select(x => this.MapToIncidentsListModel(x, updates.Where(u => u.ParentIncidentId == x.Id).ToList())).ToList();
+
                 return incidents;
             }
             catch (Exception ex)
@@ -103,18 +102,21 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber)
+        public async Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber, int pageSize)
         {
+            pagenumber = this.ValidatePageNumber(pagenumber);
+            pageSize = this.ValidatePageSize(pageSize);
+
             try
             {
-                var incidentsQuery = this.dbContext.IncidentDetails
-                    .Where(v => v.Status != IncidentStatus.Closed)
-                    .Where(v => v.District.TeamGroupId == teamId)
-                    .Skip((pagenumber - 1) * 10).Take(10)
-                    .Include(v => v.Updates).Include(x => x.District);
-                var incidents = await incidentsQuery
-                    .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
-                    .ToListAsync();
+                var userIncidents = await this.dbContext.IncidentDetails
+                    .Where(v => v.District.TeamGroupId == teamId && v.Status != IncidentStatus.Closed)
+                    //.OrderByDescending(x => x.CreatedUtc)
+                    .Skip((pagenumber - 1) * pageSize).Take(pageSize)
+                    .Include(x => x.District).ToListAsync();
+
+                var updates = await this.GetTopLatestUpdatesForIncidents(userIncidents);
+                var incidents = userIncidents.Select(x => this.MapToIncidentsListModel(x, updates.Where(u => u.ParentIncidentId == x.Id).ToList())).ToList();
                 return incidents;
             }
             catch (Exception ex)
@@ -124,17 +126,20 @@ namespace PoliceIncidents.Tab.Services
             }
         }
 
-        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber)
+        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber, int pageSize)
         {
+            pagenumber = this.ValidatePageNumber(pagenumber);
+            pageSize = this.ValidatePageSize(pageSize);
             try
             {
-                var incidentsQuery = this.dbContext.IncidentDetails
-                    .Where(v => v.Status == IncidentStatus.Closed)
-                    .Where(v => v.District.TeamGroupId == teamId).Skip((pagenumber - 1) * 10).Take(10)
-                    .Include(v => v.Updates).Include(x => x.District);
-                var incidents = await incidentsQuery
-                    .Select(v => v.ToIncidentModel(Common.Constants.MaxUpdatesInIncedentList))
-                    .ToListAsync();
+                var userIncidents = await this.dbContext.IncidentDetails
+                    .Where(v => v.District.TeamGroupId == teamId && v.Status == IncidentStatus.Closed)
+                    //.OrderByDescending(x => x.CreatedUtc)
+                    .Skip((pagenumber - 1) * pageSize).Take(pageSize)
+                    .Include(x => x.District).ToListAsync();
+
+                var updates = await this.GetTopLatestUpdatesForIncidents(userIncidents);
+                var incidents = userIncidents.Select(x => this.MapToIncidentsListModel(x, updates.Where(u => u.ParentIncidentId == x.Id).ToList())).ToList();
                 return incidents;
             }
             catch (Exception ex)
@@ -392,6 +397,85 @@ namespace PoliceIncidents.Tab.Services
             newIncident.Status = IncidentStatus.New;
             newIncident.CreatedUtc = DateTime.UtcNow;
             return newIncident;
+        }
+
+        private int ValidatePageNumber(int pageNumber)
+        {
+            if (pageNumber <= 0)
+            {
+                return 1;
+            }
+
+            return pageNumber;
+        }
+
+        private int ValidatePageSize(int pageSize)
+        {
+            if (pageSize <= 0)
+            {
+                return Common.Constants.DefaultPageSize;
+            }
+
+            return pageSize;
+        }
+
+
+        private async Task<List<IncidentUpdateEntity>> GetTopLatestUpdatesForIncidents(List<IncidentDetailsEntity> incidents, int top = 3)
+        {
+            var ids = incidents.Select(x => x.Id).ToArray();
+
+            var updates = await this.dbContext.IncidentUpdates.Where(t => ids.Contains(t.ParentIncidentId))
+                .Select(t => t.ParentIncidentId).Distinct()
+                .SelectMany(key => this.dbContext.IncidentUpdates.Where(t => t.ParentIncidentId == key).OrderByDescending(t => t.CreatedAt).Take(3)).ToListAsync();
+            return updates;
+        }
+
+        private IncidentModel MapToIncidentsListModel(IncidentDetailsEntity incidentEntity, List<IncidentUpdateEntity> updates)
+        {
+            var result = new IncidentModel();
+            result.Title = incidentEntity.Title;
+            result.Description = incidentEntity.Description;
+            result.Id = incidentEntity.Id;
+            result.ManagerId = incidentEntity.ManagerId;
+            result.Created = DateTime.SpecifyKind(incidentEntity.CreatedUtc, DateTimeKind.Utc);
+            result.Location = incidentEntity.Location;
+            result.Status = incidentEntity.Status;
+            result.ChatConverstaionId = incidentEntity.ChatConverstaionId;
+            result.ChatThreadLink =
+                this.deepLinksService.GetChatMessageLink(incidentEntity.District?.TeamGroupId, incidentEntity.ChatConverstaionId, incidentEntity.ChatConverstaionId);
+            result.IncidentUpdates = updates
+                .OrderByDescending(u => u.CreatedAt)
+                .Select(v => v.ToIncidentUpdateModel())
+                .ToList();
+            return result;
+        }
+
+        private IncidentModel MapToIncidentModel(IncidentDetailsEntity incidentEntity)
+        {
+            var result = new IncidentModel();
+            result.Title = incidentEntity.Title;
+            result.Description = incidentEntity.Description;
+            result.Id = incidentEntity.Id;
+            result.ManagerId = incidentEntity.ManagerId;
+            result.Created = DateTime.SpecifyKind(incidentEntity.CreatedUtc, DateTimeKind.Utc);
+            result.Location = incidentEntity.Location;
+            result.Status = incidentEntity.Status;
+            result.ReportsFolderPath = incidentEntity.District?.RootFolderPath + incidentEntity.FileReportFolderName;
+            result.ReportsFolderName = incidentEntity.FileReportFolderName;
+            result.ChatConverstaionId = incidentEntity.ChatConverstaionId;
+            result.ChatThreadLink =
+                this.deepLinksService.GetChatMessageLink(incidentEntity.District?.TeamGroupId, incidentEntity.ChatConverstaionId, incidentEntity.ChatConverstaionId);
+            result.PlannerLink = incidentEntity.PlannerLink;
+            result.Members = incidentEntity.Participants?.Select(v => new IncidentMemberModel
+            {
+                UserId = v.TeamMemberId,
+                RoleId = v.UserRoleId,
+            }).ToList();
+            result.IncidentUpdates = incidentEntity.Updates
+                .OrderByDescending(u => u.CreatedAt)
+                .Select(v => v.ToIncidentUpdateModel())
+                .ToList();
+            return result;
         }
     }
 }

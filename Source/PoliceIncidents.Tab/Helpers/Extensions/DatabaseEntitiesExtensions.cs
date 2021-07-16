@@ -23,36 +23,5 @@ namespace PoliceIncidents.Tab.Helpers.Extensions
 
             return result;
         }
-
-        public static IncidentModel ToIncidentModel(this IncidentDetailsEntity incidentEntity, int limitOfUpdates)
-        {
-            var result = new IncidentModel();
-            result.Title = incidentEntity.Title;
-            result.Description = incidentEntity.Description;
-            result.Id = incidentEntity.Id;
-            result.ManagerId = incidentEntity.ManagerId;
-            result.Description = incidentEntity.Description;
-            result.Created = DateTime.SpecifyKind(incidentEntity.CreatedUtc, DateTimeKind.Utc);
-            result.Location = incidentEntity.Location;
-            result.Status = incidentEntity.Status;
-            result.ExternalLink = incidentEntity.ExternalLink;
-            result.ReportsFolderPath = incidentEntity.District?.RootFolderPath + incidentEntity.FileReportFolderName;
-            result.ReportsFolderName = incidentEntity.FileReportFolderName;
-            result.ChatConverstaionId = incidentEntity.ChatConverstaionId;
-            result.ChatThreadLink = incidentEntity.District == null
-                ? string.Empty : $"https://teams.microsoft.com/l/message/{incidentEntity.District.ConversationId}/{incidentEntity.ChatConverstaionId}";
-            result.PlannerLink = incidentEntity.PlannerLink;
-            result.Members = incidentEntity.Participants?.Select(v => new IncidentMemberModel
-            {
-                UserId = v.TeamMemberId,
-                RoleId = v.UserRoleId,
-            }).ToList();
-            result.IncidentUpdates = incidentEntity.Updates
-                .OrderByDescending(u => u.CreatedAt)
-                .Take(limitOfUpdates)
-                .Select(v => v.ToIncidentUpdateModel())
-                .ToList();
-            return result;
-        }
     }
 }

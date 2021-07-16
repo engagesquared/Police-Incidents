@@ -6,7 +6,7 @@ export const useStyles = createUseStyles((theme: ITheme) => {
         container: {
             "& mgt-people-picker": {
                 "--input-border": "none",
-                "--input-background-color": "#f5f5f5",
+                "--input-background-color": theme.siteVariables.colorScheme.default.background1,
             },
         },
         row: {

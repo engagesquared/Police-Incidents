@@ -16,6 +16,7 @@ namespace PoliceIncidents.Controllers
     using PoliceIncidents.Core.Services;
     using PoliceIncidents.Models;
     using PoliceIncidents.Tab;
+    using PoliceIncidents.Tab.Common;
     using PoliceIncidents.Tab.Helpers;
     using PoliceIncidents.Tab.Interfaces;
     using PoliceIncidents.Tab.Models;
@@ -102,13 +103,13 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("user/all/{pagenumber}")]
-        public async Task<List<IncidentModel>> GetAllUserIncidents(int pagenumber)
+        [HttpGet("user/all/{pageNumber}")]
+        public async Task<List<IncidentModel>> GetAllUserIncidents(int pageNumber, [FromQuery]int pageSize = Constants.DefaultPageSize)
         {
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await this.incidentService.GetUserIncidents(userId, pagenumber);
+                return await this.incidentService.GetUserIncidents(userId, pageNumber, pageSize);
             }
             catch (Exception ex)
             {
@@ -117,13 +118,13 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("user/managed/{pagenumber}")]
-        public async Task<List<IncidentModel>> GetManagedUserIncidents(int pagenumber)
+        [HttpGet("user/managed/{pageNumber}")]
+        public async Task<List<IncidentModel>> GetManagedUserIncidents(int pageNumber, [FromQuery]int pageSize = Constants.DefaultPageSize)
         {
             try
             {
                 var userId = new Guid(this.UserObjectId);
-                return await this.incidentService.GetUserManagedIncidents(userId, pagenumber);
+                return await this.incidentService.GetUserManagedIncidents(userId, pageNumber, pageSize);
             }
             catch (Exception ex)
             {
@@ -132,12 +133,12 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("team/{teamId}/active/{pagenumber}")]
-        public async Task<List<IncidentModel>> GetActiveTeamIncidents(Guid teamId, int pagenumber)
+        [HttpGet("team/{teamId}/active/{pageNumber}")]
+        public async Task<List<IncidentModel>> GetActiveTeamIncidents(Guid teamId, int pageNumber, [FromQuery]int pageSize = Constants.DefaultPageSize)
         {
             try
             {
-                return await this.incidentService.GetTeamIncidents(teamId, pagenumber);
+                return await this.incidentService.GetTeamIncidents(teamId, pageNumber, pageSize);
             }
             catch (Exception ex)
             {
@@ -146,12 +147,12 @@ namespace PoliceIncidents.Controllers
             }
         }
 
-        [HttpGet("team/{teamId}/closed/{pagenumber}")]
-        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber)
+        [HttpGet("team/{teamId}/closed/{pageNumber}")]
+        public async Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pageNumber, [FromQuery]int pageSize = Constants.DefaultPageSize)
         {
             try
             {
-                return await this.incidentService.GetClosedTeamIncidents(teamId, pagenumber);
+                return await this.incidentService.GetClosedTeamIncidents(teamId, pageNumber, pageSize);
             }
             catch (Exception ex)
             {

@@ -26,15 +26,15 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
 
     return (
         <div className={classes.container}>
-            <Segment color="brand" style={{ borderTopWidth: "5px" }}>
-                <Flex gap="gap.smaller" className={classes.header}>
-                    <Text content={incident.title} as="h3" />
-                    <Text content={incident.description} />
-                    <div>
+            <Segment color="brand" className={classes.segment}>
+                <Flex gap="gap.small" className={classes.header}>
+                    <Text content={incident.title} title={incident.title} className={[classes.textTitle].join(" ")} />
+                    <Text content={incident.description} title={incident.description} className={classes.text} />
+                    <div className={classes.person}>
                         <Person userId={incident.managerId} showPresence={false} view={PersonViewType.oneline} personCardInteraction={PersonCardInteraction.hover} />
                     </div>
                 </Flex>
-                <Divider size={1} />
+                <Divider size={1} className={classes.divider} />
                 <List
                     items={incident.incidentUpdates.map((iu) => ({
                         content: iu.body,
@@ -46,6 +46,8 @@ export const IncidentCard = (props: { incident: IIncidentModel }) => {
                                 : iu.title,
                         headerMedia: formatDateTime(state.teamsContext.locale, iu.createdAt),
                         key: iu.id,
+                        truncateHeader: true,
+                        truncateContent: true,
                     }))}
                 />
                 <Flex gap="gap.smaller" vAlign="center">

@@ -34,14 +34,16 @@ const App = () => {
     const { isMobileDevice, teamsContext } = state;
 
     React.useEffect(() => {
-        (async () => {
-            const roles = await getAllUserRoles();
-            dispatch("updateRoles", roles);
-        })();
-    }, [dispatch]);
+        if (!state.userRoles?.length) {
+            (async () => {
+                const roles = await getAllUserRoles();
+                dispatch("updateRoles", roles);
+            })();
+        }
+    }, [dispatch, state.userRoles]);
 
     const path = teamsContext.subEntityId;
-    if (path?.includes(Routes.incidentPage.slice(1, Routes.incidentIdPart.length - 1))) {
+    if (path?.includes(Routes.incidentPage.slice(1, Routes.incidentIdPart.length - 1)) && history.location.pathname === Routes.home) {
         history.push(path);
     }
 
@@ -54,6 +56,7 @@ const App = () => {
                             {/* Do not remove this pseudo-contatiner. Routes on mobile don't work without it */}
                             <>
                                 <Route exact path={Routes.home} component={Home} />
+                                <Route exact path={Routes.backHome} component={Home} />
                                 <Route exact path={Routes.incidentPage} component={IncidentPage} />
                                 <Route exact path={Routes.newIncidentPage} component={NewIncidentPage} />
                                 <Route exact path="/errorpage" component={ErrorPage} />

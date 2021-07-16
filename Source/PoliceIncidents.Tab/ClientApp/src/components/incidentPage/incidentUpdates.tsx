@@ -39,7 +39,7 @@ export const IncidentUpdates = (props: IIncidentUpdatesProps) => {
             )}
             {itemsToShow.length > 0 &&
                 itemsToShow.map((i) => (
-                    <Flex column gap="gap.smaller" className={classes.item}>
+                    <Flex key={i.id} column gap="gap.smaller" className={classes.item}>
                         <Text weight="semibold">{i.title}</Text>
                         <Text className={classes.text}>{i.body}</Text>
                         <Flex className={classes.itemBottom} vAlign="center">

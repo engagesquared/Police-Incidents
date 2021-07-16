@@ -10,6 +10,7 @@ import {
     IAccessToken,
     IUserRoleModel,
 } from "../models";
+import { globalConstants } from "../common/GlobalConstants";
 
 let baseAxiosUrl = "/api";
 
@@ -30,25 +31,25 @@ export const getClientId = async (): Promise<AxiosResponse<string>> => {
 };
 
 export const getAllUserIncidents = async (pageNumber: number): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + `/incidents/user/all/${pageNumber}`;
+    let url = baseAxiosUrl + `/incidents/user/all/${pageNumber}?pageSize=${globalConstants.pageSize}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
 
 export const getManagedUserIncidents = async (pageNumber: number): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + `/incidents/user/managed/${pageNumber}`;
+    let url = baseAxiosUrl + `/incidents/user/managed/${pageNumber}?pageSize=${globalConstants.pageSize}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
 
 export const getActiveTeamIncidents = async (teamId: string, pageNumber: number): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + `/incidents/team/${teamId}/active/${pageNumber}`;
+    let url = baseAxiosUrl + `/incidents/team/${teamId}/active/${pageNumber}?pageSize=${globalConstants.pageSize}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };
 
 export const getClosedTeamIncidents = async (teamId: string, pageNumber: number): Promise<IIncidentModel[]> => {
-    let url = baseAxiosUrl + `/incidents/team/${teamId}/closed/${pageNumber}`;
+    let url = baseAxiosUrl + `/incidents/team/${teamId}/closed/${pageNumber}?pageSize=${globalConstants.pageSize}`;
     const response = await axios.get(url);
     return response.data as IIncidentModel[];
 };

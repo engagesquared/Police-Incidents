@@ -22,15 +22,13 @@ namespace PoliceIncidents.Tab.Interfaces
 
         Task<IncidentModel> GetIncidentById(long id);
 
-        DistrictEntity GetDistricForIncident(long incidentId);
+        Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber, int pageSize);
 
-        Task<List<IncidentModel>> GetUserIncidents(Guid userId, int pagenumber);
+        Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId, int pagenumber, int pageSize);
 
-        Task<List<IncidentModel>> GetUserManagedIncidents(Guid userId, int pagenumber);
+        Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber, int pageSize);
 
-        Task<List<IncidentModel>> GetTeamIncidents(Guid teamId, int pagenumber);
-
-        Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber);
+        Task<List<IncidentModel>> GetClosedTeamIncidents(Guid teamId, int pagenumber, int pageSize);
 
         Task<long> CreateIncident(IncidentInputModel incident, Guid authorId);
 

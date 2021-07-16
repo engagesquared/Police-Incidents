@@ -3,78 +3,41 @@ import { Flex, Menu, Button, Dialog } from "@fluentui/react-northstar";
 import { getAllUserIncidents, getManagedUserIncidents } from "../../apis/api-list";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./personalTab.styles";
-import { IncidentCard } from "../incidentCard/incidentCard";
 import { IIncidentModel } from "../../models";
 import { ReAssignMyIncident } from "./reAssignMyIncident";
 import { useGlobalState } from "../../hooks/useGlobalState";
+import { IncidentsList } from "../incidentsList/IncidentsList";
+
+enum Tabs {
+    All = 0,
+    Managed = 1,
+}
 
 export const PersonalTab = () => {
     const { t } = useTranslation();
     const classes = useStyles();
-    const [incidents, setIncidents] = React.useState<IIncidentModel[]>([]);
+    const [activeIndex, setActiveIndex] = React.useState(Tabs.All);
     const [managedIncidents, setManagedIncidents] = React.useState<IIncidentModel[]>([]);
-    const [activeIndex, setActiveIndex] = React.useState<number>(0);
-    const [pageIndex, setPageIndex] = React.useState<number>(2);
-    const [showIncidentLoadMore, setShowIncidentLoadMore] = React.useState<Boolean>(false);
-    const [showManagedIncidentsLoadMore, setShowManagedIncidentsLoadMore] = React.useState<Boolean>(false);
+    const [managedIncidentsKey, setManagedIncidentsKey] = React.useState(new Date().valueOf());
     const [reassignIncidentOpen, setReassignIncidentOpen] = React.useState<boolean>(false);
     const { state } = useGlobalState();
 
-    React.useEffect(() => {
-        (async () => {
-            let tempincidents = await getAllUserIncidents(1);
-            let tempmanagedIncidents = await getManagedUserIncidents(1);
-            const incidents = await getAllUserIncidents(2);
-            if (incidents.length === 0) {
-                setShowIncidentLoadMore(false);
-            } else {
-                setShowIncidentLoadMore(true);
-            }
-            setIncidents(tempincidents.concat(incidents));
-            const managedIncidents = await getManagedUserIncidents(2);
-            if (managedIncidents.length === 0) {
-                setShowManagedIncidentsLoadMore(false);
-            } else {
-                setShowManagedIncidentsLoadMore(true);
-            }
-            setManagedIncidents(tempmanagedIncidents.concat(managedIncidents));
-        })();
-    }, []);
-    const items = [
-        {
-            key: "all",
-            content: t("myIncidentsHeader"),
-        },
-        {
-            key: "managed",
-            content: t("myManagedIncidentsHeader"),
-        },
-    ];
-
-    const onLoadMore = async () => {
-        const newPageIndex = pageIndex + 1;
-        if (activeIndex === 0) {
-            const tempincidents = await getAllUserIncidents(newPageIndex);
-            if (tempincidents.length === 0) {
-                setShowIncidentLoadMore(false);
-            } else {
-                setShowIncidentLoadMore(true);
-            }
-            setIncidents(incidents.concat(tempincidents));
-        } else if (activeIndex === 1) {
-            const tempmanagedIncidents = await getManagedUserIncidents(newPageIndex);
-            if (tempmanagedIncidents.length === 0) {
-                setShowManagedIncidentsLoadMore(false);
-            } else {
-                setShowManagedIncidentsLoadMore(true);
-            }
-            setManagedIncidents(managedIncidents.concat(tempmanagedIncidents));
-        }
-        setPageIndex(newPageIndex);
-    };
+    const menuItems = React.useMemo(
+        () => [
+            {
+                key: "all",
+                content: t("myIncidentsHeader"),
+            },
+            {
+                key: "managed",
+                content: t("myManagedIncidentsHeader"),
+            },
+        ],
+        [t]
+    );
 
     const onMenuChange = (event: React.SyntheticEvent<HTMLElement>, data?: any) => {
-        setActiveIndex(data.activeIndex);
+        setActiveIndex(Number(data.activeIndex));
     };
 
     const onSuccess = (updatedIncidents: { incidentId: number; incidentManagerId: number }[]) => {
@@ -84,7 +47,7 @@ export const PersonalTab = () => {
             return incident;
         });
         tempManagedIncident = tempManagedIncident.filter((t) => t.managerId === state.teamsContext.userObjectId);
-        setManagedIncidents(tempManagedIncident);
+        setManagedIncidentsKey(new Date().valueOf());
     };
 
     return (
@@ -92,9 +55,9 @@ export const PersonalTab = () => {
             <Flex column gap="gap.medium">
                 <Flex space="between">
                     <Flex>
-                        <Menu className={classes.menu} defaultActiveIndex={0} items={items} underlined primary onActiveIndexChange={onMenuChange} />
+                        <Menu className={classes.menu} defaultActiveIndex={Tabs.All} items={menuItems} underlined primary onActiveIndexChange={onMenuChange} />
                     </Flex>
-                    {activeIndex === 1 && managedIncidents.length > 0 && (
+                    {activeIndex === Tabs.Managed && managedIncidents.length > 0 && (
                         <Flex>
                             <Dialog
                                 style={{ maxHeight: "500px", overflow: "auto", minWidth: "300px" }}
@@ -108,17 +71,27 @@ export const PersonalTab = () => {
                     )}
                 </Flex>
                 <Flex column>
-                    {activeIndex === 0 && incidents.slice(0, (pageIndex - 1) * 10).map((incident) => <IncidentCard incident={incident} key={incident.id} />)}
-                    {activeIndex === 0 && showIncidentLoadMore && (
-                        <Flex>
-                            <Button primary content={t("loadMoreBtnLabel")} onClick={onLoadMore} />
-                        </Flex>
+                    {activeIndex === Tabs.All && (
+                        <>
+                            <IncidentsList
+                                getIncidents={(pageId) => {
+                                    return getAllUserIncidents(pageId);
+                                }}
+                            />
+                        </>
                     )}
-                    {activeIndex === 1 && managedIncidents.slice(0, (pageIndex - 1) * 10).map((incident) => <IncidentCard incident={incident} key={incident.id} />)}
-                    {activeIndex === 1 && showManagedIncidentsLoadMore && (
-                        <Flex>
-                            <Button primary content={t("loadMoreBtnLabel")} onClick={onLoadMore} />
-                        </Flex>
+                    {activeIndex === Tabs.Managed && (
+                        <>
+                            <IncidentsList
+                                key={managedIncidentsKey}
+                                getIncidents={(pageId) => {
+                                    return getManagedUserIncidents(pageId);
+                                }}
+                                loadCallback={(incidents) => {
+                                    setManagedIncidents(incidents);
+                                }}
+                            />
+                        </>
                     )}
                 </Flex>
             </Flex>

@@ -11,15 +11,15 @@ export const useStyles = createUseStyles((theme: ITheme) => {
             margin: "0 -0.75rem",
         },
         buttonFlex: {
-            display: "inline-flex"
+            display: "inline-flex",
         },
         onlyInMobile: {
-            display: "flex"
+            display: "flex",
         },
         dialogMinWidth: {
-            minWidth: "300px"
+            minWidth: "300px",
         },
-        '@media (max-width: 600px)': {
+        "@media (max-width: 800px)": {
             contentGrid: {
                 display: "block !important",
             },
@@ -29,11 +29,11 @@ export const useStyles = createUseStyles((theme: ITheme) => {
             },
             buttonFlex: {
                 display: "block !important",
-                marginBottom: "1%"
+                marginBottom: "1%",
             },
             onlyInMobile: {
                 display: "block !important",
-            }
+            },
         },
         column: {
             padding: "0 0.75rem",

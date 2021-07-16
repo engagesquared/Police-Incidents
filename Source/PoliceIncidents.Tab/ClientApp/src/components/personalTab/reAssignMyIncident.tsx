@@ -56,7 +56,7 @@ export const ReAssignMyIncident = (props: React.PropsWithChildren<IReAssignMyInc
                 <Flex gap="gap.medium" column padding="padding.medium">
                     {props.myIncidents.map((incident, index) => {
                         return (
-                            <Flex column>
+                            <Flex key={incident.id} column>
                                 <Text content={incident.title} />
                                 <PeoplePicker
                                     selectionMode="single"

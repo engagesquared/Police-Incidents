@@ -220,8 +220,8 @@ export const EditIncidentTeamForm = (props: React.PropsWithChildren<IEditInciden
                         {!!otherRoles &&
                             otherRoles.map((userRole) => {
                                 return (
-                                    <Flex column>
-                                        <Flex key={userRole.id} className={classes.row}>
+                                    <Flex key={userRole.id} column>
+                                        <Flex className={classes.row}>
                                             <div className={classes.pickerColumn}>
                                                 <PeoplePicker
                                                     selectionMode="single"

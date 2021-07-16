@@ -113,20 +113,12 @@ export const NewIncidentPage = () => {
         history.goBack();
     };
 
-    // const isO365Group = (group: any) => {
-    //     return group.groupTypes.some((type: string) => type === "Unified");
-    // }
-
-    // const isSecurityGroup = (group: any) => {
-    //     return !group.mailEnabled && group.securityEnabled;
-    // }
-
     return (
         <Flex className={classes.container} column gap="gap.large">
             <Flex>
                 <Breadcrumb aria-label="breadcrumb" size="large">
                     <Breadcrumb.Item>
-                        <Breadcrumb.Link href={Routes.home}>{t("homePageTitle")}</Breadcrumb.Link>
+                        <Breadcrumb.Link href={Routes.backHome}>{t("homePageTitle")}</Breadcrumb.Link>
                     </Breadcrumb.Item>
                     <Breadcrumb.Divider>
                         <ChevronEndIcon size="small" />

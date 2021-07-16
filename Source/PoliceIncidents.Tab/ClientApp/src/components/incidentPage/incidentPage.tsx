@@ -2,7 +2,7 @@
 import { Flex, AddIcon, Loader, EditIcon, Text, Button, Breadcrumb, ShareLocationIcon, ChevronEndIcon, Dialog, MenuButton, ExpandIcon } from "@fluentui/react-northstar";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./incidentPage.styles";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { IIncidentModel } from "../../models/IIncidentModel";
 import { IncidentDetailsCard } from "./incidentDetailsCard";
 import { IncidentUpdates } from "./incidentUpdates";
@@ -20,6 +20,7 @@ import { useGlobalState } from "../../hooks/useGlobalState";
 export const IncidentPage = () => {
     const { t } = useTranslation();
     const { incidentId }: { incidentId?: string } = useParams();
+    const history = useHistory();
     const classes = useStyles();
     const [incident, setIncident] = React.useState<IIncidentModel>();
     const [isLoadingAction, setIsLoadingAction] = React.useState(false);
@@ -141,7 +142,14 @@ export const IncidentPage = () => {
                     <Flex>
                         <Breadcrumb aria-label="breadcrumb" size="large">
                             <Breadcrumb.Item>
-                                <Breadcrumb.Link href={Routes.home}>{t("homePageTitle")}</Breadcrumb.Link>
+                                <Breadcrumb.Link
+                                    styles={{ cursor: "pointer" }}
+                                    onClick={() => {
+                                        history.push(Routes.backHome);
+                                    }}
+                                >
+                                    {t("homePageTitle")}
+                                </Breadcrumb.Link>
                             </Breadcrumb.Item>
                             <Breadcrumb.Divider>
                                 <ChevronEndIcon size="small" />
@@ -175,7 +183,7 @@ export const IncidentPage = () => {
                                         onClick: () => setCloseIncidentFormOpen(true),
                                     },
                                     {
-                                        disabled: incident.plannerLink,
+                                        disabled: !incident.plannerLink,
                                         content: t("openPlannerBtnLabel"),
                                         onClick: onGoPlannerClick,
                                     },
@@ -253,7 +261,7 @@ export const IncidentPage = () => {
                                     {!!incident?.members?.length &&
                                         incident.members.map((u) => {
                                             return (
-                                                <div className={classes.userItem}>
+                                                <div key={u.userId + u.roleId} className={classes.userItem}>
                                                     <Person
                                                         userId={u.userId}
                                                         line2Property="jobTitle"

@@ -8,5 +8,6 @@ namespace PoliceIncidents.Tab.Common
     {
         public const int MaxUpdatesInIncedentList = 5;
         public const int MaxUpdatesInIncedentItem = 500;
+        public const int DefaultPageSize = 10;
     }
 }
